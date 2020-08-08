@@ -401,7 +401,6 @@ class Fun(commands.Cog):
         async with AioJikan() as a:
             naruto = await a.search(search_type='anime', query=query)
         res = naruto['results'][0]
-        print(naruto['results'])
         o = []
         embed = discord.Embed(color=self.client.colour)
         embed.set_thumbnail(url=res['image_url'])

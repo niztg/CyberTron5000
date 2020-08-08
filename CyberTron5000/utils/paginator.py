@@ -108,7 +108,6 @@ class IndexedListSource(menus.ListPageSource):
                 index = 0
         else:
             index = len(embed.fields) - 1
-            print(index)
         embed.set_footer(text=f'({menu.current_page + 1}/{menu._source.get_max_pages()})')
         if not entries:
             embed.set_field_at(index=index, name=f'{self._title}',

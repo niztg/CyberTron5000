@@ -195,7 +195,6 @@ class Developer(commands.Cog):
 
         else:
             cogs = [c[19:] for c in self.client.ext]
-            print(cogs)
             for i in extension:
                 if i not in cogs:
                     return await ctx.send(f"**{i}** is not a valid cog!")
