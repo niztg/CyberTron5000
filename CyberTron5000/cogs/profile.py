@@ -297,9 +297,9 @@ class Profile(commands.Cog):
         a = [badge_mapping[str(b)] for b in final if b in badge_mapping]
         a.append("<:nitro:730892254092198019>") if await GuildStats(ctx).check_nitro(m) else None
         if isinstance(m, discord.User):
-            embed.description = f'{is_bot} {" ".join(a)}\n→ ID | **{m.id}**\n'
+            embed.description = f'{is_bot} {" ".join(a)}\n→ ID **{m.id}**\n'
             embed.description += f'→ Created Account **{humanize.naturaltime(datetime.datetime.utcnow() - m.created_at)}**\n'
-            embed.description += f'→ Guilds Shared With Bot | **{len([g for g in ctx.bot.guilds if g.get_member(m.id)]) if m != ctx.bot.user else f"bro this is literally the bot ({len(ctx.bot.guilds)})"}**'
+            embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)])}**'
             embed.description += f'\n→ [Avatar URL]({m.avatar_url_as(static_format="png", size=4096)})\n'
             return await ctx.send(embed=embed)
         elif isinstance(m, discord.Member):
@@ -311,21 +311,21 @@ class Profile(commands.Cog):
             if m in ctx.guild.premium_subscribers:
                 local_emojis.append("<:nitro:731722710283190332>")
             char = '\u200b' if not a or not local_emojis else " "
-            n = f' | {m.display_name}' if m.name != m.display_name else ""
+            n = f': {m.display_name}' if m.name != m.display_name else ""
             embed.set_author(name=str(m) + n, icon_url=m.avatar_url,
                              url=m.avatar_url_as(static_format='png', size=4096))
             le = " ".join(local_emojis)
             if not a and not local_emojis and is_bot == '':
-                embed.description = f'\n→ ID | **{m.id}**\n'
+                embed.description = f'\n→ ID **{m.id}**\n'
             else:
-                embed.description = f'{is_bot}{" ".join(a)}{char}{le}\n→ ID | **{m.id}**\n'
+                embed.description = f'{is_bot}{" ".join(a)}{char}{le}\n→ ID **{m.id}**\n'
             embed.description += f'→ Created Account **{humanize.naturaltime(datetime.datetime.utcnow() - m.created_at)}**\n'
             embed.description += f'→ Joined Guild **{humanize.naturaltime(datetime.datetime.utcnow() - m.joined_at)}**\n'
-            embed.description += f'→ Guilds Shared With Bot | **{len([g for g in ctx.bot.guilds if g.get_member(m.id)]) if m != ctx.bot.user else f"bro this is literally the bot ({len(ctx.bot.guilds)})"}**'
+            embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)]) if m != ctx.bot.user else f"bro this is literally the bot ({len(ctx.bot.guilds)})"}**'
             if m.top_role.id == ctx.guild.id:
                 pass
             else:
-                embed.description += f'\n→ Roles | **{len([r for r in m.roles if r.id != ctx.guild.id])}** | Top Role | {m.top_role.mention}'
+                embed.description += f'\n→ Roles **{len([r for r in m.roles if r.id != ctx.guild.id])}** | Top Role {m.top_role.mention}'
             embed.description += f'\n→ [Avatar URL]({m.avatar_url_as(static_format="png", size=4096)})\n'
             embed.add_field(name='Status',
                             value=f'{sl[m.web_status]} **Web Status**\n{sl[m.desktop_status]} **Desktop Status**\n{sl[m.mobile_status]} **Mobile Status**')

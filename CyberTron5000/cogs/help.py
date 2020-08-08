@@ -1,6 +1,7 @@
 import itertools
 
 import discord
+import asyncio
 from discord.ext import commands
 
 from CyberTron5000.utils import paginator
@@ -72,8 +73,54 @@ class CyberTronHelpCommand(commands.HelpCommand):
             embed.description += "\n".join(cats)
             total += len([c for c in cm])
         embed.set_author(name=f"CyberTron5000 Commands (Total {total})")
-        await self.context.send(embed=embed)
-    
+        msg = await self.context.send(embed=embed)
+        embed_dict = {
+            ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour, description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
+            ":redo:741793178704937000": embed
+        }
+        valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
+
+        def check(reaction, user):
+            str_reaction = ''
+            for x in str(reaction):
+                if x in ('<', '>'):
+                    continue
+                else:
+                    str_reaction += x
+            return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
+
+        for i in valid_reactions:
+            await msg.add_reaction(i)
+        try:
+            try:
+                while True:
+                    # I am aware that I can use ext menus here
+                    # whatevs
+                    try:
+                        done, pending = await asyncio.wait(
+                            [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
+                             self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
+                            return_when=asyncio.FIRST_COMPLETED)
+                    except asyncio.TimeoutError:
+                        raise
+                    data = done.pop().result()
+                    if str(data[0]) == '<:stop_button:731316755485425744>':
+                        await msg.delete()
+                        await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                    else:
+                        str_reaction = ''
+                        for x in str(data[0]):
+                            if x in ('<', '>'):
+                                continue
+                            else:
+                                str_reaction += x
+                        e = embed_dict.get(str_reaction)
+                        await msg.edit(embed=e)
+            except asyncio.TimeoutError:
+                raise
+        except commands.CommandInvokeError:
+            raise
+
     async def send_cog_help(self, cog):
         """
         Help for a cog.
@@ -85,14 +132,62 @@ class CyberTronHelpCommand(commands.HelpCommand):
         foo = [f"→ `{c.name} {c.signature}` | {c.help or 'No help provided for this command'}" for c in entries]
         embed = discord.Embed(description=f"{cog_doc}", colour=self.context.bot.colour).set_author(
             name=f"{cog.qualified_name} Commands (Total {len(entries)})")
-        if entries:
+        if entries and len(entries) > 6:
             source = paginator.IndexedListSource(show_index=False, embed=embed, data=foo, per_page=6, title='Commands')
             menu = paginator.CatchAllMenu(source=source)
             menu.add_info_fields(self._help_dict)
             await menu.start(self.context)
         else:
-            await self.context.send(embed=embed)
-    
+            if foo:
+                embed.add_field(name="Commands", value="\n".join(foo))
+            msg = await self.context.send(embed=embed)
+            embed_dict = {
+                ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour, description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
+                ":redo:741793178704937000": embed
+            }
+            valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
+
+            def check(reaction, user):
+                str_reaction = ''
+                for x in str(reaction):
+                    if x in ('<', '>'):
+                        continue
+                    else:
+                        str_reaction += x
+                return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
+
+            for i in valid_reactions:
+                await msg.add_reaction(i)
+            try:
+                try:
+                    while True:
+                        # I am aware that I can use ext menus here
+                        # whatevs
+                        try:
+                            done, pending = await asyncio.wait(
+                                [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
+                                 self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
+                                return_when=asyncio.FIRST_COMPLETED)
+                        except asyncio.TimeoutError:
+                            raise
+                        data = done.pop().result()
+                        if str(data[0]) == '<:stop_button:731316755485425744>':
+                            await msg.delete()
+                            await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                        else:
+                            str_reaction = ''
+                            for x in str(data[0]):
+                                if x in ('<', '>'):
+                                    continue
+                                else:
+                                    str_reaction += x
+                            e = embed_dict.get(str_reaction)
+                            await msg.edit(embed=e)
+                except asyncio.TimeoutError:
+                    raise
+            except commands.CommandInvokeError:
+                raise
+
     async def send_command_help(self, command):
         """
         Help for a command.
@@ -102,7 +197,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         embed = discord.Embed(title=self.get_command_signature(command), colour=self.context.bot.colour,
                               description=command.help or "No help provided for this command.")
         await self.context.send(embed=embed)
-    
+
     async def send_group_help(self, group):
         """
         Help for a subcommand group.
@@ -117,13 +212,62 @@ class CyberTronHelpCommand(commands.HelpCommand):
             char = "\u200b" if not c.aliases else "|"
             sc.append(f"→ `{group.name} {c.name}{char}{'|'.join(c.aliases)} {c.signature or f'{u}'}` | {c.help}")
         embed.description = f"{group.help}"
-        if entries:
+        if entries and len(entries) > 6:
             source = paginator.IndexedListSource(show_index=False, data=sc, embed=embed, per_page=6, title='Subcommands')
             menu = paginator.CatchAllMenu(source=source)
             menu.add_info_fields(self._help_dict)
             await menu.start(self.context)
         else:
-            await self.context.send(embed=embed)
+            if sc:
+                embed.add_field(name="Subcommands", value="\n".join(sc))
+            msg = await self.context.send(embed=embed)
+            embed_dict = {
+                ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour,
+                                                          description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
+                ":redo:741793178704937000": embed
+            }
+            valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
+
+            def check(reaction, user):
+                str_reaction = ''
+                for x in str(reaction):
+                    if x in ('<', '>'):
+                        continue
+                    else:
+                        str_reaction += x
+                return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
+
+            for i in valid_reactions:
+                await msg.add_reaction(i)
+            try:
+                try:
+                    while True:
+                        # I am aware that I can use ext menus here
+                        # whatevs
+                        try:
+                            done, pending = await asyncio.wait(
+                                [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
+                                 self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
+                                return_when=asyncio.FIRST_COMPLETED)
+                        except asyncio.TimeoutError:
+                            raise
+                        data = done.pop().result()
+                        if str(data[0]) == '<:stop_button:731316755485425744>':
+                            await msg.delete()
+                            await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                        else:
+                            str_reaction = ''
+                            for x in str(data[0]):
+                                if x in ('<', '>'):
+                                    continue
+                                else:
+                                    str_reaction += x
+                            e = embed_dict.get(str_reaction)
+                            await msg.edit(embed=e)
+                except asyncio.TimeoutError:
+                    raise
+            except commands.CommandInvokeError:
+                raise
 
 
 class Info(commands.Cog):
