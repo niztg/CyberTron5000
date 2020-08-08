@@ -94,8 +94,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         try:
             try:
                 while True:
-                    # I am aware that I can use ext menus here
-                    # whatevs
+
                     try:
                         done, pending = await asyncio.wait(
                             [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
@@ -161,8 +160,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
             try:
                 try:
                     while True:
-                        # I am aware that I can use ext menus here
-                        # whatevs
+    
                         try:
                             done, pending = await asyncio.wait(
                                 [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
@@ -242,8 +240,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
             try:
                 try:
                     while True:
-                        # I am aware that I can use ext menus here
-                        # whatevs
+    
                         try:
                             done, pending = await asyncio.wait(
                                 [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
