@@ -110,10 +110,13 @@ class Meta(commands.Cog):
             embed.set_image(
                 url='https://media.discordapp.net/attachments/381963689470984203/740703797843722431/Screen_Shot_2020-08-05_at_6.52.17_PM.png')
             return await ctx.send(embed=embed)
-        elif command == "help":
-            await ctx.send(embed=discord.Embed(
-                description=f"This code was too long for Discord, you can see it instead [on GitHub](https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/ext/info.py#L9-L109)",
-                colour=self.client.colour))
+        elif command in ("help", "?"):
+            embed = discord.Embed(colour=self.client.colour, title=f"<:star:737736250718421032> Sourcecode for command help/?", url="https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/info.py#L9-L126")
+            embed.description = "Star the GitHub repository to support the bot!"
+            embed.add_field(name="<:license:737733205645590639> LICENSE", value=f"[MIT](https://opensource.org/licenses/MIT)")
+            embed.set_thumbnail(url=self.client.user.avatar_url)
+            embed.set_image(url='https://media.discordapp.net/attachments/381963689470984203/740703797843722431/Screen_Shot_2020-08-05_at_6.52.17_PM.png')
+            await ctx.send(embed=embed)
         else:
             cmd = self.client.get_command(command)
             if not cmd:
@@ -217,10 +220,10 @@ class Meta(commands.Cog):
         mes = await self.channel.send(embed=embed)
         for r in ['⬆️', '⬇️']:
             await mes.add_reaction(r)
-        with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+        with open("json_files/suggestions.json", "r") as f:
             res = json.load(f)
         res[str(sugid)] = []
-        with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+        with open("json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
         ms = await ctx.send(
             f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{tick} | **Yes**\n{redx} | **No**\n(You have 15 seconds)")
@@ -231,10 +234,10 @@ class Meta(commands.Cog):
                 await ms.add_reaction(redx)
                 r, u = await self.client.wait_for('reaction_add', timeout=15, check=lambda r, u: u.bot is False)
                 if r.emoji.name == "tickgreen":
-                    with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+                    with open("json_files/suggestions.json", "r") as f:
                         res = json.load(f)
                     res[str(sugid)].append(ctx.author.id)
-                    with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+                    with open("json_files/suggestions.json", "w") as f:
                         json.dump(res, f, indent=4)
                     await ctx.send("Followed suggestion!")
                 else:
@@ -250,10 +253,10 @@ class Meta(commands.Cog):
     async def follow(self, ctx, id: str):
         """Follow a suggestion"""
         try:
-            with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+            with open("json_files/suggestions.json", "r") as f:
                 res = json.load(f)
             res[str(id)].append(ctx.author.id)
-            with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+            with open("json_files/suggestions.json", "w") as f:
                 json.dump(res, f, indent=4)
             await ctx.send(f"You have successfully followed suggestion `{id}`")
         except KeyError:
@@ -263,14 +266,14 @@ class Meta(commands.Cog):
     async def unfollow(self, ctx, id: str):
         """Unfollow a suggestion"""
         try:
-            with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+            with open("json_files/suggestions.json", "r") as f:
                 res = json.load(f)
             try:
                 index = res[str(id)].index(ctx.author.id)
             except (ValueError, KeyError):
                 return await ctx.send("That suggestion was not found, or you aren't following it!")
             res[str(id)].pop(index)
-            with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+            with open("json_files/suggestions.json", "w") as f:
                 json.dump(res, f, indent=4)
             await ctx.send(f"You have successfully unfollowed suggestion `{id}`")
         except KeyError:
@@ -286,13 +289,13 @@ class Meta(commands.Cog):
         embed = msg.embeds[0]
         embed.add_field(name=f"Reply from {ctx.author}", value=reason)
         await msg.edit(embed=embed)
-        with open('CyberTron5000/json_files/suggestions.json', 'r') as f:
+        with open('json_files/suggestions.json', 'r') as f:
             res = json.load(f)
         for i in res[str(id)]:
             a = self.client.get_user(i) or await self.client.fetch_user(i)
             await a.send(content=f"Suggestion **{id}** has been resolved!", embed=embed)
         res.pop(str(id))
-        with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+        with open("json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
         await self.client.pg_con.execute("DELETE FROM suggestions WHERE suggest_id = $1", id)
     
@@ -349,7 +352,7 @@ class Meta(commands.Cog):
         
     @commands.group(invoke_without_command=True, aliases=['git'])
     async def github(self, ctx):
-        """View the sourcecode for CyberTron5000!"""
+        """View the code for CyberTron5000!"""
         embed = discord.Embed(color=self.client.colour,
                               title="<:star:737736250718421032> Check out the source code on GitHub!",
                               url=self.client.logging['github'])
