@@ -111,7 +111,7 @@ class Meta(commands.Cog):
                 url='https://media.discordapp.net/attachments/381963689470984203/740703797843722431/Screen_Shot_2020-08-05_at_6.52.17_PM.png')
             return await ctx.send(embed=embed)
         elif command in ("help", "?"):
-            embed = discord.Embed(colour=self.client.colour, title=f"<:star:737736250718421032> Sourcecode for command help/?", url="https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/info.py#L9-L126")
+            embed = discord.Embed(colour=self.client.colour, title=f"<:star:737736250718421032> Sourcecode for command help/?", url="https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/help.py#L9-L126")
             embed.description = "Star the GitHub repository to support the bot!"
             embed.add_field(name="<:license:737733205645590639> LICENSE", value=f"[MIT](https://opensource.org/licenses/MIT)")
             embed.set_thumbnail(url=self.client.user.avatar_url)
