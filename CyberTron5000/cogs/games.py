@@ -3,8 +3,8 @@ import json
 import random
 
 import aiohttp
-import discord
 import aiotrivia
+import discord
 from discord.ext import commands
 
 from CyberTron5000.utils import cyberformat

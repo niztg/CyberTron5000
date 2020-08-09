@@ -1,7 +1,8 @@
+import asyncio
 import itertools
+from contextlib import suppress
 
 import discord
-import asyncio
 from discord.ext import commands
 
 from CyberTron5000.utils import paginator
@@ -11,7 +12,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
     """
     Subclassed help FTW!
     """
-    
+
     def __init__(self):
         """
         Sets some attributes.
@@ -26,7 +27,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
                            "[argument]": "This means the argument is **optional**",
                            "[A|B]": "This means it could be either **A or B**",
                            "[argument...]": "This means you can have **multiple arguments**"}
-    
+
     def get_command_signature(self, command):
         """
         Code used from Rapptz' R.Danny repository provided by the MIT License
@@ -43,7 +44,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         else:
             alias = command.name if not parent else f'{parent} {command.name}'
         return f'{alias} {command.signature}'
-    
+
     def command_not_found(self, string):
         """
         Just makes a custom error when command is not found.
@@ -51,17 +52,17 @@ class CyberTronHelpCommand(commands.HelpCommand):
         :return:
         """
         return f"Command/category `{string}` not found!"
-    
+
     async def send_bot_help(self, mapping):
         """
         Sends the actual help message
         :param mapping:
         :return:
         """
-        
+
         def key(c):
             return c.cog_name or '\u200bUncategorized Commands'
-        
+
         total = 0
         embed = discord.Embed(colour=self.context.bot.colour,
                               description=f'You can do `{self.clean_prefix}help [command/category]` for more info.\n\n')
@@ -75,7 +76,8 @@ class CyberTronHelpCommand(commands.HelpCommand):
         embed.set_author(name=f"CyberTron5000 Commands (Total {total})")
         msg = await self.context.send(embed=embed)
         embed_dict = {
-            ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour, description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
+            ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour,
+                                                      description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
             ":redo:741793178704937000": embed
         }
         valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
@@ -91,21 +93,18 @@ class CyberTronHelpCommand(commands.HelpCommand):
 
         for i in valid_reactions:
             await msg.add_reaction(i)
-        try:
+        with suppress(Exception):
             try:
                 while True:
-
-                    try:
-                        done, pending = await asyncio.wait(
-                            [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
-                             self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
-                            return_when=asyncio.FIRST_COMPLETED)
-                    except asyncio.TimeoutError:
-                        raise
+                    done, pending = await asyncio.wait(
+                        [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
+                         self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
+                        return_when=asyncio.FIRST_COMPLETED)
                     data = done.pop().result()
                     if str(data[0]) == '<:stop_button:731316755485425744>':
                         await msg.delete()
                         await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                        break
                     else:
                         str_reaction = ''
                         for x in str(data[0]):
@@ -116,9 +115,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
                         e = embed_dict.get(str_reaction)
                         await msg.edit(embed=e)
             except asyncio.TimeoutError:
-                raise
-        except commands.CommandInvokeError:
-            raise
+                return
 
     async def send_cog_help(self, cog):
         """
@@ -139,52 +136,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         else:
             if foo:
                 embed.add_field(name="Commands", value="\n".join(foo))
-            msg = await self.context.send(embed=embed)
-            embed_dict = {
-                ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour, description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
-                ":redo:741793178704937000": embed
-            }
-            valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
-
-            def check(reaction, user):
-                str_reaction = ''
-                for x in str(reaction):
-                    if x in ('<', '>'):
-                        continue
-                    else:
-                        str_reaction += x
-                return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
-
-            for i in valid_reactions:
-                await msg.add_reaction(i)
-            try:
-                try:
-                    while True:
-    
-                        try:
-                            done, pending = await asyncio.wait(
-                                [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
-                                 self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
-                                return_when=asyncio.FIRST_COMPLETED)
-                        except asyncio.TimeoutError:
-                            raise
-                        data = done.pop().result()
-                        if str(data[0]) == '<:stop_button:731316755485425744>':
-                            await msg.delete()
-                            await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
-                        else:
-                            str_reaction = ''
-                            for x in str(data[0]):
-                                if x in ('<', '>'):
-                                    continue
-                                else:
-                                    str_reaction += x
-                            e = embed_dict.get(str_reaction)
-                            await msg.edit(embed=e)
-                except asyncio.TimeoutError:
-                    raise
-            except commands.CommandInvokeError:
-                raise
+            await self.context.send(embed=embed)
 
     async def send_command_help(self, command):
         """
@@ -211,65 +163,20 @@ class CyberTronHelpCommand(commands.HelpCommand):
             sc.append(f"→ `{group.name} {c.name}{char}{'|'.join(c.aliases)} {c.signature or f'{u}'}` | {c.help}")
         embed.description = f"{group.help}"
         if entries and len(entries) > 6:
-            source = paginator.IndexedListSource(show_index=False, data=sc, embed=embed, per_page=6, title='Subcommands')
+            source = paginator.IndexedListSource(show_index=False, data=sc, embed=embed, per_page=6,
+                                                 title='Subcommands')
             menu = paginator.CatchAllMenu(source=source)
             menu.add_info_fields(self._help_dict)
             await menu.start(self.context)
         else:
             if sc:
                 embed.add_field(name="Subcommands", value="\n".join(sc))
-            msg = await self.context.send(embed=embed)
-            embed_dict = {
-                ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour,
-                                                          description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
-                ":redo:741793178704937000": embed
-            }
-            valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
-
-            def check(reaction, user):
-                str_reaction = ''
-                for x in str(reaction):
-                    if x in ('<', '>'):
-                        continue
-                    else:
-                        str_reaction += x
-                return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
-
-            for i in valid_reactions:
-                await msg.add_reaction(i)
-            try:
-                try:
-                    while True:
-    
-                        try:
-                            done, pending = await asyncio.wait(
-                                [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
-                                 self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
-                                return_when=asyncio.FIRST_COMPLETED)
-                        except asyncio.TimeoutError:
-                            raise
-                        data = done.pop().result()
-                        if str(data[0]) == '<:stop_button:731316755485425744>':
-                            await msg.delete()
-                            await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
-                        else:
-                            str_reaction = ''
-                            for x in str(data[0]):
-                                if x in ('<', '>'):
-                                    continue
-                                else:
-                                    str_reaction += x
-                            e = embed_dict.get(str_reaction)
-                            await msg.edit(embed=e)
-                except asyncio.TimeoutError:
-                    raise
-            except commands.CommandInvokeError:
-                raise
+            await self.context.send(embed=embed)
 
 
 class Info(commands.Cog):
     """Help Commands"""
-    
+
     def __init__(self, client):
         """
         Sets up the whole help command thing
@@ -279,20 +186,21 @@ class Info(commands.Cog):
         self._original_help_command = client.help_command
         client.help_command = CyberTronHelpCommand()
         client.help_command.cog = self
-    
+
     def cog_unload(self):
         """
         ah yes, this.
         :return:
         """
         self.client.help_command = self._original_help_command
-    
+
     @commands.group(invoke_without_command=True)
     async def cogs(self, ctx):
         """Shows you every cog"""
         await ctx.send(embed=discord.Embed(colour=self.client.colour, title=f"All Cogs ({len(self.client.cogs)})",
-                                           description=f"Do `{ctx.prefix}help <cog>` to know more about them!" + "\n\n" + "\n".join([i for i in self.client.cogs.keys()])))
-    
+                                           description=f"Do `{ctx.prefix}help <cog>` to know more about them!" + "\n\n" + "\n".join(
+                                               [i for i in self.client.cogs.keys()])))
+
     @cogs.command()
     @commands.is_owner()
     async def status(self, ctx):
@@ -304,11 +212,11 @@ class Info(commands.Cog):
                 cogs.append(f"<:on:732805104620797965> `ext.{filename[18:]}`")
             except commands.ExtensionNotLoaded:
                 cogs.append(f"<:off:732805190582927410> `ext.{filename[18:]}`")
-        
+
         embed = discord.Embed(colour=self.client.colour)
         embed.description = "\n".join(cogs)
         await ctx.send(embed=embed)
-    
+
     @commands.command(name='paginated_help', aliases=['phelp'])
     async def phelp(self, ctx, *, command=None):
         """
