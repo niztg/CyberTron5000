@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import aiohttp
 import discord
-# import aiofortnite
 from async_timeout import timeout
 from discord.ext import commands
 from jikanpy import AioJikan
@@ -428,15 +427,6 @@ class Fun(commands.Cog):
         await m.edit(embed=discord.Embed(color=self.client.colour, description=f"`{c}`").set_author(
             name="Choice-O-Matic").add_field(name="My Choice", value=f'`{c}`!'))
 
-    # @commands.command()
-    # async def fortnite(self, ctx):
-    #     client = aiofortnite.Client(
-    #         email=data['email'],
-    #         password=data['password'],
-    #         launcher_token=data['CLIENT_LAUNCHER_TOKEN'],
-    #         fortnite_token=data['FORTNITE_CLIENT_TOKEN']
-    #     )
-    #     await ctx.send(await client.get_fortnite_status())
 
 
 def setup(client):

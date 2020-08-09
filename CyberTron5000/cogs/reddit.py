@@ -87,7 +87,7 @@ class Reddit(commands.Cog):
         posts = []
         async with ctx.typing():
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json") as r:
+                async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
                     res = await r.json()
                 for i in res['data']['children']:
                     posts.append(i['data'])
@@ -258,7 +258,7 @@ class Reddit(commands.Cog):
         posts = []
         u = '\u200b'
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json") as r:
+            async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
                 res = await r.json()
             for i in res['data']['children']:
                 posts.append(i['data'])

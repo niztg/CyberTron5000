@@ -348,6 +348,7 @@ class Api(commands.Cog):
         source = paginator.EmbedSource(embeds)
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
+
 #
 
 def setup(client):

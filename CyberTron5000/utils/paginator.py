@@ -28,6 +28,7 @@ class CatchAllMenu(menus.MenuPages, inherit_buttons=False):
         """stops the pagination session."""
         self.stop()
         await self.message.delete()
+        await self.message.add_reaction(":tickgreen:732660186560462958")
     
     @menus.button('<:arrow_right:731311292346007633>', position=menus.Position(5))
     async def go_to_next_page(self, payload):
