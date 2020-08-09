@@ -7,7 +7,7 @@ import aiotrivia
 import discord
 from discord.ext import commands
 
-from CyberTron5000.utils import cyberformat
+from CyberTron5000.utils import cyberformat, lists
 
 
 def dagpi():
@@ -185,17 +185,18 @@ class Games(commands.Cog):
         embed = discord.Embed(colour=ctx.bot.colour)
         embed.title = question.question
         responses = question.responses
-        answer = responses.index(question.answer)
-        embed.description = "\n".join([f'{i}. **{v}**' for i, v in enumerate(responses, 1)])
+        answer = lists.NUMBER_ALPHABET.get((responses.index(question.answer)) + 1)
+        embed.description = "\n".join([f'{lists.NUMBER_ALPHABET[i]}. **{v}**' for i, v in enumerate(responses, 1)])
         embed.add_field(name="Info",
                         value=f'Difficulty: **{question.difficulty.title()}**\nCategory: **{question.category}**')
         await ctx.send(embed=embed)
+        await trivia.close()
         try:
             msg = await self.client.wait_for('message', timeout=15, check=lambda m: m.author == ctx.author)
-            if str(answer + 1) in msg.content.lower():
-                return await ctx.send(f"**{msg.author}** got it! The answer was _{answer + 1}, {question.answer}_")
+            if str(answer.lower()) in msg.content.lower():
+                return await ctx.send(f"**{msg.author}** got it! The answer was _{answer}, {question.answer}_")
             else:
-                return await ctx.send(f"Incorrect! The answer was _{answer + 1}, {question.answer}_")
+                return await ctx.send(f"Incorrect! The answer was _{answer}, {question.answer}_")
         except asyncio.TimeoutError:
             return await ctx.send(f"The correct answer was _{answer}, {question.answer}._")
 

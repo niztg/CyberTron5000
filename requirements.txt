@@ -13,6 +13,6 @@ git+https://github.com/Rapptz/discord-ext-menus
 git+https://github.com/Gelbpunkt/aiowiki
 utils~=1.0.1
 validator_collection
-aiotrivia~=1.5.0
+aiotrivia~=2.0.1
 git+https://github.com/niztg/aiotrivia
 aiofortnite~=0.53

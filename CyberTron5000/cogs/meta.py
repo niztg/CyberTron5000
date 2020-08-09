@@ -125,7 +125,7 @@ class Meta(commands.Cog):
             location = os.path.relpath(file)
             total, fl = __import__('inspect').getsourcelines(cmd.callback)
             ll = fl + (len(total) - 1)
-            url = f"https://github.com/niztg/CyberTron5000/blob/master/{location}#L{fl}-L{ll}"
+            url = f"https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/{location}#L{fl}-L{ll}"
             if not cmd.aliases:
                 char = '\u200b'
             else:
