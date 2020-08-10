@@ -70,8 +70,6 @@ class Meta(commands.Cog):
         self.version = f"{self.client.user.name} Beta v3.0.0"
         self.softwares = ['<:dpy:708479036518694983>', '<:python:706850228652998667>', '<:JSON:710927078513442857>',
                           '<:psql:733848802334736395>']
-        self.channel = self.client.get_channel(self.client.logging['logging_channel'])
-    
     @commands.command()
     async def uptime(self, ctx):
         delta_uptime = datetime.datetime.utcnow() - start_time
@@ -162,7 +160,6 @@ class Meta(commands.Cog):
     @commands.command(aliases=['ab', 'info'])
     async def about(self, ctx):
         """Shows you information regarding the bot"""
-        owner = self.client.get_user(350349365937700864) or await self.client.fetch_user(350349365937700864)
         delta_uptime = datetime.datetime.utcnow() - start_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
@@ -179,8 +176,8 @@ class Meta(commands.Cog):
         embed.description += f"\n**{lines.get('lines'):,}** lines of code | **{lines.get('files'):,}** files\n{self.softwares[0]} {discord.__version__}\n{self.softwares[1]} {platform.python_version()}"
         embed.add_field(name=f"<:news:730866149109137520> News Update #{news[0][1]}", value=news[0][0], inline=False)
         embed.set_footer(
-            text=f"Developed by {str(owner)} | Bot created {humanize.naturaltime(datetime.datetime.utcnow() - self.client.user.created_at)}",
-            icon_url=owner.avatar_url)
+            text=f"Developed by {str(ctx.bot.owner)} | Bot created {humanize.naturaltime(datetime.datetime.utcnow() - self.client.user.created_at)}",
+            icon_url=ctx.bot.owner.avatar_url)
         await ctx.send(embed=embed)
     
     @commands.group(aliases=["n", "changenickname", "nick"], invoke_without_command=True,
@@ -217,7 +214,7 @@ class Meta(commands.Cog):
                               colour=self.client.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'Do "suggest follow {sugid}" to follow this suggestion!')
-        mes = await self.channel.send(embed=embed)
+        mes = await self.client.logging_channel.send(embed=embed)
         for r in ['⬆️', '⬇️']:
             await mes.add_reaction(r)
         with open("json_files/suggestions.json", "r") as f:
@@ -244,8 +241,7 @@ class Meta(commands.Cog):
                     await ctx.send(
                         f"Ok, suggestion not followed. If you ever want to follow it, simply do `{ctx.prefix}suggest follow {sugid}`")
         except asyncio.TimeoutError:
-            await ms.edit(
-                content=f"You ran out of time! Suggestion not followed. If you want to follow this suggestion, do `{ctx.prefix}suggest follow {sugid}`")
+            await ms.edit(content=f"You ran out of time! Suggestion not followed. If you want to follow this suggestion, do `{ctx.prefix}suggest follow {sugid}`")
             if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
                 await ms.clear_reactions()
     
@@ -302,8 +298,7 @@ class Meta(commands.Cog):
     @suggest.command(invoke_without_command=True)
     async def error(self, ctx, *, error):
         """Report an error for this bot."""
-        owner = self.client.get_user(id=350349365937700864)
-        await owner.send(f"You should fix ```{error}```")
+        await ctx.bot.owner.send(f"You should fix ```{error}```")
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
     
     @commands.command(aliases=['stats'])

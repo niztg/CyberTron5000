@@ -20,7 +20,6 @@ class Events(commands.Cog):
         self.x_r = ":warning:727013811571261540"
         self.bot = async_cleverbot.Cleverbot(secrets()['cleverbot'])
         self.bot.set_context(async_cleverbot.DictContext(self.bot))
-        self.channel = self.client.get_channel(self.client.logging['logging_channel'])
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -44,13 +43,12 @@ class Events(commands.Cog):
             embed = discord.Embed(colour=self.client.colour, title="Unkown Error Occured!",
                                   description=f"Error on `{ctx.command}`: `{error.__class__.__name__}`\n```py\n{traceback_text}```\n**Server:** {ctx.guild}\n**Author:** {ctx.author}\n[URL]({ctx.message.jump_url})")
             await ctx.message.add_reaction(self.x_r)
-            await self.channel.send(embed=embed)
+            await self.client.logging_channel.send(embed=embed)
             await ctx.send(content="The error has been sent to my creator! It will be fixed as soon as possible!",
                            embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def on_user_mention(self, message):
-        owner = self.client.get_user(350349365937700864) or await self.client.fetch_user(350349365937700864)
         if message.content in ("<@!697678160577429584>", "<@697678160577429584>"):
             DEFAULT_PREFIX = ["c$"]
             a = self.client.prefixes.get(message.guild.id, DEFAULT_PREFIX)
@@ -58,7 +56,7 @@ class Events(commands.Cog):
                                   description=f'**My prefixes for {message.guild} are** {f"{self.client.user.mention}, " + ", ".join([f"`{a}`" for a in a])}\n\n**Do** '
                                               f'{f"{self.client.user.mention} help, " + ", ".join([f"`{a}help`" for a in a])} **for a full list of commands**\n\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)')
             embed.set_thumbnail(url=self.client.user.avatar_url)
-            embed.set_author(name=f"Developed by {owner}", icon_url=owner.avatar_url)
+            embed.set_author(name=f"Developed by {self.client.owner}", icon_url=self.client.owner.avatar_url)
             await message.channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -95,7 +93,7 @@ class Events(commands.Cog):
                     continue
         await channels[0].send(embed=discord.Embed(color=self.client.colour,
                                                    description="Hi, thanks for inviting me! My default prefix is `c$`, but you can change it by doing `c$changeprefix <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
-        await self.channel.send(f"Joined Guild! This is guild **#{len(self.client.guilds)}**", embed=embed)
+        await self.client.logging_channel.send(f"Joined Guild! This is guild **#{len(self.client.guilds)}**", embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -116,7 +114,7 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(
             text=f"Guild created {humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
-        await self.channel.send(f"Left guild. We're down to **{len(self.client.guilds)}** guilds", embed=embed)
+        await self.client.logging_channel.send(f"Left guild. We're down to **{len(self.client.guilds)}** guilds", embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):

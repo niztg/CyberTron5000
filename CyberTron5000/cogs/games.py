@@ -181,7 +181,10 @@ class Games(commands.Cog):
     async def trivia(self, ctx, difficulty: str = None):
         trivia = aiotrivia.TriviaClient()
         difficulty = difficulty or random.choice(['easy', 'medium', 'hard'])
-        question = await trivia.get_random_question(difficulty)
+        try:
+            question = await trivia.get_random_question(difficulty)
+        except aiotrivia.AiotriviaException:
+            return await ctx.send(f'**{difficulty}** is not a valid difficulty!')
         embed = discord.Embed(colour=ctx.bot.colour)
         embed.title = question.question
         responses = question.responses

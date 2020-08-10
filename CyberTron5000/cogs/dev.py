@@ -23,7 +23,7 @@ class Developer(commands.Cog):
         self._ = None
         
     async def cog_check(self, ctx):
-        return ctx.author.id == 350349365937700864
+        return ctx.author == ctx.bot.owner
     
     @commands.group(aliases=["e", "evaluate"], name='eval', invoke_without_command=True, help="Evaluates a function.")
     async def eval_fn(self, ctx, *, cmd):

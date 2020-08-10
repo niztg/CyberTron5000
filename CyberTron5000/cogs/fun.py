@@ -29,7 +29,6 @@ class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.tick = ":tickgreen:732660186560462958"
-        self.owner = self.client.get_user(350349365937700864)
 
     @commands.command()
     async def horror(self, ctx, limit: int = 5):
@@ -362,7 +361,7 @@ class Fun(commands.Cog):
     @commands.command()
     async def owner(self, ctx):
         """Shows you who made this bot"""
-        return await ctx.send(f"it is {self.owner}")
+        return await ctx.send(f"it is {self.client.owner}")
 
     @commands.command()
     async def wink(self, ctx, *, member: discord.Member = None):
@@ -414,18 +413,26 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['choice'])
-    @commands.cooldown(1, 45, commands.BucketType.user)
     async def chose(self, ctx, *choices):
         c = random.choice(choices)
-        embed = discord.Embed(color=self.client.colour).set_author(name="Choice-O-Matic")
-        m = await ctx.send(embed=embed)
-        a = m.embeds[0]
-        for choice in random.sample(choices, len(choices)):
-            a.description = f"`{choice}`"
-            await m.edit(embed=a)
-            await asyncio.sleep(0.44)
-        await m.edit(embed=discord.Embed(color=self.client.colour, description=f"`{c}`").set_author(
-            name="Choice-O-Matic").add_field(name="My Choice", value=f'`{c}`!'))
+        await ctx.send(c)
+
+    @commands.command()
+    @commands.is_owner()
+    async def fn(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://api.fortnitetracker.com/v1/store", headers={"TRN-API-KEY": data['fortnite']}) as r:
+                daba = await r.json()
+        print(daba)
+
+# klwam wadsa dw ww w
+#sadijpu9aujwllllllllllawsdawdwllllwadsadawaaawdwaop;lllllllllladwllllllllllalwld,,  ,2ujuuwa  w wka[p ou
+#,mafdnsjk wuawuawawawaâw lllllllllllllllwlawdasdwwwdwwdwdwlldwlwlld d www;d;a;w;adpawc wawaawdlallwl'alwa a
+# doojadnosdamdsa;n nosdn;askdnaaw dwdwdwadwadaawdwalllllllasdawdop[ppoooopoooadw
+
+#
+#
+#
 
 
 

@@ -278,8 +278,7 @@ class VibeSchool(commands.Cog):
     @commands.command(help="Vote when it's voting time")
     @check_guild(guild=vibe)
     async def votev(self, ctx, person, *, reason):
-        niz = self.client.get_user(id=350349365937700864)
-        await niz.send(f"Hey, {ctx.message.author.display_name} just voted for {person}. Reason:\n```{reason}```")
+        await ctx.bot.owner.send(f"Hey, {ctx.message.author.display_name} just voted for {person}. Reason:\n```{reason}```")
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
     
     @commands.group(invoke_without_command=True,

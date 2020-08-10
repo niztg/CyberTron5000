@@ -17,7 +17,7 @@ def check_guild(guild):
 
 def check_admin_or_owner():
     def predicate(ctx):
-        if ctx.message.author.id == 350349365937700864:
+        if ctx.author == ctx.bot.owner:
             return True
         elif ctx.message.author.permissions_in(channel=ctx.message.channel).kick_members:
             return True
@@ -62,7 +62,7 @@ def check_guild_and_channel(channel):
 
 def betasquad():
     def predicate(ctx):
-        if ctx.author.id == 350349365937700864:
+        if ctx.author == ctx.bot.owner:
             return True
         elif ctx.author.id in beta_squad:
             return True

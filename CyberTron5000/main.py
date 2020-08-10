@@ -43,25 +43,32 @@ print("-----------------------")
 
 class CyberTron5000(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=self.get_prefix, pm_help=None, allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=False), case_insensitive=True, status=discord.Status.online)
+        super().__init__(command_prefix=self.get_prefix, pm_help=None,
+                         allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=False),
+                         case_insensitive=True, status=discord.Status.online)
         self.colour = 0x00dcff
         self.prefixes = {}
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if filename.endswith('.py')]
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if
+                    filename.endswith('.py')]
         self.load_extension(name='jishaku')
         self.loop.create_task(self.startup())
         self.loop.run_until_complete(self.create_db_pool())
-        self.logging = dict(owner=350349365937700864,
-                            logging_channel=727277234666078220,
-                            invite='https://cybertron-5k.netlify.app/invite',
-                            support='https://cybertron-5k.netlify.app/server',
-                            github='https://github.com/niztg/CyberTron5000',
-                            website='https://cybertron-5k.netlify.app',
-                            reddit='https://reddit.com/r/CyberTron5000',
-                            servers={
-                                "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
-                                "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
-                                "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
-                            })
+        self.logging = dict(
+            invite='https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
+            support='https://discord.com/invite/2fxKxJH', github='https://github.com/niztg/CyberTron5000',
+            website='https://cybertron-5k.netlify.app', reddit='https://reddit.com/r/CyberTron5000',
+            servers={"CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
+                     "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
+                     "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
+                     })
+
+    @property
+    def owner(self):
+        return self.get_user(350349365937700864)
+
+    @property
+    def logging_channel(self):
+        return self.get_channel(727277234666078220)
 
     async def create_db_pool(self):
         self.pg_con = await asyncpg.create_pool(user=token['psql_user'], password=token['psql_password'],
