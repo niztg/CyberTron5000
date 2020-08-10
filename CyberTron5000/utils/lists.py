@@ -14,7 +14,7 @@ STAT_NAMES = {
     "defense": "DEFENSE",
     "hp": "HP",
     "total": "TOTAL"
-    
+
 }
 
 ALPHABET_NUMBER = {
@@ -88,18 +88,18 @@ REGIONS = {
     "eu-east": "EU East"
 }
 
-INDICATOR_LETTERS = {'1': '1️⃣', '2': '2️⃣', '3': '3️⃣',
-                     '4': '4️⃣', '5': '5️⃣', '6': '6️⃣',
-                     '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'}
+INDICATOR_LETTERS = {'1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣', '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣',
+                     '9': '9️⃣', '0': '0️⃣'}
 
-sl = {
-    discord.Status.online: "<:online:726127263401246832>",
-    discord.Status.offline: "<:offline:726127263203983440>",
-    discord.Status.idle: "<:idle:726127192165187594>",
-    discord.Status.dnd: "<:dnd:726127192001478746>"
-}
+sl = {discord.Status.online: "<:online:726127263401246832>",
+      discord.Status.offline: "<:offline:726127263203983440>",
+      discord.Status.idle: "<:idle:726127192165187594>",
+      discord.Status.dnd: "<:dnd:726127192001478746>"
+      }
 
 emotes = {
+    # thanks to dankdumpster for this list
+    # https://github.com/Noodles-bot/Noodles/tree/master/cogs
     'eight-year club': '<:eightyearclub:702188391961198683>',
     'alpha tester': '<:alpha_user:702188392154267715>',
     'best comment': '<:bestcomment:702188392175370240>',
@@ -213,17 +213,8 @@ audit_actions = {
     discord.AuditLogAction.member_update: "**updated member**"
 }
 
-engineer_bagdes = ["<:engineer1:732745844339638334>",
-                   "<:engineer2:732745844633370684>",
-                   "<:engineer3:732745844716994690>",
-                   "<:engineer4:732745844754743306>"]
+engineer_bagdes = ["<:engineer1:732745844339638334>", "<:engineer2:732745844633370684>", "<:engineer3:732745844716994690>", "<:engineer4:732745844754743306>"]
 
-popular_badges = ['<:popular1:732745781660090459>'
-    , '<:popular2:732745781856960634>'
-    , '<:popular3:732745782054092840>'
-    , '<:popular4:732745781714354198>']
+popular_badges = ['<:popular1:732745781660090459>', '<:popular2:732745781856960634>', '<:popular3:732745782054092840>', '<:popular4:732745781714354198>']
 
-legend_badges = ['<:legend1:732745816564826212>',
-                 '<:legend2:732745816590123041>',
-                 '<:legend3:732745816598380636>',
-                 '<:legend4:732745816758026381>']
+legend_badges = ['<:legend1:732745816564826212>', '<:legend2:732745816590123041>', '<:legend3:73274581659838', '<:legend4:732745816758026381>']

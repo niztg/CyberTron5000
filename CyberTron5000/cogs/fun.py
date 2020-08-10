@@ -104,24 +104,19 @@ class Fun(commands.Cog):
 
     @reply.command(help="Spams a message.", invoke_without_command=True)
     async def spam(self, ctx, *, message):
-        l = ['@\u200beveryone', '@\u200bhere']
-        await ctx.send(f"{cyberformat.hyper_replace(text=message, old=['@everyone', '@here'], new=l)} " * 15)
+        await ctx.send(f"{message} " * 15)
 
-    @reply.command(invoke_without_command=True)
+    @reply.command(invoke_without_command=True, aliases=['emoji', 'em'])
     async def indicator(self, ctx, *, message):
         """reply in emojis"""
-        letters = []
-        alphabet = list(string.ascii_uppercase)
-        numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-        for letter in message:
-            if letter.upper() in alphabet:
-                letters.append(f":regional_indicator_{letter.lower()}:")
-            elif letter in numbers:
-                letters.append(INDICATOR_LETTERS[letter])
-            elif letter.upper() not in alphabet:
-                letters.append(letter)
-
-        await ctx.send("\u200b".join(letters))
+        msg = ''
+        letters = list(string.ascii_lowercase)
+        for x in message:
+            if x in letters:
+                msg += f':regional_indicator_{x}:'
+            else:
+                msg += INDICATOR_LETTERS.get(x, x)
+        await ctx.send('\u200b' + msg)
 
     @reply.command()
     async def mock(self, ctx, *, message):
@@ -424,16 +419,6 @@ class Fun(commands.Cog):
             async with cs.get("https://api.fortnitetracker.com/v1/store", headers={"TRN-API-KEY": data['fortnite']}) as r:
                 daba = await r.json()
         print(daba)
-
-# klwam wadsa dw ww w
-#sadijpu9aujwllllllllllawsdawdwllllwadsadawaaawdwaop;lllllllllladwllllllllllalwld,,  ,2ujuuwa  w wka[p ou
-#,mafdnsjk wuawuawawawaâw lllllllllllllllwlawdasdwwwdwwdwdwlldwlwlld d www;d;a;w;adpawc wawaawdlallwl'alwa a
-# doojadnosdamdsa;n nosdn;askdnaaw dwdwdwadwadaawdwalllllllasdawdop[ppoooopoooadw
-
-#
-#
-#
-
 
 
 def setup(client):

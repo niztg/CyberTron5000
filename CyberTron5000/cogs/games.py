@@ -188,20 +188,31 @@ class Games(commands.Cog):
         embed = discord.Embed(colour=ctx.bot.colour)
         embed.title = question.question
         responses = question.responses
-        answer = lists.NUMBER_ALPHABET.get((responses.index(question.answer)) + 1)
-        embed.description = "\n".join([f'{lists.NUMBER_ALPHABET[i]}. **{v}**' for i, v in enumerate(responses, 1)])
+        embed.description = "\n".join([f':regional_indicator_{lists.NUMBER_ALPHABET[i].lower()}: **{v}**' for i, v in enumerate(responses, 1)])
         embed.add_field(name="Info",
                         value=f'Difficulty: **{question.difficulty.title()}**\nCategory: **{question.category}**')
-        await ctx.send(embed=embed)
+        embed.set_footer(text="React with the correct answer! | You have 15 seconds")
+        emojis = [cyberformat.to_emoji(x) for x in range(len(responses))]
+        index = responses.index(question.answer)
+        msg = await ctx.send(embed=embed)
         await trivia.close()
+        for e in emojis:
+            await msg.add_reaction(e)
+
+        def check(reaction: discord.Reaction, user: discord.User):
+            return reaction.message.id == msg.id and user.id == ctx.author.id and str(reaction.emoji) in emojis
+
+        correct = emojis[index]
+
         try:
-            msg = await self.client.wait_for('message', timeout=15, check=lambda m: m.author == ctx.author)
-            if str(answer.lower()) in msg.content.lower():
-                return await ctx.send(f"**{msg.author}** got it! The answer was _{answer}, {question.answer}_")
+            r, u = await self.client.wait_for('reaction_add', check=check, timeout=15)
+            if str(r.emoji) == correct:
+                await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
             else:
-                return await ctx.send(f"Incorrect! The answer was _{answer}, {question.answer}_")
+                await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
         except asyncio.TimeoutError:
-            return await ctx.send(f"The correct answer was _{answer}, {question.answer}._")
+            await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
+
 
     @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
     async def guesslogo(self, ctx):
