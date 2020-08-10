@@ -239,6 +239,6 @@ class Developer(commands.Cog):
         res = await self.client.pg_con.fetch(statement)
         await ctx.send(res)
 
-    
+
 def setup(client):
     client.add_cog(Developer(client))

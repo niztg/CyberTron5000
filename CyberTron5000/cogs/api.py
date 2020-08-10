@@ -1,5 +1,6 @@
 import datetime
 import json
+from contextlib import suppress
 from html import unescape as unes
 
 import aiogoogletrans
@@ -244,23 +245,24 @@ class Api(commands.Cog):
     @commands.command(aliases=['wiki'])
     async def wikipedia(self, ctx, *, terms):
         try:
-            async with ctx.typing():
-                wiki = aiowiki.Wiki.wikipedia("en")
-                res = await wiki.opensearch(terms)
-                tts = []
-                embeds = []
-                for i in res:
-                    tts.append(i.title)
-                for page in tts:
-                    p = wiki.get_page(page)
-                    embed = discord.Embed(colour=self.client.colour,
-                                          description=(__import__('html').unescape(await p.summary()))[:1000] + "...",
-                                          title=page)
-                    embed.url = f"https://en.wikipedia.org/wiki/{str(page).replace(' ', '_')}"
-                    embeds.append(embed)
-                source = paginator.EmbedSource(embeds)
-            await wiki.close()
-            await paginator.CatchAllMenu(source=source).start(ctx)
+            with suppress(Exception):
+                async with ctx.typing():
+                    wiki = aiowiki.Wiki.wikipedia("en")
+                    res = await wiki.opensearch(terms)
+                    tts = []
+                    embeds = []
+                    for i in res:
+                        tts.append(i.title)
+                    for page in tts:
+                        p = wiki.get_page(page)
+                        embed = discord.Embed(colour=self.client.colour,
+                                              description=(__import__('html').unescape(await p.summary()))[:1000] + "...",
+                                              title=page)
+                        embed.url = f"https://en.wikipedia.org/wiki/{str(page).replace(' ', '_')}"
+                        embeds.append(embed)
+                    source = paginator.EmbedSource(embeds)
+                await wiki.close()
+                await paginator.CatchAllMenu(source=source).start(ctx)
         except IndexError:
             await ctx.send("Not found.")
     

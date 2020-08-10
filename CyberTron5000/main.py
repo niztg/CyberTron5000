@@ -79,6 +79,8 @@ class CyberTron5000(commands.Bot):
             return 'c$'
         DEFAULT_PREFIX = ["c$"]
         prefixes = self.prefixes.get(message.guild.id, DEFAULT_PREFIX)
+        if message.author.id == self.owner.id:
+            return commands.when_mentioned_or(*prefixes, 'dev ')(self, message)
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     def run(self, *args, **kwargs):

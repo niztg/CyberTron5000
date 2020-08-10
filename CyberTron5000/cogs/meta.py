@@ -359,7 +359,6 @@ class Meta(commands.Cog):
         await ctx.send(embed=embed)
         
     @github.command(name='commits')
-    @commands.is_owner()
     async def _git_commits(self, ctx, limit: int = 5):
         """Shows you recent github commits"""
         if limit < 1 or limit > 15:

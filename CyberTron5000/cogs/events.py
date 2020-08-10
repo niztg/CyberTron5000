@@ -92,7 +92,7 @@ class Events(commands.Cog):
                 else:
                     continue
         await channels[0].send(embed=discord.Embed(color=self.client.colour,
-                                                   description="Hi, thanks for inviting me! My default prefix is `c$`, but you can change it by doing `c$changeprefix <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
+                                                   description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
         await self.client.logging_channel.send(f"Joined Guild! This is guild **#{len(self.client.guilds)}**", embed=embed)
 
     @commands.Cog.listener()

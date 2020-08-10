@@ -174,7 +174,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
             await self.context.send(embed=embed)
 
 
-class Info(commands.Cog):
+class Help(commands.Cog):
     """Help Commands"""
 
     def __init__(self, client):
@@ -275,4 +275,4 @@ class Info(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Info(client))
+    client.add_cog(Help(client))
