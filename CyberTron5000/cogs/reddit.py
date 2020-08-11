@@ -7,7 +7,7 @@ import humanize
 from discord.ext import commands
 
 from CyberTron5000.utils import paginator
-from CyberTron5000.utils.lists import emotes
+from CyberTron5000.utils.lists import REDDIT_EMOJIS
 
 
 class Reddit(commands.Cog):
@@ -30,7 +30,6 @@ class Reddit(commands.Cog):
     @commands.command(help="Shows your Reddit Stats.", aliases=['rs', 'karma', 'redditor'])
     async def redditstats(self, ctx, user):
         trophies = []
-        i = []
         td = {
             True: "<:on:732805104620797965>",
             False: "<:off:732805190582927410>"
@@ -49,13 +48,14 @@ class Reddit(commands.Cog):
                     return await ctx.send(
                         f"Whoops, something went wrong.{custom_message}Error Codes: {r.status}, {re.status}")
             for item in res['data']['trophies']:
-                if str(item['data']['name']).lower() in emotes:
-                    trophies.append(emotes[str(item['data']['name']).lower()])
-                else:
-                    trophies.append(" ")
-                for t in trophies:
-                    if t not in i:
-                        i.append(t)
+                try:
+                    trophies.append(REDDIT_EMOJIS[item['data']['name']])
+                except KeyError:
+                    print(f"{item['data']['name']} not in trophies list!")
+            final = []
+            for i in trophies:
+                if i not in final:
+                    final.append(i)
             cake = " <:cakeday:736660679938932876>" if await self.cakeday(user) else ''
             icon = k['data']['icon_img']
             icon = icon.split("?")[0]
@@ -71,7 +71,7 @@ class Reddit(commands.Cog):
             embed.description += f"\n<:asset:734531316741046283> [Icon URL]({icon})"
             if banner:
                 embed.description += f" | [Banner URL]({banner})"
-            embed.description += "\n" + ' '.join(i)
+            embed.description += "\n" + ' '.join(final)
             dt = datetime.datetime.utcfromtimestamp(k['data']['created_utc'])
             created = humanize.naturaltime(datetime.datetime.utcnow() - dt)
             embed.add_field(name="Account Settings",

@@ -6,14 +6,25 @@ import sys
 import aiohttp
 import discord
 from discord.ext import commands
-
-from CyberTron5000.utils import checks
 from CyberTron5000.utils import cyberformat
 
 tick = "<:tickgreen:732660186560462958>"
 null = '<:ticknull:732660186057015317>'
 redx = "<:redx:732660210132451369>"
 reload = '<:reload:732674920873459712>'
+
+
+def insert_returns(body):
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+
+    if isinstance(body[-1], ast.If):
+        insert_returns(body[-1].body)
+        insert_returns(body[-1].orelse)
+
+    if isinstance(body[-1], ast.With):
+        insert_returns(body[-1].body)
 
 
 class Developer(commands.Cog):
@@ -36,7 +47,7 @@ class Developer(commands.Cog):
             body = f"async def {fn_name}():\n{cmd}"
             parsed = ast.parse(body)
             body = parsed.body[0].body
-            checks.insert_returns(body)
+            insert_returns(body)
             env = {
                 'me': ctx.guild.me,
                 'bot': ctx.bot,
@@ -85,7 +96,7 @@ class Developer(commands.Cog):
                 body = f"async def {fn_name}():\n{cmd}"
                 parsed = ast.parse(body)
                 body = parsed.body[0].body
-                checks.insert_returns(body)
+                insert_returns(body)
                 env = {
                     'me': ctx.guild.me,
                     'bot': ctx.bot,

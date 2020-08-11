@@ -6,7 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
-from CyberTron5000.utils.checks import check_guild_and_channel, check_guild, check_guild_and_admin
+from CyberTron5000.utils.checks import check_channel, check_guild, check_guild_and_admin
 
 
 # ≫
@@ -17,10 +17,10 @@ class VibeSchool(commands.Cog):
     def __init__(self, client):
         self.client = client
     
-    vibe = 734159981208666134
+    async def cog_check(self, ctx):
+        return ctx.guild.id == 734159981208666134
     
     @commands.command(help="info about Vibe School.")
-    @check_guild(guild=vibe)
     async def vinfo(self, ctx):
         infoEmbed = discord.Embed(title="Vibe School Info", color=ctx.message.author.color)
         infoEmbed.add_field(name="Visitors",
@@ -59,7 +59,6 @@ class VibeSchool(commands.Cog):
         await ctx.send(embed=infoEmbed)
     
     @commands.command(help="rules for Vibe School")
-    @check_guild(guild=vibe)
     async def rules(self, ctx):
         rulesEmbed = discord.Embed(color=ctx.message.author.color, title="Vibe School Rules")
         rulesEmbed.add_field(name="No Cheating",
@@ -82,7 +81,6 @@ class VibeSchool(commands.Cog):
         await ctx.send(embed=rulesEmbed)
     
     @commands.command(help="MEE6 commands for Vibe School")
-    @check_guild(guild=vibe)
     async def cmds(self, ctx):
         await ctx.send(embed=discord.Embed(title="MEE6 Commands",
                                            description="`!niz`- alerts Sensei Niz\n`!yv` - Alerts YeetVegetabales."
@@ -90,13 +88,12 @@ class VibeSchool(commands.Cog):
                                            color=ctx.message.author.color))
     
     @commands.group(invoke_without_command=True, aliases=['q', 'tq'])
-    @check_guild(guild=vibe)
     async def take_quiz(self, ctx):
         cmds = [f"→ `{ctx.prefix}take_quiz {c.name}` - {c.help}" for c in self.client.get_command("take_quiz").commands]
         await ctx.send("**Quizzes Commands**\n" + "\n".join(cmds))
     
     @take_quiz.command(aliases=['young', 'ty'], invoke_without_command=True)
-    @check_guild_and_channel(channel=738230552959909909)
+    @check_channel(channel=738230552959909909)
     async def the_young(self, ctx):
         """Quiz for which you can study in <#687817303177691373> and take in <#687818177773568090>"""
         try:
@@ -161,7 +158,7 @@ class VibeSchool(commands.Cog):
             await ctx.send(er)
     
     @take_quiz.command(aliases=['ad', 'adulthood'], invoke_without_command=True)
-    @check_guild_and_channel(channel=738231113696280587)
+    @check_channel(channel=738231113696280587)
     async def vibe_adult(self, ctx):
         """Quiz for which you can study in <#687821074200526873> and take in <#687821074200526873>"""
         try:
@@ -223,7 +220,7 @@ class VibeSchool(commands.Cog):
             await ctx.send(er)
     
     @commands.command(help="Gets you info about Vibe Adulthood")
-    @check_guild(guild=vibe)
+    @check_channel(channel=738231113696280587)
     async def adinfo(self, ctx):
         adEmbed = discord.Embed(color=0xa30533, title="Job Info")
         adEmbed.add_field(name="Vibe Mentor",
@@ -276,14 +273,12 @@ class VibeSchool(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(help="Vote when it's voting time")
-    @check_guild(guild=vibe)
     async def votev(self, ctx, person, *, reason):
         await ctx.bot.owner.send(f"Hey, {ctx.message.author.display_name} just voted for {person}. Reason:\n```{reason}```")
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
     
     @commands.group(invoke_without_command=True,
                     help="contact management if there's anything you want to say to them")
-    @check_guild(guild=vibe)
     async def management(self, ctx, *, message):
         channel = self.client.get_channel(id=734171313253515274)
         await channel.send(
@@ -291,7 +286,7 @@ class VibeSchool(commands.Cog):
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
     
     @management.command(invoke_without_command=True, help="reply to someone contacting management")
-    @check_guild_and_channel(channel=734171313253515274)
+    @check_channel(channel=734171313253515274)
     async def reply(self, ctx, member: discord.Member, *, message):
         try:
             user = self.client.get_user(id=member.id)
@@ -318,7 +313,6 @@ class VibeSchool(commands.Cog):
             await message.add_reaction(r)
             
     @commands.command()
-    @check_guild(guild=vibe)
     async def vibe_suggest(self, ctx, *, message):
         """Suggest something for VIBE SCHOOL's rebuilding!"""
         channel = self.client.get_channel(734171313253515274)

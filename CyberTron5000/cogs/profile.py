@@ -410,9 +410,8 @@ class Profile(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(aliases=['spot'])
-    async def spotify(self, ctx, member: discord.Member = None):
+    async def spotify(self, ctx, *, member: discord.Member = None):
         """Shows a member's spotify status"""
-        global a
         member = member or ctx.author
         for a in member.activities:
             if isinstance(a, discord.Spotify):

@@ -19,7 +19,7 @@ import psutil
 from discord.ext import commands
 
 from CyberTron5000.utils import cyberformat
-from CyberTron5000.utils.checks import check_admin_or_owner, beta_squad
+from CyberTron5000.utils.checks import check_mod_or_owner, beta_squad
 
 start_time = datetime.datetime.utcnow()
 
@@ -182,7 +182,7 @@ class Meta(commands.Cog):
     
     @commands.group(aliases=["n", "changenickname", "nick"], invoke_without_command=True,
                     help="Change the bot's nickname to a custom one.")
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def nickname(self, ctx, *, nickname=None):
         if nickname:
             await ctx.guild.me.edit(nick=f"{nickname}")
@@ -192,13 +192,13 @@ class Meta(commands.Cog):
             await ctx.message.add_reaction(emoji=self.tick)
     
     @nickname.command(invoke_without_command=True, help="Change the bot's nickname back to the default.")
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def default(self, ctx):
         await ctx.guild.me.edit(nick=f"{self.client.user.name}")
         await ctx.message.add_reaction(emoji=self.tick)
     
     @nickname.command(invoke_without_command=True, help="Change the bot's nickname to the default, without the prefix.")
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def client(self, ctx):
         await ctx.guild.me.edit(nick=self.client.user.name)
         await ctx.message.add_reaction(emoji=self.tick)
@@ -412,14 +412,6 @@ class Meta(commands.Cog):
                              icon_url=self.client.user.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def actual_users(self, ctx):
-        """Shows the bot's user count excluding bot servers"""
-        totals = []
-        for g in [336642139381301249, 450594207787384832, 733064960241958982]:
-            totals.append(ctx.bot.get_guild(g).member_count)
-        total = len([u for u in ctx.bot.users]) - sum(totals)
-        await ctx.send(f"Aside from bot servers, {self.client.user.name} has a total of **{total:,}** users.")
 
 def setup(client):
     client.add_cog(Meta(client))

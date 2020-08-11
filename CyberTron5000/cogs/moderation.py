@@ -6,7 +6,7 @@ import humanize
 from discord.ext import commands
 
 from CyberTron5000.utils import paginator, lists
-from CyberTron5000.utils.checks import check_admin_or_owner
+from CyberTron5000.utils.checks import check_mod_or_owner
 
 
 # ≫
@@ -131,7 +131,7 @@ class Moderation(commands.Cog):
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
     
     @commands.command()
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def leave(self, ctx):
         """Makes bot leave server"""
         await ctx.guild.leave()
@@ -208,7 +208,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
     
     @_prefix.command()
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def add(self, ctx, *, prefix):
         """Add a prefix for the guild."""
         prefixes = self.client.prefixes.get(ctx.guild.id, ["c$"])
@@ -225,7 +225,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'Success! `{prefix}` is now a prefix in {ctx.guild}!')
     
     @_prefix.command(aliases=['sp-add'])
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def spaceprefix_add(self, ctx, *, prefix):
         """Add a prefix for the guild that ends in a space."""
         prefixes = self.client.prefixes.get(ctx.guild.id, ["c$"])
@@ -242,7 +242,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'Success! `{prefix} ` is now a prefix in {ctx.guild}!')
     
     @_prefix.command(aliases=['rm'])
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def remove(self, ctx, *, prefix):
         """Remove a prefix for the guild."""
         prefixes = self.client.prefixes.get(ctx.guild.id)
@@ -257,7 +257,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'`{prefix}` is no longer a prefix for {ctx.guild}')
     
     @_prefix.command(aliases=['sp-rm'])
-    @check_admin_or_owner()
+    @check_mod_or_owner()
     async def spaceprefix_remove(self, ctx, *, prefix):
         """Remove a prefix for the guild."""
         prefixes = self.client.prefixes.get(ctx.guild.id)

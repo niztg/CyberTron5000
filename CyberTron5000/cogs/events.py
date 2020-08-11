@@ -1,5 +1,6 @@
 import json
 import traceback
+import asyncio
 
 import async_cleverbot
 import discord
@@ -31,9 +32,8 @@ class Events(commands.Cog):
         v = 4
         lines = traceback.format_exception(et, error, tb, v)
         traceback_text = "".join(lines)
-        known_errors = [commands.BadArgument, commands.MissingRequiredArgument, commands.MissingPermissions,
-                        commands.BotMissingPermissions, commands.CommandOnCooldown, commands.NSFWChannelRequired]
-        pass_errors = [commands.NotOwner, commands.CommandNotFound, commands.CheckFailure, commands.BadUnionArgument]
+        known_errors = [commands.BadArgument, commands.MissingRequiredArgument, commands.MissingPermissions, commands.BotMissingPermissions, commands.CommandOnCooldown, commands.NSFWChannelRequired, discord.Forbidden]
+        pass_errors = [commands.NotOwner, commands.CommandNotFound, commands.CheckFailure, commands.BadUnionArgument, asyncio.TimeoutError]
         if type(error) in pass_errors:
             return
         elif type(error) in known_errors:
