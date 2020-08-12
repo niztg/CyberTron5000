@@ -300,6 +300,10 @@ class Moderation(commands.Cog):
         for message in messages:
             await ctx.send(message)
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, discord.Forbidden):
+            return await ctx.send("I dont have the permissions to do that!")
+
 
 def setup(client):
     client.add_cog(Moderation(client))

@@ -37,13 +37,13 @@ class CyberTronHelpCommand(commands.HelpCommand):
         parent = command.full_parent_name
         if len(command.aliases) > 0:
             aliases = '•'.join(command.aliases)
-            fmt = f'[{command.name}•{aliases}]'
+            fmt = f'{command.name}•{aliases}'
             if parent:
                 fmt = f'{parent} {fmt}'
             alias = fmt
         else:
             alias = command.name if not parent else f'{parent} {command.name}'
-        return f'{alias} {command.signature}'
+        return f'{self.clean_prefix}{alias} {command.signature}'
 
     def command_not_found(self, string):
         """
@@ -94,28 +94,25 @@ class CyberTronHelpCommand(commands.HelpCommand):
         for i in valid_reactions:
             await msg.add_reaction(i)
         with suppress(Exception):
-            try:
-                while True:
-                    done, pending = await asyncio.wait(
-                        [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
-                         self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
-                        return_when=asyncio.FIRST_COMPLETED)
-                    data = done.pop().result()
-                    if str(data[0]) == '<:stop_button:731316755485425744>':
-                        await msg.delete()
-                        await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
-                        break
-                    else:
-                        str_reaction = ''
-                        for x in str(data[0]):
-                            if x in ('<', '>'):
-                                continue
-                            else:
-                                str_reaction += x
-                        e = embed_dict.get(str_reaction)
-                        await msg.edit(embed=e)
-            except asyncio.TimeoutError:
-                return
+            while True:
+                done, pending = await asyncio.wait(
+                    [self.context.bot.wait_for('reaction_add', timeout=300, check=check),
+                     self.context.bot.wait_for('reaction_remove', timeout=300, check=check)],
+                    return_when=asyncio.FIRST_COMPLETED)
+                data = done.pop().result()
+                if str(data[0]) == '<:stop_button:731316755485425744>':
+                    await msg.delete()
+                    await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                    break
+                else:
+                    str_reaction = ''
+                    for x in str(data[0]):
+                        if x in ('<', '>'):
+                            continue
+                        else:
+                            str_reaction += x
+                    e = embed_dict.get(str_reaction)
+                    await msg.edit(embed=e)
 
     async def send_cog_help(self, cog):
         """
@@ -125,7 +122,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         """
         cog_doc = cog.__doc__ or " "
         entries = await self.filter_commands(cog.get_commands(), sort=True)
-        foo = [f"→ `{c.name} {c.signature}` | {c.help or 'No help provided for this command'}" for c in entries]
+        foo = [f"→ `{self.get_command_signature(c)}` {c.help or 'No help provided for this command'}" for c in entries]
         embed = discord.Embed(description=f"{cog_doc}", colour=self.context.bot.colour).set_author(
             name=f"{cog.qualified_name} Commands (Total {len(entries)})")
         if entries and len(entries) > 6:
@@ -155,12 +152,10 @@ class CyberTronHelpCommand(commands.HelpCommand):
         :return:
         """
         sc = []
-        u = '\u200b'
         entries = await self.filter_commands(group.commands)
         embed = discord.Embed(title=self.get_command_signature(group), colour=self.context.bot.colour)
         for c in entries:
-            char = "\u200b" if not c.aliases else "|"
-            sc.append(f"→ `{group.name} {c.name}{char}{'|'.join(c.aliases)} {c.signature or f'{u}'}` | {c.help}")
+            sc.append(f"→ `{self.get_command_signature(c)}` {c.help or 'No help provided.'}")
         embed.description = f"{group.help}"
         if entries and len(entries) > 6:
             source = paginator.IndexedListSource(show_index=False, data=sc, embed=embed, per_page=6,

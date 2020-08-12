@@ -396,17 +396,15 @@ class Fun(commands.Cog):
 
 
     @todo.command()
-    @commands.is_owner()
     async def add(self, ctx, *, todo):
         """Adds an item to your todo list"""
         results = await self.get_all_todo()
-        id = len(results) + 1
+        id = random.randint(12986, 99999)
         await self.client.pg_con.execute("INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(), str(ctx.message.jump_url), ctx.author.id)
-        await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list!")
+        await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list! (ID: `{id}`)")
 
 
     @todo.command(aliases=['rm', 'remove'])
-    @commands.is_owner()
     async def resolve(self, ctx, *id: int):
         """Resolves an item from your todo list"""
         items = await self.get_all_todo(ctx.author.id)
@@ -421,7 +419,6 @@ class Fun(commands.Cog):
         await ctx.send(f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
 
     @todo.command()
-    @commands.is_owner()
     async def list(self, ctx):
         """Shows your todo list"""
         items = []

@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from discord.ext import commands
 
-from CyberTron5000.utils import paginator, cyberformat
+from CyberTron5000.utils import paginator, cyberformat, checks
 from CyberTron5000.utils.lists import REGIONS, sl, status_mapping, badge_mapping
 
 matplotlib.use('Agg')
@@ -146,6 +146,7 @@ class Profile(commands.Cog):
         await ctx.send(embed=embed, file=gs.guild_graph)
     
     @guildinfo.command(aliases=['chan'])
+    @checks.bruh()
     async def channels(self, ctx):
         """Shows you the channels of a guild that only mods/admins can see."""
         embed = discord.Embed(colour=self.client.colour).set_author(icon_url=ctx.guild.icon_url_as(format='png'),
@@ -197,8 +198,7 @@ class Profile(commands.Cog):
                     chl.append(f"{channel} {o.name}")
         
         embed.description = "\n".join(chl)
-        return await ctx.send("peanut no like :angry:") if ctx.guild.id == 653376332507643914 else await ctx.send(
-            embed=embed)
+        await ctx.send(embed=embed)
     
     @guildinfo.command(aliases=['def-chan'])
     async def default_channels(self, ctx):
@@ -254,8 +254,7 @@ class Profile(commands.Cog):
                     chl.append(f"{channel} {o.name}")
         
         embed.description = "\n".join(chl)
-        return await ctx.send("peanut no like :angry:") if ctx.guild.id == 653376332507643914 else await ctx.send(
-            embed=embed)
+        await ctx.send(embed=embed)
     
     @commands.command(help="Gets a user's info.")
     async def betteruserinfo(self, ctx, *, member: discord.Member = None):
@@ -450,7 +449,7 @@ class Profile(commands.Cog):
         last_message = await channel.fetch_message(channel.last_message_id)
         embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
         embed.set_footer(
-            text=f'Channel created {nt(dt.utcnow() - channel.created_at)}c')
+            text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)
         
     async def cog_command_error(self, ctx, error):

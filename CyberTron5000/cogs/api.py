@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime as dt
 import json
 from html import unescape as unes
 
@@ -7,7 +7,7 @@ import aiohttp
 import async_cleverbot
 import async_cse
 import discord
-from discord.ext import commands
+from discord.ext import commands, flags
 
 from CyberTron5000.utils import paginator, cyberformat
 from CyberTron5000.utils.lists import STAT_NAMES, TYPES
@@ -64,33 +64,42 @@ class Api(commands.Cog):
         except Exception as error:
             await ctx.send(f"```py\n{error}```")
     
-    @commands.group(help="Shows the weather in your city.", invoke_without_command=True)
-    async def weather(self, ctx, city):
+    @flags.add_flag("-unit", type=str)
+    @flags.command(usage='<city>,[country]')
+    async def weather(self, ctx, city, **flags):
+        """
+        Shows the weather in your city.
+        If you want the temperature to display in farenheit, add `-unit f` at the end of your command usage.
+        If you want kelvin, add `-unit k` at the end. (Celsius is the default)
+        """
         try:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(
-                        f"http://api.openweathermap.org/data/2.5/weather?appid=2a5e00144cd0454e62a99f975c701c4e&q={city}") as r:
-                    res = await r.json()
+                        f"http://api.openweathermap.org/data/2.5/weather?appid={token['weather']}&q={city}") as r:
+                    data = await r.json()
                     await cs.close()
-                topic = res['weather'][0]
-                kelv_temp = round(res['main']['temp'], 1)
-                cels_temp = round(kelv_temp - 273.15, 1)
-                faren_temp = round(cels_temp * 1.8 + 32, 1)
-                ts = res['sys']['sunrise']
-                te = res['sys']['sunset']
-                town = res['name']
-                sunrise = datetime.datetime.fromtimestamp(ts).strftime("%H:%M")
-                sunset = datetime.datetime.fromtimestamp(te).strftime("%H:%M")
-                embed = discord.Embed(colour=self.client.colour,
-                                      description="**" + unes(topic['main']) + "**" + '\n' + unes(
-                                          topic['description']).capitalize())
-                embed.add_field(name="Info",
-                                value=f"*Temperature:* **{cels_temp}**° C • **{faren_temp}**° F • **{kelv_temp}**° K\n*Sunrise:* **{sunrise} UTC**\n*Sunset:* **{sunset} UTC**")
-                embed.set_footer(text=f"Weather for {town} • http://api.openweathermap.org")
-                await ctx.send(embed=embed)
-        except KeyError:
-            await ctx.send(
-                f"<:warning:727013811571261540> **{ctx.author.name}**, city probably not found. You can specify even more by adding your country as well. eg:\n`{ctx.prefix}weather <city name>,<country name>`")
+            if r.status == 404:
+                return await ctx.send(f"City not found!")
+            if not flags['unit']:
+                flags.pop('unit')
+            if not str(unit := flags.get('unit', 'c')).startswith(('c', 'k', 'f')):
+                return await ctx.send(f"**{unit}** is an invalid unit! Please make sure your unit starts with either **c**, **k** or **f**")
+            embed = discord.Embed(colour=self.client.colour)
+            temperature = round(cyberformat.get_temperature(data['main']['temp'],  unit), 1)
+            feels_like = round(cyberformat.get_temperature(data['main']['feels_like'], unit), 1)
+            embed.title = data['name']
+            weather = data['weather'][0]
+            sunrise = dt.utcfromtimestamp(data['sys']['sunrise']).strftime("%I:%M %p")
+            sunset = dt.utcfromtimestamp(data['sys']['sunset']).strftime("%I:%M %p")
+            embed.description = f"**{weather['main'].title()}** - {weather['description'].capitalize()}\n"
+            embed.description += f"<:temperature:742933558221340723> **{temperature}**° {unit[:1].capitalize()} (Feels Like **{feels_like}**° {unit[:1].capitalize()})\n"
+            embed.description += f"☀️ Sunrise: **{sunrise}** • Sunset: **{sunset}**"
+            embed.set_thumbnail(url="https://i.dlpng.com/static/png/6552264_preview.png")
+            await ctx.send(embed=embed)
+        except Exception as error:
+            print(error)
+            return
+
     
     @commands.command(help="Shows you info about a Pokémon", aliases=['pokemon', 'poke', 'pokémon', 'pokédex'])
     async def pokedex(self, ctx, pokemon):
@@ -181,8 +190,9 @@ class Api(commands.Cog):
         
         embed = discord.Embed(colour=self.client.colour)
         char = '\u200b' if not res['info']['author_email'] else f' • {res["info"]["author_email"]}'
-        embed.title = f"<:pypi:740694184763064393>  `pip install {res['info']['name']}=={res['info']['version']}`"
+        embed.title = f"`pip install {res['info']['name']}=={res['info']['version']}`"
         embed.description = f"{res['info']['summary']}\n"
+        embed.set_thumbnail(url=self.pypi_logo)
         if res['info']['requires_python']:
             versions = res['info']['requires_python'].replace("*", "").split(",")
         else:

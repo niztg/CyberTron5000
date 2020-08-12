@@ -100,7 +100,7 @@ def fieldify(embed: discord.Embed, names: list, values: list, inline: bool = Tru
     if not limit:
         for name, val in zip(names, values):
             embed.add_field(name=name, value=val, inline=inline)
-    
+
     elif limit:
         counter = 0
         for name, val in zip(names, values):
@@ -128,3 +128,16 @@ def to_emoji(c):
 
 async def better_random_char(s: str, c: str = None):
     return "".join(random.choice([b, c or b.upper()]) for b in s)
+
+
+def get_temperature(value: int, unit='c'):
+    if not unit.startswith(('c', 'k', 'f')):
+        raise ValueError('That is an invalid unit!')
+    if unit.startswith('c'):
+        return value - 273.15
+    elif unit.startswith('f'):
+        return (value - 273.15) + 9/5 + 32
+    elif unit.startswith('k'):
+        return value
+    else:
+        return
