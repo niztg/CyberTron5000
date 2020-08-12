@@ -16,11 +16,11 @@ def secrets():
 
 
 class Events(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.x_r = ":warning:727013811571261540"
-        self.bot = async_cleverbot.Cleverbot(secrets()['cleverbot'])
-        self.bot.set_context(async_cleverbot.DictContext(self.bot))
+        self.clever = async_cleverbot.Cleverbot(secrets()['cleverbot'])
+        self.clever.set_context(async_cleverbot.DictContext(self.clever))
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -40,10 +40,10 @@ class Events(commands.Cog):
             await ctx.message.add_reaction(self.x_r)
             await ctx.send(f'<{self.x_r}> **{ctx.author.name}**, {m(str(error))}')
         else:
-            embed = discord.Embed(colour=self.client.colour, title="Unkown Error Occured!",
+            embed = discord.Embed(colour=self.bot.colour, title="Unkown Error Occured!",
                                   description=f"Error on `{ctx.command}`: `{error.__class__.__name__}`\n```py\n{traceback_text}```\n**Server:** {ctx.guild}\n**Author:** {ctx.author}\n[URL]({ctx.message.jump_url})")
             await ctx.message.add_reaction(self.x_r)
-            await self.client.logging_channel.send(embed=embed)
+            await self.bot.logging_channel.send(embed=embed)
             await ctx.send(content="The error has been sent to my creator! It will be fixed as soon as possible!",
                            embed=embed)
 
@@ -51,12 +51,12 @@ class Events(commands.Cog):
     async def on_user_mention(self, message):
         if message.content in ("<@!697678160577429584>", "<@697678160577429584>"):
             DEFAULT_PREFIX = ["c$"]
-            a = self.client.prefixes.get(message.guild.id, DEFAULT_PREFIX)
-            embed = discord.Embed(colour=self.client.colour,
-                                  description=f'**My prefixes for {message.guild} are** {f"{self.client.user.mention}, " + ", ".join([f"`{a}`" for a in a])}\n\n**Do** '
-                                              f'{f"{self.client.user.mention} help, " + ", ".join([f"`{a}help`" for a in a])} **for a full list of commands**\n\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)')
-            embed.set_thumbnail(url=self.client.user.avatar_url)
-            embed.set_author(name=f"Developed by {self.client.owner}", icon_url=self.client.owner.avatar_url)
+            a = self.bot.prefixes.get(message.guild.id, DEFAULT_PREFIX)
+            embed = discord.Embed(colour=self.bot.colour,
+                                  description=f'**My prefixes for {message.guild} are** {f"{self.bot.user.mention}, " + ", ".join([f"`{a}`" for a in a])}\n\n**Do** '
+                                              f'{f"{self.bot.user.mention} help, " + ", ".join([f"`{a}help`" for a in a])} **for a full list of commands**\n\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)')
+            embed.set_thumbnail(url=self.bot.user.avatar_url)
+            embed.set_author(name=f"Developed by {self.bot.owner}", icon_url=self.bot.owner.avatar_url)
             await message.channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -68,9 +68,9 @@ class Events(commands.Cog):
         voice_channels = guild.voice_channels
         categories = guild.categories
         emojis = guild.emojis
-        await self.client.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", guild.id, "c$")
+        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", guild.id, "c$")
         try:
-            self.client.prefixes[guild.id] = ["c$"]
+            self.bot.prefixes[guild.id] = ["c$"]
         except BaseException:
             pass
         embed = discord.Embed(colour=0x00ff00, title=f'{guild}',
@@ -78,7 +78,7 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(
             text=f"Guild created" f"{humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
-        await guild.me.edit(nick=f"(c$) {self.client.user.name}")
+        await guild.me.edit(nick=f"(c$) {self.bot.user.name}")
         channels = sorted([t for t in guild.text_channels if t.permissions_for(guild.me).send_messages],
                           key=lambda x: x.position)
         c = [channel for channel in guild.text_channels if guild.me.permissions_in(channel).view_audit_log]
@@ -86,14 +86,14 @@ class Events(commands.Cog):
             pass
         else:
             async for action in guild.audit_logs(limit=10):
-                if action.action == discord.AuditLogAction.bot_add and action.target == self.client.user:
+                if action.action == discord.AuditLogAction.bot_add and action.target == self.bot.user:
                     embed.add_field(name="Added By", value=action.user)
                     break
                 else:
                     continue
-        await channels[0].send(embed=discord.Embed(color=self.client.colour,
+        await channels[0].send(embed=discord.Embed(color=self.bot.colour,
                                                    description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
-        await self.client.logging_channel.send(f"Joined Guild! This is guild **#{len(self.client.guilds)}**", embed=embed)
+        await self.bot.logging_channel.send(f"Joined Guild! This is guild **#{len(self.bot.guilds)}**", embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -104,9 +104,9 @@ class Events(commands.Cog):
         voice_channels = guild.voice_channels
         categories = guild.categories
         emojis = guild.emojis
-        await self.client.pg_con.execute("DELETE FROM prefixes WHERE guild_id = $1", guild.id)
+        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE guild_id = $1", guild.id)
         try:
-            self.client.prefixes.pop(guild.id)
+            self.bot.prefixes.pop(guild.id)
         except BaseException:
             pass
         embed = discord.Embed(colour=discord.Colour.red(), title=f'{guild}',
@@ -114,7 +114,7 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(
             text=f"Guild created {humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
-        await self.client.logging_channel.send(f"Left guild. We're down to **{len(self.client.guilds)}** guilds", embed=embed)
+        await self.bot.logging_channel.send(f"Left guild. We're down to **{len(self.bot.guilds)}** guilds", embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):
@@ -125,7 +125,7 @@ class Events(commands.Cog):
                 if len(message.content) < 2 or len(message.content) > 100:
                     return await message.channel.send(
                         f"**{message.author.name}**, text must be below 100 characters and over 2.")
-                resp = await self.bot.ask(message.content, message.author.id)
+                resp = await self.clever.ask(message.content, message.author.id)
                 r = str(resp) if str(resp).startswith("I") else m(str(resp))
                 if str(r)[-1] not in ['.', '?', '!']:
                     suff = "?" if any(s in str(r) for s in ['who', 'what', 'when', 'where', 'why', 'how']) else "."
@@ -141,5 +141,5 @@ class Events(commands.Cog):
                 await message.add_reaction(i)
 
 
-def setup(client):
-    client.add_cog(Events(client))
+def setup(bot):
+    bot.add_cog(Events(bot))

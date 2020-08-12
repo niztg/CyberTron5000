@@ -20,8 +20,8 @@ dagpi_token = dagpi()
 
 
 class Images(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
         self.daggy = 491174779278065689
 
@@ -30,7 +30,7 @@ class Images(commands.Cog):
         """
         Wanted...
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -44,7 +44,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/wanted', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -54,7 +54,7 @@ class Images(commands.Cog):
         """
         I'm just great.
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -68,7 +68,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/obamameme', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -78,7 +78,7 @@ class Images(commands.Cog):
         """
         Bad boy! Bad boy!
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -92,7 +92,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/bad', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -102,7 +102,7 @@ class Images(commands.Cog):
         """
         What a monster
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -116,7 +116,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/hitler', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -126,7 +126,7 @@ class Images(commands.Cog):
         """
         Yeah i use twitter
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         image = str(url.avatar_url_as(static_format='png')) or str(ctx.author.avatar_url_as(static_format='png'))
         async with ctx.typing():
             resp = {'token': dagpi_token, 'url': image, 'text': tweet, 'name': url.display_name}
@@ -134,7 +134,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/tweet', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -144,7 +144,7 @@ class Images(commands.Cog):
         """
         'Stop believing internet quotes' - God
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         member = member or ctx.author
         async with ctx.typing():
             resp = {'token': dagpi_token, 'url': str(member.avatar_url_as(static_format='png')),
@@ -153,7 +153,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/quote', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -163,7 +163,7 @@ class Images(commands.Cog):
         """
         Brrrr
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -177,7 +177,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/triggered', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -187,7 +187,7 @@ class Images(commands.Cog):
         """
         :rainbow_flag:
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -201,7 +201,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/gay', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -211,7 +211,7 @@ class Images(commands.Cog):
         """
         Paint a masterpiece
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -225,7 +225,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/paint', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -235,7 +235,7 @@ class Images(commands.Cog):
         """
         Why are you gay?
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -253,7 +253,7 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/whyareyougay', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
@@ -263,7 +263,7 @@ class Images(commands.Cog):
         """
         uwu
         """
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -281,11 +281,11 @@ class Images(commands.Cog):
                 async with cs.post('https://dagpi.tk/api/5g1g', headers=resp) as r:
                     resp = await r.json()
             res = resp['url']
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=res)
             embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Images(client))
+def setup(bot):
+    bot.add_cog(Images(bot))

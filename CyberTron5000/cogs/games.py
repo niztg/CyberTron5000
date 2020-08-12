@@ -19,8 +19,8 @@ def dagpi():
 class Games(commands.Cog):
     """Games!"""
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.daggy = 491174779278065689
 
     # rock paper scissors, shoot
@@ -45,13 +45,13 @@ class Games(commands.Cog):
             }
         }
         choice = random.choice([*rps_dict.keys()])
-        msg = await ctx.send(embed=discord.Embed(colour=self.client.colour, description=f"**Choose one 👇**").set_footer(text=f"You have 15 seconds."))
+        msg = await ctx.send(embed=discord.Embed(colour=self.bot.colour, description=f"**Choose one 👇**").set_footer(text=f"You have 15 seconds."))
         for r in rps_dict.keys():
             await msg.add_reaction(r)
         try:
-            r, u = await self.client.wait_for('reaction_add', timeout=15, check=lambda re, us: us == ctx.author and str(re) in rps_dict.keys() and re.message.id == msg.id)
+            r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda re, us: us == ctx.author and str(re) in rps_dict.keys() and re.message.id == msg.id)
             play = rps_dict.get(str(r.emoji))
-            await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"Result: **{play[choice].title()}**\nI Played: **{choice}**\nYou Played: **{str(r.emoji)}**"))
+            await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"Result: **{play[choice].title()}**\nI Played: **{choice}**\nYou Played: **{str(r.emoji)}**"))
         except asyncio.TimeoutError:
             await ctx.send(f"Boo, you ran out of time!")
 
@@ -68,7 +68,7 @@ class Games(commands.Cog):
             member3 = random.choice(ctx.guild.members)
         members = [member1, member2, member3]
         kmk = {'😘': 'kiss (😘)', '👫': 'marry (👫)', '🔪': 'kill(🔪)'}
-        embed = discord.Embed(colour=self.client.colour)
+        embed = discord.Embed(colour=self.bot.colour)
         embed.add_field(name=member1.display_name, value="\u200b")
         embed.add_field(name=member2.display_name, value="\u200b")
         embed.add_field(name=member3.display_name, value="\u200b")
@@ -84,13 +84,13 @@ class Games(commands.Cog):
             ask_kmk = ', '.join(kmk.values())
             embed.description = f"**Would you {ask_kmk} {members[index].display_name}?**"
             msg = await ctx.send(embed=embed)
-            self.client.loop.create_task(_add_reactions(msg, kmk))
+            self.bot.loop.create_task(_add_reactions(msg, kmk))
 
             def check(reaction, user):
                 return str(reaction.emoji) in kmk and user == ctx.author and reaction.message.id == msg.id
 
             try:
-                reaction, user = await self.client.wait_for(
+                reaction, user = await self.bot.wait_for(
                     'reaction_add', timeout=30, check=check)
             except asyncio.TimeoutError:
                 return await ctx.send("Didn't respond in time")
@@ -110,8 +110,8 @@ class Games(commands.Cog):
         Who's that pokemon!?
         """
         try:
-            dutchy = self.client.get_user(171539705043615744) or await self.client.fetch_user(171539705043615744)
-            daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+            dutchy = self.bot.get_user(171539705043615744) or await self.bot.fetch_user(171539705043615744)
+            daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
             async with ctx.typing():
                 resp = {'token': dagpi()}
                 async with aiohttp.ClientSession() as cs:
@@ -128,7 +128,7 @@ class Games(commands.Cog):
                         evo_line.append("???")
                     else:
                         evo_line.append(e)
-                embed = discord.Embed(colour=self.client.colour)
+                embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=resp['question_image'])
                 embed.set_footer(
                     text=f"Much thanks to {str(daggy)} for this amazing API, and {str(dutchy)} for the wonderful idea!")
@@ -137,21 +137,21 @@ class Games(commands.Cog):
                 await ctx.send(embed=embed)
                 dashes = await cyberformat.better_random_char(pokemon['name'], '_')
                 hints = [
-                    discord.Embed(colour=self.client.colour, title="Types", description=', '.join(pokemon['type'])),
-                    discord.Embed(title=f"`{dashes}`", colour=self.client.colour),
-                    discord.Embed(colour=self.client.colour, title="Evolution Line", description=" → ".join(evo_line)),
+                    discord.Embed(colour=self.bot.colour, title="Types", description=', '.join(pokemon['type'])),
+                    discord.Embed(title=f"`{dashes}`", colour=self.bot.colour),
+                    discord.Embed(colour=self.bot.colour, title="Evolution Line", description=" → ".join(evo_line)),
                     discord.Embed(title="Pokédex Entry",
                                   description=res[0]['description'].lower().replace(pokemon['name'].lower(), "???"),
-                                  colour=self.client.colour),
-                    discord.Embed(colour=self.client.colour, title="Species", description=" ".join(res[0]['species']))]
+                                  colour=self.bot.colour),
+                    discord.Embed(colour=self.bot.colour, title="Species", description=" ".join(res[0]['species']))]
             try:
                 for x in range(3):
-                    msg = await self.client.wait_for('message',
-                                                     check=lambda m: m.author == ctx.author and not m.author.bot,
-                                                     timeout=30.0)
+                    msg = await self.bot.wait_for('message',
+                                                  check=lambda m: m.author == ctx.author and not m.author.bot,
+                                                  timeout=30.0)
                     if msg.content.lower() == str(resp['pokemon']['name']).lower():
                         embed = discord.Embed(title=f"Correct! The answer was {resp['pokemon']['name']}",
-                                              colour=self.client.colour)
+                                              colour=self.bot.colour)
                         embed.set_image(url=resp['answer_image'])
                         return await ctx.send(embed=embed)
                     elif msg.content.lower().startswith(f"{ctx.prefix}hint"):
@@ -159,18 +159,18 @@ class Games(commands.Cog):
                             embed=random.choice(hints))
                         continue
                     elif msg.content.lower().startswith(f"{ctx.prefix}cancel"):
-                        embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.client.colour)
+                        embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
                         embed.set_image(url=resp['answer_image'])
                         embed.set_author(name="The correct answer was....")
                         return await ctx.send(embed=embed)
                     else:
                         continue
-                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.client.colour)
+                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
                 embed.set_image(url=resp['answer_image'])
                 embed.set_author(name="Incorrect! The correct answer was....")
                 return await ctx.send(embed=embed)
             except asyncio.TimeoutError:
-                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.client.colour)
+                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
                 embed.set_image(url=resp['answer_image'])
                 embed.set_author(name="You ran out of time! The answer was...")
                 return await ctx.send(embed=embed)
@@ -205,13 +205,13 @@ class Games(commands.Cog):
         correct = emojis[index]
 
         try:
-            r, u = await self.client.wait_for('reaction_add', check=check, timeout=15)
+            r, u = await self.bot.wait_for('reaction_add', check=check, timeout=15)
             if str(r.emoji) == correct:
-                await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
+                await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
             else:
-                await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
+                await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
         except asyncio.TimeoutError:
-            await msg.edit(embed=discord.Embed(colour=self.client.colour, description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
+            await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
 
     @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
@@ -223,7 +223,7 @@ class Games(commands.Cog):
             True: "<:tickgreen:732660186560462958>",
             False: "<:redx:732660210132451369>",
         }
-        daggy = self.client.get_user(self.daggy) or await self.client.fetch_user(self.daggy)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         async with ctx.typing():
             resp = {'token': dagpi()}
             async with aiohttp.ClientSession() as cs:
@@ -233,7 +233,7 @@ class Games(commands.Cog):
             hard = not easy
             await cs.close()
             embed = discord.Embed(
-                title="Which company is this?", colour=self.client.colour).set_image(
+                title="Which company is this?", colour=self.bot.colour).set_image(
                 url=resp['question']).set_footer(
                 text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
             embed.add_field(name=f'**Difficulty**', value=f'{td[easy]} | **Easy?**\n{td[hard]} | **Hard?**')
@@ -245,35 +245,35 @@ class Games(commands.Cog):
             await ctx.send(embed=embed)
         try:
             for x in range(3):
-                msg = await self.client.wait_for('message', check=lambda m: m.author == ctx.author and not m.author.bot,
-                                                 timeout=30.0)
+                msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and not m.author.bot,
+                                              timeout=30.0)
                 if msg.content.lower() == str(resp['brand']).lower():
                     embed = discord.Embed(title=f"Correct! The answer was {resp['brand']}",
-                                          colour=self.client.colour)
+                                          colour=self.bot.colour)
                     embed.set_image(url=resp['answer'])
                     return await ctx.send(embed=embed)
                 elif msg.content.lower().startswith(f"{ctx.prefix}hint"):
                     embed = discord.Embed(title=f"`{resp['hint']}`",
-                                          colour=self.client.colour)
+                                          colour=self.bot.colour)
                     await ctx.send(embed=embed)
                     continue
                 elif msg.content.lower().startswith(f"{ctx.prefix}cancel"):
                     embed = discord.Embed(title=f"The answer was {resp['brand']}",
-                                          colour=self.client.colour)
+                                          colour=self.bot.colour)
                     embed.set_image(url=resp['answer'])
                     return await ctx.send(embed=embed)
                 else:
                     continue
             embed = discord.Embed(title=f"The answer was {resp['brand']}",
-                                  colour=self.client.colour)
+                                  colour=self.bot.colour)
             embed.set_image(url=resp['answer'])
             return await ctx.send(embed=embed)
         except asyncio.TimeoutError:
-            embed = discord.Embed(title=f"{resp['brand']}", colour=self.client.colour)
+            embed = discord.Embed(title=f"{resp['brand']}", colour=self.bot.colour)
             embed.set_image(url=resp['answer'])
             embed.set_author(name="You ran out of time! The answer was...")
             return await ctx.send(embed=embed)
 
 
-def setup(client):
-    client.add_cog(Games(client))
+def setup(bot):
+    bot.add_cog(Games(bot))

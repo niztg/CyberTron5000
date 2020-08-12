@@ -15,8 +15,8 @@ from CyberTron5000.utils.checks import check_mod_or_owner
 class Moderation(commands.Cog):
     """Commands for Moderation"""
     
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
     
     def hierarchy(self, member):
@@ -38,7 +38,7 @@ class Moderation(commands.Cog):
         """Kick a member from a guild."""
         if not self.hierarchy(member):
             return await ctx.send('I cannot moderate that user')
-        r = "No reason specified" if not reason else reason
+        r = "No reason specified" or reason
         await member.send(
             f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
         await member.kick(reason=r)
@@ -51,7 +51,7 @@ class Moderation(commands.Cog):
         """Ban a member from a guild."""
         if not self.hierarchy(member):
             return await ctx.send('I cannot moderate that user')
-        r = "No reason specified" if not reason else reason
+        r = "No reason specified" or reason
         await member.send(
             f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
         await member.ban(reason=r)
@@ -75,7 +75,7 @@ class Moderation(commands.Cog):
         valid_emojis = ['⬆️', '⬇️']
         author = ctx.message.author
         embed = discord.Embed(
-            colour=self.client.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
+            colour=self.bot.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
         )
         embed.set_footer(text=f"Started by {author}", icon_url=author.avatar_url)
         embed.add_field(name="Upvotes", value="1", inline=False)
@@ -86,8 +86,8 @@ class Moderation(commands.Cog):
         while True:
             names = ['Upvotes', 'Downvotes']
             done, pending = await asyncio.wait([
-                self.client.wait_for("reaction_add"),
-                self.client.wait_for("reaction_remove")
+                self.bot.wait_for("reaction_add"),
+                self.bot.wait_for("reaction_remove")
             ], return_when=asyncio.FIRST_COMPLETED)
             # m = await ctx.channel.fetch_message(e.id)
             res = done.pop().result()
@@ -103,7 +103,7 @@ class Moderation(commands.Cog):
         """Voting only in the CyberTron5000 help server (https://discord.gg/2fxKxJH)"""
         author = ctx.message.author
         embed = discord.Embed(
-            colour=self.client.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
+            colour=self.bot.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
         )
         embed.set_footer(text=f"Started by {author}", icon_url=author.avatar_url)
         await ctx.message.delete()
@@ -145,7 +145,7 @@ class Moderation(commands.Cog):
             async for x in ctx.guild.audit_logs(limit=limit):
                 actions.append(
                     f"{x.user.name} {lists.audit_actions[x.action]} {x.target} ({humanize.naturaltime(__import__('datetime').datetime.utcnow() - x.created_at)})")
-            source = paginator.IndexedListSource(embed=discord.Embed(colour=self.client.colour).set_author(
+            source = paginator.IndexedListSource(embed=discord.Embed(colour=self.bot.colour).set_author(
                 name=f"Last Audit Log Actions for {ctx.guild}",
                 icon_url="https://cdn.discordapp.com/emojis/446847139977625620.png?v=1"), data=actions)
             menu = paginator.CatchAllMenu(source=source)
@@ -198,11 +198,11 @@ class Moderation(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=['pre', 'prefix'], name='changeprefix')
     async def _prefix(self, ctx):
         """View the guild's current prefixes."""
-        prefixes = self.client.prefixes.get(ctx.guild.id, ["c$"])
-        embed = discord.Embed(color=self.client.colour)
+        prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
+        embed = discord.Embed(color=self.bot.colour)
         embed.set_author(name=f"Prefixes for {ctx.guild}", icon_url=ctx.guild.icon_url)
         embed.add_field(name="Prefixes",
-                        value=f"{self.client.user.mention}, " + ", ".join([f"`{pre}`" for pre in prefixes]))
+                        value=f"{self.bot.user.mention}, " + ", ".join([f"`{pre}`" for pre in prefixes]))
         embed.set_footer(
             text=f'Do "{ctx.prefix}prefix add" to add a new prefix, or "{ctx.prefix}prefix remove" to remove a prefix!')
         await ctx.send(embed=embed)
@@ -211,64 +211,64 @@ class Moderation(commands.Cog):
     @check_mod_or_owner()
     async def add(self, ctx, *, prefix):
         """Add a prefix for the guild."""
-        prefixes = self.client.prefixes.get(ctx.guild.id, ["c$"])
+        prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
         if prefix in prefixes:
             return await ctx.send(f"`{prefix}` is already a prefix for this guild!")
         if len(prefixes) > 15:
             return await ctx.send("This guild already has 15 prefixes! Please remove some before continuing.")
-        await self.client.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
-                                         prefix)
+        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
+                                      prefix)
         try:
-            self.client.prefixes[ctx.guild.id].append(prefix)
+            self.bot.prefixes[ctx.guild.id].append(prefix)
         except KeyError:
-            self.client.prefixes[ctx.guild.id] = ["c$", prefix]
+            self.bot.prefixes[ctx.guild.id] = ["c$", prefix]
         await ctx.send(f'Success! `{prefix}` is now a prefix in {ctx.guild}!')
     
     @_prefix.command(aliases=['sp-add'])
     @check_mod_or_owner()
     async def spaceprefix_add(self, ctx, *, prefix):
         """Add a prefix for the guild that ends in a space."""
-        prefixes = self.client.prefixes.get(ctx.guild.id, ["c$"])
+        prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
         if prefix in prefixes:
             return await ctx.send(f"`{prefix}` is already a prefix for this guild!")
         if len(prefixes) > 15:
             return await ctx.send("This guild already has 15 prefixes! Please remove some before continuing.")
-        await self.client.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
+        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
                                          f"{prefix} ")
         try:
-            self.client.prefixes[ctx.guild.id].append(f"{prefix} ")
+            self.bot.prefixes[ctx.guild.id].append(f"{prefix} ")
         except KeyError:
-            self.client.prefixes[ctx.guild.id] = [f"{prefix} ", "c$"]
+            self.bot.prefixes[ctx.guild.id] = [f"{prefix} ", "c$"]
         await ctx.send(f'Success! `{prefix} ` is now a prefix in {ctx.guild}!')
     
     @_prefix.command(aliases=['rm'])
     @check_mod_or_owner()
     async def remove(self, ctx, *, prefix):
         """Remove a prefix for the guild."""
-        prefixes = self.client.prefixes.get(ctx.guild.id)
+        prefixes = self.bot.prefixes.get(ctx.guild.id)
         if prefix not in prefixes:
             return await ctx.send(f"`{prefix}` is not a prefix in {ctx.guild}!")
-        await self.client.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", prefix,
-                                         ctx.guild.id)
+        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", prefix,
+                                      ctx.guild.id)
         try:
-            self.client.prefixes[ctx.guild.id].remove(prefix)
+            self.bot.prefixes[ctx.guild.id].remove(prefix)
         except KeyError:
-            self.client.prefixes[ctx.guild.id] = []
+            self.bot.prefixes[ctx.guild.id] = []
         await ctx.send(f'`{prefix}` is no longer a prefix for {ctx.guild}')
     
     @_prefix.command(aliases=['sp-rm'])
     @check_mod_or_owner()
     async def spaceprefix_remove(self, ctx, *, prefix):
         """Remove a prefix for the guild."""
-        prefixes = self.client.prefixes.get(ctx.guild.id)
+        prefixes = self.bot.prefixes.get(ctx.guild.id)
         if f"{prefix} " not in prefixes:
             return await ctx.send(f"`{prefix} ` is not a prefix in {ctx.guild}!")
-        await self.client.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", f"{prefix} ",
-                                         ctx.guild.id)
+        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", f"{prefix} ",
+                                      ctx.guild.id)
         try:
-            self.client.prefixes[ctx.guild.id].remove(f"{prefix} ")
+            self.bot.prefixes[ctx.guild.id].remove(f"{prefix} ")
         except KeyError:
-            self.client.prefixes[ctx.guild.id] = []
+            self.bot.prefixes[ctx.guild.id] = []
         await ctx.send(f'`{prefix} ` is no longer a prefix for {ctx.guild}')
     
     @add.error
@@ -305,5 +305,5 @@ class Moderation(commands.Cog):
             return await ctx.send("I dont have the permissions to do that!")
 
 
-def setup(client):
-    client.add_cog(Moderation(client))
+def setup(bot):
+    bot.add_cog(Moderation(bot))

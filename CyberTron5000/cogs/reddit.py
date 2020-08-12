@@ -13,8 +13,8 @@ from CyberTron5000.utils.lists import REDDIT_EMOJIS
 class Reddit(commands.Cog):
     """Commands interacting with the Reddit API."""
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.up = "<:upvote:718895913342337036>"
         self.share = "<:share:730823872265584680>"
 
@@ -61,7 +61,7 @@ class Reddit(commands.Cog):
             icon = icon.split("?")[0]
             banner = k['data']['subreddit']['banner_img']
             banner = banner.split("?")[0]
-            embed = discord.Embed(color=self.client.colour)
+            embed = discord.Embed(color=self.bot.colour)
             embed.set_thumbnail(url=icon)
             embed.url = f"https://reddit.com/user/{user}"
             embed.set_author(name=f"{k['data']['subreddit']['title']}",
@@ -92,7 +92,7 @@ class Reddit(commands.Cog):
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['is_self'] and not p['stickied']])
-                embed = discord.Embed(title=str(s['title']), colour=self.client.colour,
+                embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
                                       url=f"https://reddit.com/{s['permalink']}",
                                       description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
                 embed.set_author(name=s['author'])
@@ -115,7 +115,7 @@ class Reddit(commands.Cog):
             images = [banner, icon]
             if choice not in choices:
                 return await ctx.send(f"Error! Please chose between {' or '.join([f'`{a}`' for a in choices])}!")
-            await ctx.send(embed=discord.Embed(colour=self.client.colour, title=f'r/{subreddit}',
+            await ctx.send(embed=discord.Embed(colour=self.bot.colour, title=f'r/{subreddit}',
                                                url=images[choices.index(choice)]).set_image(
                 url=images[choices.index(choice)]))
 
@@ -136,7 +136,7 @@ class Reddit(commands.Cog):
                 else:
                     char = f" | {__import__('html').unescape([i['author_flair_text'] for i in mods][0])}"
                 this = [f"{i['name']}{char}" for i in mods]
-                embed = discord.Embed(colour=self.client.colour,
+                embed = discord.Embed(colour=self.bot.colour,
                                       description=f"Permissions: {f', '.join(f'**{p.capitalize()}**' for p in perms[0])}\nAdded as Mod: **{datetime.datetime.utcfromtimestamp(timestamp[0]).strftime('%B %d, %Y')}**").set_author(
                     name=this[0])
                 embed.set_footer(text=f"r/{subreddit}")
@@ -152,7 +152,7 @@ class Reddit(commands.Cog):
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['stickied']])
-                embed = discord.Embed(title=str(s['title']), colour=self.client.colour,
+                embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
                                       url=f"https://reddit.com/{s['permalink']}",
                                       description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
                 embed.set_author(name=s['author'])
@@ -189,7 +189,7 @@ class Reddit(commands.Cog):
                 ten_million = len([item for item in numbas if item >= 10_000_000])
                 embed = discord.Embed(
                     description=f"u/{user} mods **{len(reddits):,}** subreddits with **{humanize.intcomma(sum(numbas))}** total readers\n\n*{msg}*\n\n{final_ms}",
-                    colour=self.client.colour)
+                    colour=self.bot.colour)
                 embed.add_field(name="Advanced Statistics",
                                 value=f"Subreddits with 0 subscribers: **{zero_subs}**\nSubreddits with 1 subscriber: **{one_subs}**\nSubreddits with 100 or more subscribers: **{hundred_subs}**\nSubreddits with 1,000 or more subscribers: **{thousand_subs}**\nSubreddits with 100,000 or more subscribers: **{hundred_thousand_subs}**\nSubreddits with 1,000,000 or more subscribers: **{million}**\nSubreddits with 10,000,000 or more subscribers: **{ten_million}**\n\nAverage Subscribers Per Subreddit: **{humanize.intcomma(round(sum(numbas) / len(numbas)))}**")
             await ctx.send(embed=embed)
@@ -209,7 +209,7 @@ class Reddit(commands.Cog):
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['stickied']])
-                embed = discord.Embed(title=str(s['title']), colour=self.client.colour,
+                embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
                                       url=f"https://reddit.com/{s['permalink']}")
                 embed.set_author(name=s['author'])
                 embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
@@ -236,8 +236,8 @@ class Reddit(commands.Cog):
                 banner = data['banner_background_image'].split("?")[0]
                 embed = discord.Embed(
                     description=f"{data['public_description']}\n**{data['subscribers']:,}** subscribers | **{data['active_user_count']:,}** active users",
-                    colour=self.client.colour).set_author(name=data['display_name_prefixed'],
-                                                          url=f"https://reddit.com/r/{subreddit}", icon_url=icon)
+                    colour=self.bot.colour).set_author(name=data['display_name_prefixed'],
+                                                       url=f"https://reddit.com/r/{subreddit}", icon_url=icon)
                 embed.description += f'\n<:asset:734531316741046283> [Icon URL]({str(icon)}) | [Banner URL]({str(banner)})'
                 async with aiohttp.ClientSession() as cs:
                     async with cs.get(f"https://www.reddit.com/r/{subreddit}/about/moderators.json") as r:
@@ -266,7 +266,7 @@ class Reddit(commands.Cog):
             embeds = []
             async with ctx.typing():
                 for s in random.sample(posts, len(posts)):
-                    embed = discord.Embed(title=str(s['title']), colour=self.client.colour,
+                    embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
                                           url=f"https://reddit.com/{s['permalink']}")
                     embed.set_author(name=s['author'])
                     embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
@@ -288,5 +288,5 @@ class Reddit(commands.Cog):
         await p.start(ctx)
 
 
-def setup(client):
-    client.add_cog(Reddit(client))
+def setup(bot):
+    bot.add_cog(Reddit(bot))

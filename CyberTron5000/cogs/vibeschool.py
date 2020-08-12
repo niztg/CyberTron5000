@@ -14,8 +14,8 @@ from CyberTron5000.utils.checks import check_channel, check_guild, check_guild_a
 class VibeSchool(commands.Cog):
     """The best Discord Server. Join today!"""
     
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
     
     async def cog_check(self, ctx):
         return ctx.guild.id == 734159981208666134
@@ -89,7 +89,7 @@ class VibeSchool(commands.Cog):
     
     @commands.group(invoke_without_command=True, aliases=['q', 'tq'])
     async def take_quiz(self, ctx):
-        cmds = [f"→ `{ctx.prefix}take_quiz {c.name}` - {c.help}" for c in self.client.get_command("take_quiz").commands]
+        cmds = [f"→ `{ctx.prefix}take_quiz {c.name}` - {c.help}" for c in self.bot.get_command("take_quiz").commands]
         await ctx.send("**Quizzes Commands**\n" + "\n".join(cmds))
     
     @take_quiz.command(aliases=['young', 'ty'], invoke_without_command=True)
@@ -109,7 +109,7 @@ class VibeSchool(commands.Cog):
                          'No violence, No pinging The Council'], ['Sensei Niz', 'kalmdown1', 'Cookie'],
                         ['Vibe', 'Vibe Adult', 'Vibe, Vibe Adult'], ['!sensei', '!senseiniz', '!vibe-check']]
             await ctx.send("You are about to take **The Young Quiz**. Do you wish to proceed? **[yes/no]**")
-            message = await self.client.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
+            message = await self.bot.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
             index = 0
             total = 0
             sleep = 0.5
@@ -124,7 +124,7 @@ class VibeSchool(commands.Cog):
                     for i, v in enumerate(answers, start=1):
                         x.append(f"{i}. **{v}**")
                     await ctx.send(f"{pref} {question}\n_(Type **only** the number)_\n" + "\n".join(x))
-                    msg = await self.client.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
+                    msg = await self.bot.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
                     if str(answers.index(answer) + 1) == str(msg.content):
                         await ctx.send("Correct!")
                         score = 1 if "bonus" not in pref.lower() else 2
@@ -139,7 +139,7 @@ class VibeSchool(commands.Cog):
                 p = True if round(total / len(ty_questions) * 100) > 70 else False
                 embed = discord.Embed(
                     description=f"Score: **{total}** out of **{len(ty_questions)}**\nPercent: **{round(total / len(ty_questions) * 100)}%**\nPass? {p}",
-                    colour=self.client.colour, title="Test Results").set_footer(text="Note: Bonus questions count as two points.")
+                    colour=self.bot.colour, title="Test Results").set_footer(text="Note: Bonus questions count as two points.")
                 embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
                 await ctx.send(embed=embed)
                 if p:
@@ -163,7 +163,7 @@ class VibeSchool(commands.Cog):
         """Quiz for which you can study in <#687821074200526873> and take in <#687821074200526873>"""
         try:
             ty_questions = ['Who is/are the boss(es) of The Council?',
-                            f'Which role manages the Discord server and uses {self.client.user.mention}?',
+                            f'Which role manages the Discord server and uses {self.bot.user.mention}?',
                             'Who manage the Subreddit?', 'What colour does the Vibe Mentor role get?',
                             'What job is on the bottom of the hierarchy?', 'What is the job of The Council?']
             ty_correct = ['HEAD COUNCIL', 'Moderator', 'Subreddit Manager', 'Blue', 'Vibe Mentor',
@@ -173,7 +173,7 @@ class VibeSchool(commands.Cog):
                         ['Moderator', 'Subreddit Boss', 'Queue Manager'],
                         ['To teach you how to vibe', 'To promote the Discord', 'To promote the subreddit']]
             await ctx.send("You are about to take **Vibe Adulthood Quiz**. Do you wish to proceed? **[yes/no]**")
-            message = await self.client.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
+            message = await self.bot.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
             index = 0
             total = 0
             sleep = 0.5
@@ -188,7 +188,7 @@ class VibeSchool(commands.Cog):
                     for i, v in enumerate(answers, start=1):
                         x.append(f"{i}. **{v}**")
                     await ctx.send(f"{pref} {question}\n_(Type **only** the number)_\n" + "\n".join(x))
-                    msg = await self.client.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
+                    msg = await self.bot.wait_for('message', timeout=30.0, check=lambda m: m.author == ctx.author)
                     if str(answers.index(answer) + 1) == str(msg.content):
                         await ctx.send("Correct!")
                         score = 1 if "bonus" not in pref.lower() else 2
@@ -203,7 +203,7 @@ class VibeSchool(commands.Cog):
                 p = True if round(total / len(ty_questions) * 100) > 70 else False
                 embed = discord.Embed(
                     description=f"Score: **{total}** out of **{len(ty_questions)}**\nPercent: **{round(total / len(ty_questions) * 100)}%**\nPass? {p}",
-                    colour=self.client.colour, title="Test Results").set_footer(text="Note: Bonus questions count as two points.")
+                    colour=self.bot.colour, title="Test Results").set_footer(text="Note: Bonus questions count as two points.")
                 embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
                 await ctx.send(embed=embed)
                 if p:
@@ -267,7 +267,7 @@ class VibeSchool(commands.Cog):
     @commands.command(help="the eppicest server in the land")
     async def vibe_server (self, ctx):
         embed = discord.Embed(
-            colour=self.client.colour,
+            colour=self.bot.colour,
             title="join now", url="https://discord.gg/m6mqkPT"
         )
         await ctx.send(embed=embed)
@@ -280,7 +280,7 @@ class VibeSchool(commands.Cog):
     @commands.group(invoke_without_command=True,
                     help="contact management if there's anything you want to say to them")
     async def management(self, ctx, *, message):
-        channel = self.client.get_channel(id=734171313253515274)
+        channel = self.bot.get_channel(id=734171313253515274)
         await channel.send(
             f"Hey, {ctx.message.author} contacted you <@&689613285170872575>\n```{message}```")
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
@@ -289,7 +289,7 @@ class VibeSchool(commands.Cog):
     @check_channel(channel=734171313253515274)
     async def reply(self, ctx, member: discord.Member, *, message):
         try:
-            user = self.client.get_user(id=member.id)
+            user = self.bot.get_user(id=member.id)
             await user.send(f"Hey, Management got back to you for {ctx.guild}.\n```{message}```")
             await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
         except Exception as error:
@@ -315,10 +315,10 @@ class VibeSchool(commands.Cog):
     @commands.command()
     async def vibe_suggest(self, ctx, *, message):
         """Suggest something for VIBE SCHOOL's rebuilding!"""
-        channel = self.client.get_channel(734171313253515274)
+        channel = self.bot.get_channel(734171313253515274)
         await channel.send(f"Suggestion from **{ctx.author}**\n```{message}```")
         await ctx.message.delete()
 
 
-def setup(client):
-    client.add_cog(VibeSchool(client))
+def setup(bot):
+    bot.add_cog(VibeSchool(bot))

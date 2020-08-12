@@ -172,29 +172,29 @@ class CyberTronHelpCommand(commands.HelpCommand):
 class Help(commands.Cog):
     """Help Commands"""
 
-    def __init__(self, client):
+    def __init__(self, bot):
         """
         Sets up the whole help command thing
-        :param client:
+        :param bot:
         """
-        self.client = client
-        self._original_help_command = client.help_command
-        client.help_command = CyberTronHelpCommand()
-        client.help_command.cog = self
+        self.bot = bot
+        self._original_help_command = bot.help_command
+        bot.help_command = CyberTronHelpCommand()
+        bot.help_command.cog = self
 
     def cog_unload(self):
         """
         ah yes, this.
         :return:
         """
-        self.client.help_command = self._original_help_command
+        self.bot.help_command = self._original_help_command
 
     @commands.group(invoke_without_command=True)
     async def cogs(self, ctx):
         """Shows you every cog"""
-        await ctx.send(embed=discord.Embed(colour=self.client.colour, title=f"All Cogs ({len(self.client.cogs)})",
+        await ctx.send(embed=discord.Embed(colour=self.bot.colour, title=f"All Cogs ({len(self.bot.cogs)})",
                                            description=f"Do `{ctx.prefix}help <cog>` to know more about them!" + "\n\n" + "\n".join(
-                                               [i for i in self.client.cogs.keys()])))
+                                               [i for i in self.bot.cogs.keys()])))
 
     @cogs.command()
     @commands.is_owner()
@@ -203,12 +203,12 @@ class Help(commands.Cog):
         cogs = []
         for filename in ctx.bot.ext:
             try:
-                self.client.reload_extension(filename)
+                self.bot.reload_extension(filename)
                 cogs.append(f"<:on:732805104620797965> `ext.{filename[18:]}`")
             except commands.ExtensionNotLoaded:
                 cogs.append(f"<:off:732805190582927410> `ext.{filename[18:]}`")
 
-        embed = discord.Embed(colour=self.client.colour)
+        embed = discord.Embed(colour=self.bot.colour)
         embed.description = "\n".join(cogs)
         await ctx.send(embed=embed)
 
@@ -219,11 +219,11 @@ class Help(commands.Cog):
 
         """
         embeds = []
-        use = self.client.get_command(command) if command else None
-        lcogs = [str(cog) for cog in self.client.cogs]
+        use = self.bot.get_command(command) if command else None
+        lcogs = [str(cog) for cog in self.bot.cogs]
         if not command:
-            for name, obj in self.client.cogs.items():
-                embed = discord.Embed(title=f"{name} Commands", colour=self.client.colour)
+            for name, obj in self.bot.cogs.items():
+                embed = discord.Embed(title=f"{name} Commands", colour=self.bot.colour)
                 cmds = []
                 for cmd in obj.get_commands():
                     cmds.append(f"→ `{cmd.name} {cmd.signature}` | {cmd.help}")
@@ -232,15 +232,15 @@ class Help(commands.Cog):
                     embeds.append(embed)
                 else:
                     continue
-            pages = paginator.CatchAllMenu(paginator.EmbedSource([discord.Embed(colour=self.client.colour,
-                                                                                title=f'{self.client.user.name} Help',
+            pages = paginator.CatchAllMenu(paginator.EmbedSource([discord.Embed(colour=self.bot.colour,
+                                                                                title=f'{self.bot.user.name} Help',
                                                                                 description=f'Do `{ctx.prefix}help command/cog` for more info').set_image(
-                url=self.client.user.avatar_url)] + embeds))
+                url=self.bot.user.avatar_url)] + embeds))
             await pages.start(ctx)
         elif command in lcogs:
-            embed = discord.Embed(colour=self.client.colour, title=f'{command.capitalize()} Help')
+            embed = discord.Embed(colour=self.bot.colour, title=f'{command.capitalize()} Help')
             embed.description = '\n'.join(
-                [f"→ `{cmd.name} {cmd.signature}` | {cmd.help}" for cmd in self.client.cogs[command].get_commands()])
+                [f"→ `{cmd.name} {cmd.signature}` | {cmd.help}" for cmd in self.bot.cogs[command].get_commands()])
             await ctx.send(embed=embed)
         elif command and use:
             help_msg = use.help or "No help provided for this command"
@@ -253,10 +253,10 @@ class Help(commands.Cog):
                 alias = cmd_alias_format
             else:
                 alias = use.name if not parent else f'{parent} {use.name}'
-            embed = discord.Embed(title=f"{alias} {use.signature}", description=help_msg, colour=self.client.colour)
+            embed = discord.Embed(title=f"{alias} {use.signature}", description=help_msg, colour=self.bot.colour)
             if isinstance(use, commands.Group):
                 embed = discord.Embed(title=f"{alias} {use.signature}", description=help_msg,
-                                      colour=self.client.colour)
+                                      colour=self.bot.colour)
                 for sub_cmd in use.commands:
                     u = '\u200b'
                     embed.add_field(
@@ -269,5 +269,5 @@ class Help(commands.Cog):
             await ctx.send("not found")
 
 
-def setup(client):
-    client.add_cog(Help(client))
+def setup(bot):
+    bot.add_cog(Help(bot))

@@ -42,11 +42,11 @@ async def fetch_rtfs(res):
 class Api(commands.Cog):
     """Interact with various API's"""
     
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
-        self.bot = async_cleverbot.Cleverbot(token['cleverbot'])
-        self.bot.set_context(async_cleverbot.DictContext(self.bot))
+        self.clever = async_cleverbot.Cleverbot(token['cleverbot'])
+        self.clever.set_context(async_cleverbot.DictContext(self.bot))
     
     @commands.command(aliases=['ily'], help="compliment your friends :heart:")
     async def compliment(self, ctx, *, user: discord.Member = None):
@@ -59,7 +59,7 @@ class Api(commands.Cog):
             
             await ctx.send(
                 embed=discord.Embed(description=f"{user.name}, {unes(comp['compliment'])}",
-                                    colour=self.client.colour).set_footer(
+                                    colour=self.bot.colour).set_footer(
                     text="https://complimentr.com/api"))
         except Exception as error:
             await ctx.send(f"```py\n{error}```")
@@ -80,11 +80,9 @@ class Api(commands.Cog):
                     await cs.close()
             if r.status == 404:
                 return await ctx.send(f"City not found!")
-            if not flags['unit']:
-                flags.pop('unit')
-            if not str(unit := flags.get('unit', 'c')).startswith(('c', 'k', 'f')):
+            if not str(unit := flags.get('unit') or 'c').startswith(('c', 'k', 'f')):
                 return await ctx.send(f"**{unit}** is an invalid unit! Please make sure your unit starts with either **c**, **k** or **f**")
-            embed = discord.Embed(colour=self.client.colour)
+            embed = discord.Embed(colour=self.bot.colour)
             temperature = round(cyberformat.get_temperature(data['main']['temp'],  unit), 1)
             feels_like = round(cyberformat.get_temperature(data['main']['feels_like'], unit), 1)
             embed.title = data['name']
@@ -93,7 +91,7 @@ class Api(commands.Cog):
             sunset = dt.utcfromtimestamp(data['sys']['sunset']).strftime("%I:%M %p")
             embed.description = f"**{weather['main'].title()}** - {weather['description'].capitalize()}\n"
             embed.description += f"<:temperature:742933558221340723> **{temperature}**° {unit[:1].capitalize()} (Feels Like **{feels_like}**° {unit[:1].capitalize()})\n"
-            embed.description += f"☀️ Sunrise: **{sunrise}** • Sunset: **{sunset}**"
+            embed.description += f"☀️ Sunrise: **{sunrise}** UTC • Sunset: **{sunset}** UTC"
             embed.set_thumbnail(url="https://i.dlpng.com/static/png/6552264_preview.png")
             await ctx.send(embed=embed)
         except Exception as error:
@@ -110,7 +108,7 @@ class Api(commands.Cog):
                 if r.status != 200:
                     return await ctx.send("Error!")
                 await cs.close()
-                embed = discord.Embed(title=f"{res[0]['name'].title()} • #{res[0]['id']}", colour=self.client.colour)
+                embed = discord.Embed(title=f"{res[0]['name'].title()} • #{res[0]['id']}", colour=self.bot.colour)
                 embed.set_author(name=f'The {" ".join(res[0]["species"])}')
                 embed.set_thumbnail(url=res[0]['sprites']['normal'])
                 evo_line = []
@@ -145,7 +143,7 @@ class Api(commands.Cog):
                     res = await r.json()
                 await cs.close()
                 for item in res['list']:
-                    embed = discord.Embed(color=self.client.colour)
+                    embed = discord.Embed(color=self.bot.colour)
                     embed.title = item['word']
                     embed.set_author(name=item['author'],
                                      icon_url="https://images-ext-1.discordapp.net/external/Gp2DBilGEcbI2YR0qkOGVkivomBLwmkW_7v3K8cD1mg/https/cdn.discordapp.com/emojis/734991429843157042.png")
@@ -171,7 +169,7 @@ class Api(commands.Cog):
             async with cs.get("https://useless-facts.sameerkumar.website/api") as r:
                 res = await r.json()
                 await cs.close()
-        await ctx.send(embed=discord.Embed(title=res['data'], colour=self.client.colour))
+        await ctx.send(embed=discord.Embed(title=res['data'], colour=self.bot.colour))
     
     @commands.command()
     async def pypi(self, ctx, *, package):
@@ -188,16 +186,16 @@ class Api(commands.Cog):
             else:
                 return await ctx.send(f"Unknown error occured: {er.__class__.__name__}. Code: {r.status}")
         
-        embed = discord.Embed(colour=self.client.colour)
+        embed = discord.Embed(colour=self.bot.colour)
         char = '\u200b' if not res['info']['author_email'] else f' • {res["info"]["author_email"]}'
-        embed.title = f"`pip install {res['info']['name']}=={res['info']['version']}`"
+        embed.title = f"```pip install {res['info']['name']}=={res['info']['version']}```"
         embed.description = f"{res['info']['summary']}\n"
         embed.set_thumbnail(url=self.pypi_logo)
         if res['info']['requires_python']:
             versions = res['info']['requires_python'].replace("*", "").split(",")
         else:
             versions = ['???']
-        embed.description += f"<:author:734991429843157042> **{res['info']['author']}{char}**\n<:python:706850228652998667> {' | '.join([f'**{version}**' for version in versions])}\n<:license:737733205645590639> **{res['info']['license'] or '???'}**\n<:releases:734994325020213248> **{len(res['releases'])}**"
+        embed.description += f"<:author:734991429843157042> **{res['info']['author']}{char}**\n<:python:706850228652998667> {', '.join([f'**{version}**' for version in versions])}\n<:license:737733205645590639> **{res['info']['license'] or '???'}**\n<:releases:734994325020213248> **{len(res['releases'])}**"
         embed.description += f"\n[PyPi Page]({res['info']['project_url']})"
         if res['info']['project_urls']:
             for key, value in res['info']['project_urls'].items():
@@ -213,7 +211,7 @@ class Api(commands.Cog):
             if len(ctx.message.content) < 2 or len(ctx.message.content) > 60:
                 return await ctx.send(
                     f"**{ctx.author.name}**, text must be below 60 characters and over 2.")
-            resp = await self.bot.ask(text, ctx.author.id)
+            resp = await self.clever.ask(text, ctx.author.id)
             r = str(resp) if str(resp).startswith("I") else cyberformat.minimalize(str(resp))
             if str(r)[-1] not in ['.', '?', '!']:
                 suff = "?" if any(s in str(r) for s in ['who', 'what', 'when', 'where', 'why', 'how']) else "."
@@ -228,7 +226,7 @@ class Api(commands.Cog):
         res = await translator.translate(message)
         from_lang = aiogoogletrans.LANGUAGES[res.src]
         to_lang = aiogoogletrans.LANGUAGES[res.dest]
-        embed = discord.Embed(colour=self.client.colour,
+        embed = discord.Embed(colour=self.bot.colour,
                               description=f"**{from_lang.title()}**\n{message}\n\n**{to_lang.title()}**\n{res.text}\n\n**Pronunciation**\n{res.pronunciation}").set_author(
             name='Translated Text',
             icon_url="https://cdn3.iconfinder.com/data/icons/google-suits-1/32/18_google_translate_text_language_translation-512.png")
@@ -244,7 +242,7 @@ class Api(commands.Cog):
                 f"<:warning:727013811571261540> **{ctx.author.name}**, `{target_lang}` is not a valid langauge!")
         from_lang = aiogoogletrans.LANGUAGES[res.src]
         to_lang = aiogoogletrans.LANGUAGES[res.dest]
-        embed = discord.Embed(colour=self.client.colour,
+        embed = discord.Embed(colour=self.bot.colour,
                               description=f"**{from_lang.capitalize()}**\n{message}\n\n**{to_lang.capitalize()}**\n{res.text}\n\n**Pronunciation**\n{res.pronunciation}").set_author(
             name='Translated Text',
             icon_url="https://cdn3.iconfinder.com/data/icons/google-suits-1/32/18_google_translate_text_language_translation-512.png")
@@ -303,7 +301,7 @@ class Api(commands.Cog):
                 resp = await t.json()
             await cs.close()
             return await ctx.send(
-                embed=discord.Embed(description=f"Cute {animal.title()}!", colour=self.client.colour).set_image(
+                embed=discord.Embed(description=f"Cute {animal.title()}!", colour=self.bot.colour).set_image(
                     url=resp['link']))
     
     @commands.command(aliases=['g'])
@@ -314,7 +312,7 @@ class Api(commands.Cog):
         embeds = []
         for res in results:
             embeds.append(
-                discord.Embed(colour=self.client.colour, title=res.title, description=res.description, url=res.url))
+                discord.Embed(colour=self.bot.colour, title=res.title, description=res.description, url=res.url))
         source = paginator.EmbedSource(embeds)
         await client.close()
         await paginator.CatchAllMenu(source=source).start(ctx)
@@ -336,7 +334,7 @@ class Api(commands.Cog):
             if not res:
                 return await ctx.send("no results.")
         await cs.close()
-        embed = discord.Embed(color=self.client.colour)
+        embed = discord.Embed(color=self.bot.colour)
         data = await fetch_rtfs(res)
         source = paginator.IndexedListSource(data, embed=embed, per_page=5, show_index=False)
         await paginator.CatchAllMenu(source=source).start(ctx)
@@ -351,7 +349,7 @@ class Api(commands.Cog):
         data = res.get('data')
         embeds = []
         for item in data:
-            embed = discord.Embed(colour=self.client.colour, title=f"> {item.get('title')}")
+            embed = discord.Embed(colour=self.bot.colour, title=f"> {item.get('title')}")
             embed.set_thumbnail(url='https://image.ibb.co/b0Gkwo/Poweredby_640px_Black_Vert_Text.png')
             embed.set_image(url=item.get('images')['original']['url'])
             embeds.append(embed)
@@ -361,5 +359,5 @@ class Api(commands.Cog):
 
 #
 
-def setup(client):
-    client.add_cog(Api(client))
+def setup(bot):
+    bot.add_cog(Api(bot))

@@ -315,8 +315,6 @@ class Fun(commands.Cog):
                 res = await r.json()
             await ctx.send(f'{res["text"]}')
 
-
-
     @commands.command()
     async def owner(self, ctx):
         """Shows you who made this bot"""
@@ -388,21 +386,22 @@ class Fun(commands.Cog):
         results = sorted((await self.get_all_todo(ctx.author.id)), key=lambda x: x['time'])
         for each in results:
             time = dt.utcfromtimestamp(each['time'])
-            since = nt(dt.utcnow()-time)
+            since = nt(dt.utcnow() - time)
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
         source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
 
-
     @todo.command()
     async def add(self, ctx, *, todo):
         """Adds an item to your todo list"""
-        results = await self.get_all_todo()
-        id = random.randint(12986, 99999)
-        await self.client.pg_con.execute("INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(), str(ctx.message.jump_url), ctx.author.id)
+        if len(todo) > 50:
+            return await ctx.send("Your todo is too long. Please be more consice.")
+        id = random.randint(1, 99999)
+        await self.client.pg_con.execute(
+            "INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(),
+            str(ctx.message.jump_url), ctx.author.id)
         await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list! (ID: `{id}`)")
-
 
     @todo.command(aliases=['rm', 'remove'])
     async def resolve(self, ctx, *id: int):
@@ -416,7 +415,8 @@ class Fun(commands.Cog):
         for i in id:
             message.append(f"• {todos[ids.index(i)]}")
             await self.client.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
-        await ctx.send(f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
+        await ctx.send(
+            f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
 
     @todo.command()
     async def list(self, ctx):
@@ -425,7 +425,7 @@ class Fun(commands.Cog):
         results = sorted((await self.get_all_todo(ctx.author.id)), key=lambda x: x['time'])
         for each in results:
             time = dt.utcfromtimestamp(each['time'])
-            since = nt(dt.utcnow()-time)
+            since = nt(dt.utcnow() - time)
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
         source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
         menu = paginator.CatchAllMenu(source=source)
