@@ -82,8 +82,10 @@ class Meta(commands.Cog):
         await ctx.send(embed=discord.Embed(description=a, colour=self.bot.colour).set_author(
             name=f"I have been up for {str(humanize.naturaltime(datetime.datetime.utcnow() - start_time)).split('ago')[0]}"))
 
-    @commands.command(help="Checks the bot's ping.")
+    @commands.command()
     async def ping(self, ctx):
+        """Shows you the bot's latency"""
+
         def check_health(i: float, vals: tuple = (150, 400)):
             if i <= vals[0]:
                 return '<:online:726127263401246832>'

@@ -6,6 +6,7 @@ import aiohttp
 import aiotrivia
 import discord
 from discord.ext import commands
+from unidecode import unidecode as u
 
 from CyberTron5000.utils import cyberformat, lists
 
@@ -45,13 +46,16 @@ class Games(commands.Cog):
             }
         }
         choice = random.choice([*rps_dict.keys()])
-        msg = await ctx.send(embed=discord.Embed(colour=self.bot.colour, description=f"**Choose one 👇**").set_footer(text=f"You have 15 seconds."))
+        msg = await ctx.send(embed=discord.Embed(colour=self.bot.colour, description=f"**Choose one 👇**").set_footer(
+            text=f"You have 15 seconds."))
         for r in rps_dict.keys():
             await msg.add_reaction(r)
         try:
-            r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda re, us: us == ctx.author and str(re) in rps_dict.keys() and re.message.id == msg.id)
+            r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda re, us: us == ctx.author and str(
+                re) in rps_dict.keys() and re.message.id == msg.id)
             play = rps_dict.get(str(r.emoji))
-            await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"Result: **{play[choice].title()}**\nI Played: **{choice}**\nYou Played: **{str(r.emoji)}**"))
+            await msg.edit(embed=discord.Embed(colour=self.bot.colour,
+                                               description=f"Result: **{play[choice].title()}**\nI Played: **{choice}**\nYou Played: **{str(r.emoji)}**"))
         except asyncio.TimeoutError:
             await ctx.send(f"Boo, you ran out of time!")
 
@@ -118,8 +122,7 @@ class Games(commands.Cog):
                     async with cs.get('https://dagpi.tk/api/wtp', headers=resp) as r:
                         resp = await r.json()
                     pokemon = resp['pokemon']
-                    print(pokemon)
-                    async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={pokemon['name']}") as r:
+                    async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={u(pokemon['name'])}") as r:
                         res = await r.json()
                     await cs.close()
                 evo_line = []
@@ -188,7 +191,8 @@ class Games(commands.Cog):
         embed = discord.Embed(colour=ctx.bot.colour)
         embed.title = question.question
         responses = question.responses
-        embed.description = "\n".join([f':regional_indicator_{lists.NUMBER_ALPHABET[i].lower()}: **{v}**' for i, v in enumerate(responses, 1)])
+        embed.description = "\n".join(
+            [f':regional_indicator_{lists.NUMBER_ALPHABET[i].lower()}: **{v}**' for i, v in enumerate(responses, 1)])
         embed.add_field(name="Info",
                         value=f'Difficulty: **{question.difficulty.title()}**\nCategory: **{question.category}**')
         embed.set_footer(text="React with the correct answer! | You have 15 seconds")
@@ -207,12 +211,14 @@ class Games(commands.Cog):
         try:
             r, u = await self.bot.wait_for('reaction_add', check=check, timeout=15)
             if str(r.emoji) == correct:
-                await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
+                await msg.edit(embed=discord.Embed(colour=self.bot.colour,
+                                                   description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
             else:
-                await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
+                await msg.edit(embed=discord.Embed(colour=self.bot.colour,
+                                                   description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
         except asyncio.TimeoutError:
-            await msg.edit(embed=discord.Embed(colour=self.bot.colour, description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
-
+            await msg.edit(embed=discord.Embed(colour=self.bot.colour,
+                                               description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
     @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
     async def guesslogo(self, ctx):

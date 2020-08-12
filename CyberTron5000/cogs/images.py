@@ -23,14 +23,16 @@ class Images(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
-        self.daggy = 491174779278065689
 
-    @commands.command()
-    async def wanted(self, ctx, *, url: ImageConverter = None):
+    @property
+    def dag(self):
+        return self.bot.get_user(491174779278065689)
+
+    @commands.command(name='wanted')
+    async def _static_wanted(self, ctx, *, url: ImageConverter = None):
         """
         Wanted...
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -39,22 +41,24 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            headers = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/wanted', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
+                async with cs.post('https://dagpi.tk/api/wanted', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
 
-    @commands.command()
-    async def obama(self, ctx, *, url: ImageConverter = None):
+    @commands.command(name='obama')
+    async def _static_obama(self, ctx, *, url: ImageConverter = None):
         """
         I'm just great.
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -63,22 +67,24 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            headers = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/obamameme', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
+                async with cs.post('https://dagpi.tk/api/obamameme', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
 
-    @commands.command()
-    async def bad(self, ctx, *, url: ImageConverter = None):
+    @commands.command(name='bad')
+    async def _static_bad(self, ctx, *, url: ImageConverter = None):
         """
         Bad boy! Bad boy!
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -87,22 +93,24 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            headers = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/bad', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
+                async with cs.post('https://dagpi.tk/api/bad', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
 
-    @commands.command()
-    async def hitler(self, ctx, *, url: ImageConverter = None):
+    @commands.command(name='hitler')
+    async def _static_hitler(self, ctx, *, url: ImageConverter = None):
         """
         What a monster
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -111,59 +119,24 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            headers = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/hitler', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
+                async with cs.post('https://dagpi.tk/api/hitler', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def tweet(self, ctx, url: discord.Member, *, tweet: str):
         """
         Yeah i use twitter
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
-        image = str(url.avatar_url_as(static_format='png')) or str(ctx.author.avatar_url_as(static_format='png'))
-        async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': image, 'text': tweet, 'name': url.display_name}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/tweet', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
-
-    @commands.command()
-    async def quote(self, ctx, member: discord.Member, *, quote: str):
-        """
-        'Stop believing internet quotes' - God
-        """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
-        member = member or ctx.author
-        async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': str(member.avatar_url_as(static_format='png')),
-                    'text': quote, 'name': member.display_name}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/quote', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            await ctx.send(embed=embed)
-
-    @commands.command()
-    async def triggered(self, ctx, *, url: ImageConverter = None):
-        """
-        Brrrr
-        """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -172,14 +145,64 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            headers = {'token': dagpi_token, 'url': url, 'text': tweet, 'name': url.display_name}
             async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/triggered', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
+                async with cs.post('https://dagpi.tk/api/tweet', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def quote(self, ctx, member: discord.Member, *, quote: str):
+        """
+        'Stop believing internet quotes' - Abraham Lincoln
+        """
+        async with ctx.typing():
+            headers = {'token': dagpi_token, 'url': str(member.avatar_url_as(static_fornat='png')), 'text': quote, 'name': member.display_name}
+            async with aiohttp.ClientSession() as cs:
+                async with cs.post('https://dagpi.tk/api/quote', headers=headers) as r:
+                    data = await r.json()
+            try:
+                image = data['url']
+            except KeyError:
+                return await ctx.send(data.get('error'))
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.set_image(url=image)
+            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def triggered(self, ctx, *, url: ImageConverter = None):
+        """
+        Brrrr
+        """
+
+        if not url:
+            if ctx.message.attachments:
+                url = str(ctx.message.attachments[0].url)
+            else:
+                url = str(ctx.author.avatar_url_as(static_format='png'))
+        else:
+            url = url
+        async with ctx.typing():
+            headers = {'token': dagpi_token, 'url': url}
+            async with aiohttp.ClientSession() as cs:
+                async with cs.post('https://dagpi.tk/api/triggered', headers=headers) as r:
+                    data = await r.json()
+                try:
+                    image = data['url']
+                except KeyError:
+                    return await ctx.send(data.get('error'))
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.set_image(url=image)
+                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
+                                 icon_url=self.dag.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -187,7 +210,7 @@ class Images(commands.Cog):
         """
         :rainbow_flag:
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
+
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -199,11 +222,15 @@ class Images(commands.Cog):
             resp = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/gay', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
+                    data = await r.json()
+                try:
+                    image = data['url']
+                except KeyError:
+                    return await ctx.send(data.get('error'))
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.set_image(url=image)
+                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
+                                 icon_url=self.dag.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -211,7 +238,7 @@ class Images(commands.Cog):
         """
         Paint a masterpiece
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
+
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -223,11 +250,15 @@ class Images(commands.Cog):
             resp = {'token': dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/paint', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
+                    data = await r.json()
+                try:
+                    image = data['url']
+                except KeyError:
+                    return await ctx.send(data.get('error'))
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.set_image(url=image)
+                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
+                                 icon_url=self.dag.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -235,7 +266,7 @@ class Images(commands.Cog):
         """
         Why are you gay?
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
+
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -251,11 +282,15 @@ class Images(commands.Cog):
             resp = {'token': dagpi_token, 'url2': url, 'url': url2}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/whyareyougay', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
+                    data = await r.json()
+                try:
+                    image = data['url']
+                except KeyError:
+                    return await ctx.send(data.get('error'))
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.set_image(url=image)
+                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
+                                 icon_url=self.dag.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -263,7 +298,7 @@ class Images(commands.Cog):
         """
         uwu
         """
-        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
+
         if not url:
             if ctx.message.attachments:
                 url = str(ctx.message.attachments[0].url)
@@ -279,11 +314,15 @@ class Images(commands.Cog):
             resp = {'token': dagpi_token, 'url': url, 'url2': url2}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/5g1g', headers=resp) as r:
-                    resp = await r.json()
-            res = resp['url']
-            embed = discord.Embed(colour=self.bot.colour)
-            embed.set_image(url=res)
-            embed.set_footer(text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
+                    data = await r.json()
+                try:
+                    image = data['url']
+                except KeyError:
+                    return await ctx.send(data.get('error'))
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.set_image(url=image)
+                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
+                                 icon_url=self.dag.avatar_url)
             await ctx.send(embed=embed)
 
 
