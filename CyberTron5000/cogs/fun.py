@@ -2,7 +2,9 @@ import asyncio
 import json
 import random
 import string
-from uuid import uuid4
+from time import time
+from datetime import datetime as dt
+from humanize import naturaltime as nt
 
 import aiohttp
 import discord
@@ -313,45 +315,7 @@ class Fun(commands.Cog):
                 res = await r.json()
             await ctx.send(f'{res["text"]}')
 
-    @commands.group(invoke_without_command=True)
-    async def todo(self, ctx):
-        """Shows you todo commands"""
-        result = await self.client.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)
-        final = [f"{a[1]} (ID: {a[0]})" for a in
-                 result]
-        source = paginator.IndexedListSource(embed=discord.Embed(color=self.client.colour).set_author(
-            name=f"{ctx.author}'s todo list (Total {len(result)})", icon_url=ctx.author.avatar_url),
-            data=final)
-        return await paginator.CatchAllMenu(source=source).start(ctx)
 
-    @todo.command()
-    async def list(self, ctx):
-        """Shows you your todo list"""
-        result = await self.client.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)
-        final = [f"{a[1]} (ID: {a[0]})" for a in
-                 result]
-        source = paginator.IndexedListSource(embed=discord.Embed(color=self.client.colour).set_author(
-            name=f"{ctx.author}'s todo list (Total {len(result)})", icon_url=ctx.author.avatar_url),
-            data=final)
-        return await paginator.CatchAllMenu(source=source).start(ctx)
-
-    @todo.command()
-    async def add(self, ctx, *, item):
-        """Adds an item to your todo list"""
-        id = str(uuid4())[:8]
-        await self.client.pg_con.execute("INSERT INTO todo (user_id, id, item) VALUES ($1, $2, $3)", ctx.author.id, id,
-                                         item)
-        await ctx.send(f"Added `{item}` to your todo list with the id `{id}`.")
-
-    @todo.command(aliases=['rm', 'r', 'remove'])
-    async def resolve(self, ctx, id: str, *, reason=None):
-        """Resolves an item from your todo list"""
-        a = await self.client.pg_con.fetch("SELECT item FROM todo WHERE id = $1", id)
-        if not a:
-            return await ctx.send("Item not found. Note that you have to remove items by their **id**, not their name.")
-        await self.client.pg_con.execute("DELETE FROM todo WHERE id = $1", id)
-        await ctx.send(
-            f"<:tickgreen:732660186560462958> | Item {id}, `{a[0][0]}` has been removed from your todo list:\n{reason}")
 
     @commands.command()
     async def owner(self, ctx):
@@ -409,16 +373,66 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=['choice'])
     async def chose(self, ctx, *choices):
-        c = random.choice(choices)
-        await ctx.send(c)
+        await ctx.send(random.choice(choices))
 
-    @commands.command()
+    async def get_all_todo(self, id: int = None):
+        if not id:
+            return await self.client.pg_con.fetch("SELECT * FROM todo")
+        else:
+            return await self.client.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", id)
+
+    @commands.group(invoke_without_command=True)
+    async def todo(self, ctx):
+        """Shows your current todo list"""
+        items = []
+        results = sorted((await self.get_all_todo(ctx.author.id)), key=lambda x: x['time'])
+        for each in results:
+            time = dt.utcfromtimestamp(each['time'])
+            since = nt(dt.utcnow()-time)
+            items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
+        menu = paginator.CatchAllMenu(source=source)
+        await menu.start(ctx)
+
+
+    @todo.command()
     @commands.is_owner()
-    async def fn(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://api.fortnitetracker.com/v1/store", headers={"TRN-API-KEY": data['fortnite']}) as r:
-                daba = await r.json()
-        print(daba)
+    async def add(self, ctx, *, todo):
+        """Adds an item to your todo list"""
+        results = await self.get_all_todo()
+        id = len(results) + 1
+        await self.client.pg_con.execute("INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(), str(ctx.message.jump_url), ctx.author.id)
+        await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list!")
+
+
+    @todo.command(aliases=['rm', 'remove'])
+    @commands.is_owner()
+    async def resolve(self, ctx, *id: int):
+        """Resolves an item from your todo list"""
+        items = await self.get_all_todo(ctx.author.id)
+        todos = [item[0] for item in items]
+        ids = [item[1] for item in items]
+        if any(item not in ids for item in id):
+            return await ctx.send("You passed in invalid id's!")
+        message = []
+        for i in id:
+            message.append(f"• {todos[ids.index(i)]}")
+            await self.client.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
+        await ctx.send(f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
+
+    @todo.command()
+    @commands.is_owner()
+    async def list(self, ctx):
+        """Shows your todo list"""
+        items = []
+        results = sorted((await self.get_all_todo(ctx.author.id)), key=lambda x: x['time'])
+        for each in results:
+            time = dt.utcfromtimestamp(each['time'])
+            since = nt(dt.utcnow()-time)
+            items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
+        menu = paginator.CatchAllMenu(source=source)
+        await menu.start(ctx)
 
 
 def setup(client):

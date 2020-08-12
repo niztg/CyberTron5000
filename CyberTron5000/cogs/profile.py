@@ -1,9 +1,9 @@
 import collections
-import datetime
+from datetime import datetime as dt
 from typing import Union
 
 import discord
-import humanize
+from humanize import naturaltime as nt
 import matplotlib
 import matplotlib.pyplot as plt
 from discord.ext import commands
@@ -114,7 +114,7 @@ class Profile(commands.Cog):
                                               f"\n{f'{n}'.join(people)}\n<:bot:703728026512392312> **{GuildStats(ctx).num_bot}**\n<:boost:726151031322443787> **Tier: {guild.premium_tier}**\n{guild.premium_subscription_count} {cyberformat.bar(stat=guild.premium_subscription_count, max=30, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>', show_stat=True)} {30}")
             embed.set_author(name=f"{guild}", icon_url=guild.icon_url)
             embed.set_footer(
-                text=f"Guild created {humanize.naturaltime(datetime.datetime.utcnow() - ctx.guild.created_at)}")
+                text=f"Guild created {nt(dt.utcnow() - ctx.guild.created_at)}")
             await ctx.send(embed=embed)
         except Exception as er:
             await ctx.send(er)
@@ -298,7 +298,7 @@ class Profile(commands.Cog):
         a.append("<:nitro:730892254092198019>") if await GuildStats(ctx).check_nitro(m) else None
         if isinstance(m, discord.User):
             embed.description = f'{is_bot} {" ".join(a)}\n→ ID **{m.id}**\n'
-            embed.description += f'→ Created Account **{humanize.naturaltime(datetime.datetime.utcnow() - m.created_at)}**\n'
+            embed.description += f'→ Created Account **{nt(dt.utcnow() - m.created_at)}**\n'
             embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)])}**'
             embed.description += f'\n→ [Avatar URL]({m.avatar_url_as(static_format="png", size=4096)})\n'
             return await ctx.send(embed=embed)
@@ -319,8 +319,8 @@ class Profile(commands.Cog):
                 embed.description = f'\n→ ID **{m.id}**\n'
             else:
                 embed.description = f'{is_bot}{" ".join(a)}{char}{le}\n→ ID **{m.id}**\n'
-            embed.description += f'→ Created Account **{humanize.naturaltime(datetime.datetime.utcnow() - m.created_at)}**\n'
-            embed.description += f'→ Joined Guild **{humanize.naturaltime(datetime.datetime.utcnow() - m.joined_at)}**\n'
+            embed.description += f'→ Created Account **{nt(dt.utcnow() - m.created_at)}**\n'
+            embed.description += f'→ Joined Guild **{nt(dt.utcnow() - m.joined_at)}**\n'
             embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)]) if m != ctx.bot.user else f"bro this is literally the bot ({len(ctx.bot.guilds)})"}**'
             if m.top_role.id == ctx.guild.id:
                 pass
@@ -406,7 +406,7 @@ class Profile(commands.Cog):
         embed.add_field(name=f'Position ({index + 1})', value='\u200b' + '\n'.join(r[one:two]), inline=False)
         embed.add_field(name='Permissions', value='\u200b' + ', '.join(perms))
         embed.description += f"\n:paintbrush: **{role.colour}**\n<:member:731190477927219231> **{len(role.members)}**\n<:ping:733142612839628830> {role.mention}"
-        embed.set_footer(text=f'Role created {humanize.naturaltime(datetime.datetime.utcnow() - role.created_at)}')
+        embed.set_footer(text=f'Role created {nt(dt.utcnow() - role.created_at)}')
         await ctx.send(embed=embed)
     
     @commands.command(aliases=['spot'])
@@ -416,14 +416,14 @@ class Profile(commands.Cog):
         for a in member.activities:
             if isinstance(a, discord.Spotify):
                 embed = discord.Embed(colour=a.colour)
-                le_bar = cyberformat.bar(stat=(datetime.datetime.utcnow() - a.start).seconds,
+                le_bar = cyberformat.bar(stat=(dt.utcnow() - a.start).seconds,
                                              max=a.duration.seconds,
                                              filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>', show_stat=True)
                 embed.set_thumbnail(url=a.album_cover_url)
                 embed.description = f"[{a.title}](https://open.spotify.com/track/{a.track_id})\n"
                 embed.description += f"by {a.artist}\n"
                 embed.description += f"on {a.album}\n"
-                embed.description += f"{datetime.datetime.utcfromtimestamp((datetime.datetime.utcnow() - a.start).seconds).strftime('%-M:%S')} {le_bar} {datetime.datetime.utcfromtimestamp(a.duration.seconds).strftime('%-M:%S')}"
+                embed.description += f"{dt.utcfromtimestamp((dt.utcnow() - a.start).seconds).strftime('%-M:%S')} {le_bar} {dt.utcfromtimestamp(a.duration.seconds).strftime('%-M:%S')}"
                 embed.set_footer(icon_url='https://cdn.discordapp.com/emojis/739983277053706302.png?v=1', text=str(member))
                 return await ctx.send(embed=embed)
             else:
@@ -450,7 +450,7 @@ class Profile(commands.Cog):
         last_message = await channel.fetch_message(channel.last_message_id)
         embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
         embed.set_footer(
-            text=f'Channel created {humanize.naturaltime(datetime.datetime.utcnow() - channel.created_at)}c')
+            text=f'Channel created {nt(dt.utcnow() - channel.created_at)}c')
         await ctx.send(embed=embed)
         
     async def cog_command_error(self, ctx, error):

@@ -1,11 +1,9 @@
 import datetime
 import json
-from contextlib import suppress
 from html import unescape as unes
 
 import aiogoogletrans
 import aiohttp
-import aiowiki
 import async_cleverbot
 import async_cse
 import discord
@@ -242,29 +240,29 @@ class Api(commands.Cog):
             icon_url="https://cdn3.iconfinder.com/data/icons/google-suits-1/32/18_google_translate_text_language_translation-512.png")
         return await ctx.send(embed=embed.set_footer(text=f"{res.confidence * 100}% confident"))
     
-    @commands.command(aliases=['wiki'])
-    async def wikipedia(self, ctx, *, terms):
-        try:
-            with suppress(Exception):
-                async with ctx.typing():
-                    wiki = aiowiki.Wiki.wikipedia("en")
-                    res = await wiki.opensearch(terms)
-                    tts = []
-                    embeds = []
-                    for i in res:
-                        tts.append(i.title)
-                    for page in tts:
-                        p = wiki.get_page(page)
-                        embed = discord.Embed(colour=self.client.colour,
-                                              description=(__import__('html').unescape(await p.summary()))[:1000] + "...",
-                                              title=page)
-                        embed.url = f"https://en.wikipedia.org/wiki/{str(page).replace(' ', '_')}"
-                        embeds.append(embed)
-                    source = paginator.EmbedSource(embeds)
-                await wiki.close()
-                await paginator.CatchAllMenu(source=source).start(ctx)
-        except IndexError:
-            await ctx.send("Not found.")
+    # @commands.command(aliases=['wiki'])
+    # async def wikipedia(self, ctx, *, terms):
+    #     try:
+    #         with suppress(Exception):
+    #             async with ctx.typing():
+    #                 wiki = aiowiki.Wiki.wikipedia("en")
+    #                 res = await wiki.opensearch(terms)
+    #                 tts = []
+    #                 embeds = []
+    #                 for i in res:
+    #                     tts.append(i.title)
+    #                 for page in tts:
+    #                     p = wiki.get_page(page)
+    #                     embed = discord.Embed(colour=self.client.colour,
+    #                                           description=(__import__('html').unescape(await p.summary()))[:1000] + "...",
+    #                                           title=page)
+    #                     embed.url = f"https://en.wikipedia.org/wiki/{str(page).replace(' ', '_')}"
+    #                     embeds.append(embed)
+    #                 source = paginator.EmbedSource(embeds)
+    #             await wiki.close()
+    #             await paginator.CatchAllMenu(source=source).start(ctx)
+    #     except IndexError:
+    #         await ctx.send("Not found.")
     
     @commands.command(aliases=['af'])
     async def animalfact(self, ctx, animal=None):
