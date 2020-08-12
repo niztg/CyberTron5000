@@ -188,7 +188,7 @@ class Reddit(commands.Cog):
                 million = len([item for item in numbas if item >= 1_000_000])
                 ten_million = len([item for item in numbas if item >= 10_000_000])
                 embed = discord.Embed(
-                    description=f"u/{user} mods **{len(reddits):,}** subreddits with **{humanize.intcomma(sum(numbas))}** total readers\n\n*{msg}*\n\n{final_ms}",
+                    description=f"u/{user} mods **{len(reddits):,}** subreddits with **{sum(numbas)}** total readers\n\n*{msg}*\n\n{final_ms}",
                     colour=self.bot.colour)
                 embed.add_field(name="Advanced Statistics",
                                 value=f"Subreddits with 0 subscribers: **{zero_subs}**\nSubreddits with 1 subscriber: **{one_subs}**\nSubreddits with 100 or more subscribers: **{hundred_subs}**\nSubreddits with 1,000 or more subscribers: **{thousand_subs}**\nSubreddits with 100,000 or more subscribers: **{hundred_thousand_subs}**\nSubreddits with 1,000,000 or more subscribers: **{million}**\nSubreddits with 10,000,000 or more subscribers: **{ten_million}**\n\nAverage Subscribers Per Subreddit: **{humanize.intcomma(round(sum(numbas) / len(numbas)))}**")

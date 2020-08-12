@@ -113,72 +113,64 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
+        dutchy = self.bot.get_user(171539705043615744) or await self.bot.fetch_user(171539705043615744)
+        daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
+        async with ctx.typing():
+            resp = {'token': dagpi()}
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get('https://dagpi.tk/api/wtp', headers=resp) as r:
+                    resp = await r.json()
+                pokemon = resp['pokemon']
+                async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={u(pokemon['name'])}") as r:
+                    res = await r.json()
+                await cs.close()
+            evo_line = []
+            for e in res[0]['family']['evolutionLine']:
+                if str(e).lower() == pokemon['name'].lower():
+                    evo_line.append("???")
+                else:
+                    evo_line.append(e)
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.set_image(url=resp['question_image'])
+            embed.set_footer(
+                text=f"Much thanks to {str(daggy)} for this amazing API, and {str(dutchy)} for the wonderful idea!")
+            embed.title = "Who's that Pokémon?"
+            embed.description = f"You have 3 attempts | You have 30 seconds\nYou can ask for a hint by doing `{ctx.prefix}hint`, or cancel by doing `{ctx.prefix}cancel`!"
+            await ctx.send(embed=embed)
+            dashes = await cyberformat.better_random_char(pokemon['name'], '_')
+            hints = [
+                discord.Embed(colour=self.bot.colour, title="Types", description=', '.join(pokemon['type'])),
+                discord.Embed(title=f"`{dashes}`", colour=self.bot.colour),
+                discord.Embed(colour=self.bot.colour, title="Evolution Line", description=" → ".join(evo_line)),
+                discord.Embed(title="Pokédex Entry", description=res[0]['description'].lower().replace(pokemon['name'].lower(), "???"), colour=self.bot.colour),
+                discord.Embed(colour=self.bot.colour, title="Species", description=" ".join(res[0]['species']))
+            ]
         try:
-            dutchy = self.bot.get_user(171539705043615744) or await self.bot.fetch_user(171539705043615744)
-            daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
-            async with ctx.typing():
-                resp = {'token': dagpi()}
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get('https://dagpi.tk/api/wtp', headers=resp) as r:
-                        resp = await r.json()
-                    pokemon = resp['pokemon']
-                    async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={u(pokemon['name'])}") as r:
-                        res = await r.json()
-                    await cs.close()
-                evo_line = []
-                for e in res[0]['family']['evolutionLine']:
-                    if str(e).lower() == pokemon['name'].lower():
-                        evo_line.append("???")
-                    else:
-                        evo_line.append(e)
-                embed = discord.Embed(colour=self.bot.colour)
-                embed.set_image(url=resp['question_image'])
-                embed.set_footer(
-                    text=f"Much thanks to {str(daggy)} for this amazing API, and {str(dutchy)} for the wonderful idea!")
-                embed.title = "Who's that Pokémon?"
-                embed.description = f"You have 3 attempts | You have 30 seconds\nYou can ask for a hint by doing `{ctx.prefix}hint`, or cancel by doing `{ctx.prefix}cancel`!"
-                await ctx.send(embed=embed)
-                dashes = await cyberformat.better_random_char(pokemon['name'], '_')
-                hints = [
-                    discord.Embed(colour=self.bot.colour, title="Types", description=', '.join(pokemon['type'])),
-                    discord.Embed(title=f"`{dashes}`", colour=self.bot.colour),
-                    discord.Embed(colour=self.bot.colour, title="Evolution Line", description=" → ".join(evo_line)),
-                    discord.Embed(title="Pokédex Entry",
-                                  description=res[0]['description'].lower().replace(pokemon['name'].lower(), "???"),
-                                  colour=self.bot.colour),
-                    discord.Embed(colour=self.bot.colour, title="Species", description=" ".join(res[0]['species']))]
-            try:
-                for x in range(3):
-                    msg = await self.bot.wait_for('message',
-                                                  check=lambda m: m.author == ctx.author and not m.author.bot,
-                                                  timeout=30.0)
-                    if msg.content.lower() == str(resp['pokemon']['name']).lower():
-                        embed = discord.Embed(title=f"Correct! The answer was {resp['pokemon']['name']}",
-                                              colour=self.bot.colour)
-                        embed.set_image(url=resp['answer_image'])
-                        return await ctx.send(embed=embed)
-                    elif msg.content.lower().startswith(f"{ctx.prefix}hint"):
-                        await ctx.send(
-                            embed=random.choice(hints))
-                        continue
-                    elif msg.content.lower().startswith(f"{ctx.prefix}cancel"):
-                        embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
-                        embed.set_image(url=resp['answer_image'])
-                        embed.set_author(name="The correct answer was....")
-                        return await ctx.send(embed=embed)
-                    else:
-                        continue
-                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
-                embed.set_image(url=resp['answer_image'])
-                embed.set_author(name="Incorrect! The correct answer was....")
-                return await ctx.send(embed=embed)
-            except asyncio.TimeoutError:
-                embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
-                embed.set_image(url=resp['answer_image'])
-                embed.set_author(name="You ran out of time! The answer was...")
-                return await ctx.send(embed=embed)
-        except Exception as erro:
-            await ctx.send(erro)
+            for x in range(3):
+                msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author, timeout=30.0)
+                if msg.content.lower() == str(resp['pokemon']['name']).lower():
+                    embed = discord.Embed(title=f"Correct! The answer was {resp['pokemon']['name']}", colour=self.bot.colour)
+                    embed.set_image(url=resp['answer_image'])
+                    return await ctx.send(embed=embed)
+                elif msg.content.lower().startswith(f"{ctx.prefix}hint"):
+                    await ctx.send(embed=random.choice(hints))
+                    continue
+                elif msg.content.lower().startswith(f"{ctx.prefix}cancel"):
+                    embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
+                    embed.set_image(url=resp['answer_image'])
+                    embed.set_author(name="The correct answer was....")
+                    return await ctx.send(embed=embed)
+                else:
+                    continue
+            embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
+            embed.set_image(url=resp['answer_image'])
+            embed.set_author(name="Incorrect! The correct answer was....")
+            return await ctx.send(embed=embed)
+        except asyncio.TimeoutError:
+            embed = discord.Embed(title=f"{resp['pokemon']['name']}", colour=self.bot.colour)
+            embed.set_image(url=resp['answer_image'])
+            embed.set_author(name="You ran out of time! The answer was...")
+            return await ctx.send(embed=embed)
 
     @commands.command(help="Get's you a trivia question.", aliases=['tr', 't'])
     async def trivia(self, ctx, difficulty: str = None):

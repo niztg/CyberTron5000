@@ -24,7 +24,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        # Traceback code used from Daggy1234's Dagbot GitHub Repository provided by the GNU Affero General Public License v3.0
+        # Lines 30-34 used from Daggy1234's Dagbot GitHub Repository provided by the GNU Affero General Public License v3.0
         # https://github.com/Daggy1234/dagbot/blob/master/dagbot/extensions/errors.py#L38-L42
         # Copyright (C) 2020  Daggy1234
         et = type(error)

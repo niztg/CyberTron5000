@@ -4,7 +4,7 @@ from discord.ext import menus
 
 class CatchAllMenu(menus.MenuPages, inherit_buttons=False):
     """
-    Code used from Rapptz' discord-ext-menus GitHub repository
+    Lines 16-40 used from Rapptz' discord-ext-menus GitHub repository
     Provided by the MIT License
     https://github.com/Rapptz/discord-ext-menus
     Copyright (c) 2015-2020 Danny Y. (Rapptz)

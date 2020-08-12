@@ -30,7 +30,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
 
     def get_command_signature(self, command):
         """
-        Code used from Rapptz' R.Danny repository provided by the MIT License
+        Lines 35-45 used from Rapptz' R.Danny repository provided by the MIT License
         https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/meta.py#L125-L135
         Copyright (c) 2015 Rapptz
         """

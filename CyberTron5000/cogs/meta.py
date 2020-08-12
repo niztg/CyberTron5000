@@ -100,12 +100,12 @@ class Meta(commands.Cog):
         msg = await ctx.send(message)
         end = time.perf_counter()
         duration = round((end - start) * 1000, 3)
-        message += f"\n{check_health(duration, (200, 500))} ⏰ Response Time: `{duration}`"
+        message += f"\n{check_health(duration, (200, 500))} ⏰ Response Time `{duration}`"
         await msg.edit(content=message)
 
     @commands.command(aliases=["sourcecode", "src"], help="Shows source code for a given command")
     async def source(self, ctx, *, command=None):
-        # Code used from Rapptz' RoboDanny GitHub repository provided by the MIT License
+        # Lines 137-141 used from Rapptz' RoboDanny GitHub repository provided by the MIT License
         # https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/meta.py#L328-L366
         # Copyright (c) 2015 Rapptz
         if not command:
