@@ -13,7 +13,6 @@ class Tags(commands.Cog):
         self.bot = bot
         self._tag_dict = bot._tag_dict
 
-
     @property
     def forbidden(self):
         ftags = list()
@@ -34,7 +33,6 @@ class Tags(commands.Cog):
             raise commands.BadArgument('This tag does not exist for this guild! (Note that tags are case-sensitive)')
 
     @commands.group(invoke_without_command=True)
-    @commands.is_owner()
     async def tag(self, ctx, *, tag=None):
         """Invokes a tag"""
         if not tag:
@@ -53,7 +51,7 @@ class Tags(commands.Cog):
                                       ctx.guild.id)
 
     @tag.command(aliases=['create'])
-    @commands.is_owner()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def add(self, ctx, tag, *, content):
         """Adds a tag"""
         if str(tag) in self.forbidden:
@@ -70,7 +68,7 @@ class Tags(commands.Cog):
         await ctx.send(f"<:tickgreen:732660186560462958> Success! `{tag}` is now a tag in **{ctx.guild.name}**")
 
     @tag.command()
-    @commands.is_owner()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def edit(self, ctx, tag, *, new_content):
         """Edits a tag"""
         try:
@@ -85,7 +83,6 @@ class Tags(commands.Cog):
         await ctx.send(f"<:tickgreen:732660186560462958> Success! Tag `{tag}` has been edited!")
 
     @commands.command(aliases=['all_tags', 'at'])
-    @commands.is_owner()
     async def guild_tags(self, ctx):
         """Shows you all the tags in the guild"""
         if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
@@ -98,7 +95,6 @@ class Tags(commands.Cog):
         await CatchAllMenu(source=source).start(ctx)
 
     @tag.command()
-    @commands.is_owner()
     async def list(self, ctx, member: discord.Member = None):
         """Shows you all the tags of you or another member"""
         member = member or ctx.author
@@ -116,7 +112,6 @@ class Tags(commands.Cog):
         await CatchAllMenu(source=source).start(ctx)
 
     @commands.command()
-    @commands.is_owner()
     async def tags(self, ctx, member: discord.Member = None):
         """Shows you all the tags of you or another member"""
         member = member or ctx.author
@@ -134,7 +129,7 @@ class Tags(commands.Cog):
         await CatchAllMenu(source=source).start(ctx)
 
     @tag.command()
-    @commands.is_owner()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def make(self, ctx):
         """Makes a tag"""
         if not self._tag_dict.get(ctx.guild.id):
@@ -160,19 +155,22 @@ class Tags(commands.Cog):
         await ctx.send(f"<:tickgreen:732660186560462958> Success! Tag `{message1.content}` created!")
 
     @tag.command(aliases=['rm', 'remove'])
-    @commands.is_owner()
     async def delete(self, ctx, *, tag):
+        """Deletes a tag"""
         try:
             self.fetch_tag(ctx, tag)
         except Exception as error:
             return await ctx.send(error)
-        await self.bot.pg_con.execute("DELETE FROM tags WHERE name = $1 AND guild_id = $2", tag, ctx.guild.id)
-        self._tag_dict[ctx.guild.id].pop(tag)
-        await ctx.send(f"<:tickgreen:732660186560462958> Success! Tag `{tag}` deleted!")
+        if ctx.author.permissions_in(ctx.channel).kick_members or ctx.author.id == self._tag_dict[ctx.guild.id][tag]['author']:
+            await self.bot.pg_con.execute("DELETE FROM tags WHERE name = $1 AND guild_id = $2", tag, ctx.guild.id)
+            self._tag_dict[ctx.guild.id].pop(tag)
+            await ctx.send(f"<:tickgreen:732660186560462958> Success! Tag `{tag}` deleted!")
+        else:
+            await ctx.send("You cant delete that tag!")
 
     @tag.command()
-    @commands.is_owner()
     async def info(self, ctx, *, tag):
+        """Shows info on a tag"""
         try:
             self.fetch_tag(ctx, tag)
         except Exception as error:
@@ -185,7 +183,6 @@ class Tags(commands.Cog):
         embed.description += f"Uses: **{data['uses']}**"
         embed.set_author(name=str(author), icon_url=author.avatar_url)
         await ctx.send(embed=embed)
-
 
 
 def setup(bot):
