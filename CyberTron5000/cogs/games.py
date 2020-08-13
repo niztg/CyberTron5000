@@ -183,6 +183,7 @@ class Games(commands.Cog):
         embed = discord.Embed(colour=ctx.bot.colour)
         embed.title = question.question
         responses = question.responses
+        random.shuffle(responses)
         embed.description = "\n".join(
             [f':regional_indicator_{lists.NUMBER_ALPHABET[i].lower()}: **{v}**' for i, v in enumerate(responses, 1)])
         embed.add_field(name="Info",

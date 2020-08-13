@@ -48,11 +48,12 @@ class CyberTron5000(commands.Bot):
                          case_insensitive=True, status=discord.Status.online)
         self.colour = 0x00dcff
         self.prefixes = {}
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if
-                    filename.endswith('.py')]
+        self._tag_dict = {}
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if filename.endswith('.py')]
+        self.pg_con = self.loop.run_until_complete(self.create_db_pool())
         self.load_extension(name='jishaku')
         self.loop.create_task(self.startup())
-        self.loop.run_until_complete(self.create_db_pool())
+        self.loop.create_task(self._init_tags())
         self.logging = dict(
             invite='https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
             support='https://discord.com/invite/2fxKxJH', github='https://github.com/niztg/CyberTron5000',
@@ -71,7 +72,7 @@ class CyberTron5000(commands.Bot):
         return self.get_channel(727277234666078220)
 
     async def create_db_pool(self):
-        self.pg_con = await asyncpg.create_pool(user=token['psql_user'], password=token['psql_password'],
+        return await asyncpg.create_pool(user=token['psql_user'], password=token['psql_password'],
                                                 database=token['psql_db'])
 
     async def get_prefix(self, message):
@@ -111,6 +112,22 @@ class CyberTron5000(commands.Bot):
         print("PREFIXES AND PRESENCE SETUP")
         print("-----------------------")
         print("Ready!")
+
+    async def _init_tags(self):
+        await self.wait_until_ready()
+        SQL = """
+        SELECT guild_id FROM tags
+        """
+        tags = await self.pg_con.fetch(SQL)
+        for query in tags:
+            self._tag_dict[query['guild_id']] = {}
+            tags2 = await self.pg_con.fetch("""SELECT name, content, uses, user_id FROM tags WHERE guild_id = $1""",
+                                                query['guild_id'])
+            for query2 in tags2:
+                self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
+                                                                     'uses': query2['uses'] or 0,
+                                                                     'author': query2['user_id']}
+        print(self._tag_dict)
 
 
 CyberTron5000().run()

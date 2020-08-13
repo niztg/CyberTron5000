@@ -40,6 +40,7 @@ class Reddit(commands.Cog):
                     res = await r.json()
                 async with cs.get(f"https://www.reddit.com/user/{user}/about/.json") as re:
                     k = await re.json()
+                await cs.close()
                 if r.status != 200 or re.status != 200:
                     if r.status or re.status == 400:
                         custom_message = " Redditor not found. "
@@ -89,6 +90,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
                     res = await r.json()
+                await cs.close()
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['is_self'] and not p['stickied']])
@@ -108,6 +110,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://reddit.com/r/{subreddit}/about/.json") as r:
                     res = await r.json()
+                await cs.close()
                 data = res['data']
             icon = data['community_icon'].split("?")[0]
             banner = data['banner_background_image'].split("?")[0]
@@ -125,6 +128,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/r/{subreddit}/about/moderators.json") as r:
                     resp = await r.json()
+                await cs.close()
                 if r.status != 200:
                     return await ctx.send(f"Whoops, something went wrong, Error Code: {r.status}")
                 data = resp['data']
@@ -149,6 +153,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/r/ShowerThoughts/hot.json") as r:
                     res = await r.json()
+                await cs.close()
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['stickied']])
@@ -170,6 +175,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/user/{user}/moderated_subreddits/.json") as r:
                     res = await r.json()
+                await cs.close()
                 if r.status != 200:
                     return await ctx.send("Whoops, something went wrong. Error Code: {}".format(r.status))
                 subreddits = res['data']
@@ -206,6 +212,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/r/{subreddit}/{sort}.json") as r:
                     res = await r.json()
+                await cs.close()
                 for i in res['data']['children']:
                     posts.append(i['data'])
                 s = random.choice([p for p in posts if not p['stickied']])
@@ -231,6 +238,7 @@ class Reddit(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://reddit.com/r/{subreddit}/about/.json") as r:
                     res = await r.json()
+                await cs.close()
                 data = res['data']
                 icon = data['community_icon'].split("?")[0]
                 banner = data['banner_background_image'].split("?")[0]
@@ -260,6 +268,7 @@ class Reddit(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
                 res = await r.json()
+            await cs.close()
             for i in res['data']['children']:
                 posts.append(i['data'])
             counter = 0
