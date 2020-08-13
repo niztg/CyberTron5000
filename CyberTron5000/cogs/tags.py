@@ -9,6 +9,7 @@ from CyberTron5000.utils.paginator import CatchAllMenu, IndexedListSource
 
 
 class Tags(commands.Cog):
+    """Tags are a way of storing data for later retrieval"""
     def __init__(self, bot):
         self.bot = bot
         self._tag_dict = bot._tag_dict
