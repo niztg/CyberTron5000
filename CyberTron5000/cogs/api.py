@@ -1,5 +1,4 @@
 from datetime import datetime as dt
-import json
 from html import unescape as unes
 
 import aiogoogletrans
@@ -14,12 +13,6 @@ from CyberTron5000.utils.lists import STAT_NAMES, TYPES
 
 
 # ≫
-
-def secrets():
-    with open("json_files/secrets.json", "r") as f:
-        return json.load(f)
-
-token = secrets()
 
 async def fetch_rtfs(res):
     items = []
@@ -45,7 +38,7 @@ class Api(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
-        self.clever = async_cleverbot.Cleverbot(token['cleverbot'])
+        self.clever = async_cleverbot.Cleverbot(bot.config.cleverbot)
         self.clever.set_context(async_cleverbot.DictContext(self.bot))
     
     @commands.command(aliases=['ily'], help="compliment your friends :heart:")
@@ -75,7 +68,7 @@ class Api(commands.Cog):
         try:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(
-                        f"http://api.openweathermap.org/data/2.5/weather?appid={token['weather']}&q={city}") as r:
+                        f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}") as r:
                     data = await r.json()
                     await cs.close()
             if r.status == 404:
@@ -307,7 +300,7 @@ class Api(commands.Cog):
     @commands.command(aliases=['g'])
     async def google(self, ctx, *, query=None):
         """Shows you google search results for a specified query"""
-        client = async_cse.Search(token['google_key'])
+        client = async_cse.Search(self.bot.config.google_key)
         results = await client.search(query, safesearch=not(ctx.channel.is_nsfw()))
         embeds = []
         for res in results:
@@ -344,7 +337,7 @@ class Api(commands.Cog):
     async def giphy(self, ctx, *, query):
         """Get a random gif based on your query"""
         async with aiohttp.ClientSession() as cs:
-            async with cs.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={token["giphy"]}&limit=10') as r:
+            async with cs.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10') as r:
                 res = await r.json()
         data = res.get('data')
         embeds = []

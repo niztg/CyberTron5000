@@ -1,5 +1,4 @@
 import asyncio
-import json
 import random
 
 import aiohttp
@@ -9,13 +8,6 @@ from discord.ext import commands
 from unidecode import unidecode as u
 
 from CyberTron5000.utils import cyberformat, lists
-
-
-def dagpi():
-    with open("json_files/secrets.json", "r") as f:
-        res = json.load(f)
-    return res['dagpi_token']
-
 
 class Games(commands.Cog):
     """Games!"""
@@ -116,7 +108,7 @@ class Games(commands.Cog):
         dutchy = self.bot.get_user(171539705043615744) or await self.bot.fetch_user(171539705043615744)
         daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         async with ctx.typing():
-            resp = {'token': dagpi()}
+            resp = {'token': self.bot.config.dagpi_token}
             async with aiohttp.ClientSession() as cs:
                 async with cs.get('https://dagpi.tk/api/wtp', headers=resp) as r:
                     resp = await r.json()
@@ -224,7 +216,7 @@ class Games(commands.Cog):
         }
         daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         async with ctx.typing():
-            resp = {'token': dagpi()}
+            resp = {'token': self.bot.config.dagpi_token}
             async with aiohttp.ClientSession() as cs:
                 async with cs.get('https://dagpi.tk/api/logogame', headers=resp) as r:
                     resp = await r.json()

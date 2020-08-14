@@ -1,5 +1,3 @@
-import json
-
 import aiohttp
 import discord
 from discord.ext import commands
@@ -10,23 +8,18 @@ member_converter = commands.MemberConverter()
 emoji_converter = commands.EmojiConverter()
 
 
-def dagpi():
-    with open("json_files/secrets.json", "r") as f:
-        res = json.load(f)
-    return res['dagpi_token']
-
-
-dagpi_token = dagpi()
-
-
 class Images(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
 
     @property
-    def dag(self):
+    def daggy(self):
         return self.bot.get_user(491174779278065689)
+
+    @property
+    def dagpi_token(self):
+        return self.bot.config.dagpi_token
 
     @commands.command(name='wanted')
     async def _static_wanted(self, ctx, *, url: ImageConverter = None):
@@ -41,7 +34,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url}
+            headers = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/wanted', headers=headers) as r:
                     data = await r.json()
@@ -51,7 +44,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='obama')
@@ -67,7 +60,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url}
+            headers = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/obamameme', headers=headers) as r:
                     data = await r.json()
@@ -77,7 +70,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='bad')
@@ -93,7 +86,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url}
+            headers = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/bad', headers=headers) as r:
                     data = await r.json()
@@ -103,7 +96,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name='hitler')
@@ -119,7 +112,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url}
+            headers = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/hitler', headers=headers) as r:
                     data = await r.json()
@@ -129,7 +122,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -145,7 +138,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url, 'text': tweet, 'name': url.display_name}
+            headers = {'token': self.dagpi_token, 'url': url, 'text': tweet, 'name': url.display_name}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/tweet', headers=headers) as r:
                     data = await r.json()
@@ -155,7 +148,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -164,7 +157,8 @@ class Images(commands.Cog):
         'Stop believing internet quotes' - Abraham Lincoln
         """
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': str(member.avatar_url_as(static_fornat='png')), 'text': quote, 'name': member.display_name}
+            headers = {'token': self.dagpi_token, 'url': str(member.avatar_url_as(static_fornat='png')), 'text': quote,
+                       'name': member.display_name}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/quote', headers=headers) as r:
                     data = await r.json()
@@ -174,7 +168,7 @@ class Images(commands.Cog):
                 return await ctx.send(data.get('error'))
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_image(url=image)
-            embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!", icon_url=self.dag.avatar_url)
+            embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!", icon_url=self.daggy.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -191,7 +185,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            headers = {'token': dagpi_token, 'url': url}
+            headers = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/triggered', headers=headers) as r:
                     data = await r.json()
@@ -201,8 +195,8 @@ class Images(commands.Cog):
                     return await ctx.send(data.get('error'))
                 embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=image)
-                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
-                                 icon_url=self.dag.avatar_url)
+                embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!",
+                                 icon_url=self.daggy.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -219,7 +213,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            resp = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/gay', headers=resp) as r:
                     data = await r.json()
@@ -229,8 +223,8 @@ class Images(commands.Cog):
                     return await ctx.send(data.get('error'))
                 embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=image)
-                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
-                                 icon_url=self.dag.avatar_url)
+                embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!",
+                                 icon_url=self.daggy.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -247,7 +241,7 @@ class Images(commands.Cog):
         else:
             url = url
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url}
+            resp = {'token': self.dagpi_token, 'url': url}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/paint', headers=resp) as r:
                     data = await r.json()
@@ -257,8 +251,8 @@ class Images(commands.Cog):
                     return await ctx.send(data.get('error'))
                 embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=image)
-                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
-                                 icon_url=self.dag.avatar_url)
+                embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!",
+                                 icon_url=self.daggy.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -279,7 +273,7 @@ class Images(commands.Cog):
         else:
             url2 = url2
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url2': url, 'url': url2}
+            resp = {'token': self.dagpi_token, 'url2': url, 'url': url2}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/whyareyougay', headers=resp) as r:
                     data = await r.json()
@@ -289,8 +283,8 @@ class Images(commands.Cog):
                     return await ctx.send(data.get('error'))
                 embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=image)
-                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
-                                 icon_url=self.dag.avatar_url)
+                embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!",
+                                 icon_url=self.daggy.avatar_url)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -311,7 +305,7 @@ class Images(commands.Cog):
         else:
             url2 = url2
         async with ctx.typing():
-            resp = {'token': dagpi_token, 'url': url, 'url2': url2}
+            resp = {'token': self.dagpi_token, 'url': url, 'url2': url2}
             async with aiohttp.ClientSession() as cs:
                 async with cs.post('https://dagpi.tk/api/5g1g', headers=resp) as r:
                     data = await r.json()
@@ -321,8 +315,8 @@ class Images(commands.Cog):
                     return await ctx.send(data.get('error'))
                 embed = discord.Embed(colour=self.bot.colour)
                 embed.set_image(url=image)
-                embed.set_footer(text=f"Much thanks to {str(self.dag)} for this amazing API!",
-                                 icon_url=self.dag.avatar_url)
+                embed.set_footer(text=f"Much thanks to {str(self.daggy)} for this amazing API!",
+                                 icon_url=self.daggy.avatar_url)
             await ctx.send(embed=embed)
 
 

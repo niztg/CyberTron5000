@@ -1,5 +1,4 @@
 import asyncio
-import json
 import random
 import string
 from time import time
@@ -14,16 +13,6 @@ from jikanpy import AioJikan
 
 from CyberTron5000.utils import paginator, cyberformat
 from CyberTron5000.utils.lists import INDICATOR_LETTERS
-
-
-def secrets():
-    with open('json_files/secrets.json') as f:
-        data = json.load(f)
-    return data
-
-
-data = secrets()
-
 
 class Fun(commands.Cog):
     """Fun commands"""

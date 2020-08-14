@@ -21,21 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import json
 import os
 
 import asyncpg
 import discord
 from discord.ext import commands, tasks as t
+from CyberTron5000.config import config as cfg
 
-
-def get_token():
-    with open("json_files/secrets.json", "r") as f:
-        res = json.load(f)
-    return res
-
-
-token = get_token()
 
 print("INITIALISATION COMPLETE")
 print("-----------------------")
@@ -49,8 +41,8 @@ class CyberTron5000(commands.Bot):
         self.colour = 0x00dcff
         self.prefixes = {}
         self._tag_dict = {}
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if
-                    filename.endswith('.py')]
+        self.config = cfg()
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if filename.endswith('.py')]
         self.pg_con = self.loop.run_until_complete(self.create_db_pool())
         self.load_extension(name='jishaku')
         self.loop.create_task(self.startup())
@@ -73,8 +65,8 @@ class CyberTron5000(commands.Bot):
         return self.get_channel(727277234666078220)
 
     async def create_db_pool(self):
-        return await asyncpg.create_pool(user=token['psql_user'], password=token['psql_password'],
-                                         database=token['psql_db'])
+        return await asyncpg.create_pool(user=self.config.pg_data["user"], password=self.config.pg_data["password"],
+                                         database=self.config.pg_data["db"])
 
     async def get_prefix(self, message):
         if not message.guild:
@@ -86,7 +78,7 @@ class CyberTron5000(commands.Bot):
         return commands.when_mentioned_or(*prefixes)(self, message)
 
     def run(self, *args, **kwargs):
-        super().run(token['bot_token'])
+        super().run(self.config.bot_token)
 
     @t.loop(minutes=3)
     async def loop(self):

@@ -1,4 +1,3 @@
-import json
 import traceback
 import asyncio
 
@@ -9,17 +8,11 @@ from discord.ext import commands
 
 from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr
 
-
-def secrets():
-    with open("json_files/secrets.json", "r") as f:
-        return json.load(f)
-
-
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.x_r = ":warning:727013811571261540"
-        self.clever = async_cleverbot.Cleverbot(secrets()['cleverbot'])
+        self.clever = async_cleverbot.Cleverbot(self.bot.config.cleverbot)
         self.clever.set_context(async_cleverbot.DictContext(self.clever))
 
     @commands.Cog.listener()
