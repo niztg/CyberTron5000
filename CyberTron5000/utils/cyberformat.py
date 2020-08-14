@@ -126,7 +126,7 @@ def to_emoji(c):
     return chr(base + c)
 
 
-async def better_random_char(s: str, c: str = None):
+def better_random_char(s: str, c: str = None):
     return "".join(random.choice([b, c or b.upper()]) for b in s)
 
 

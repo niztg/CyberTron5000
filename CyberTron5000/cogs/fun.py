@@ -28,8 +28,8 @@ data = secrets()
 class Fun(commands.Cog):
     """Fun commands"""
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
 
     @commands.command()
@@ -46,7 +46,7 @@ class Fun(commands.Cog):
             async with ctx.typing():
                 for s in random.sample(posts, len(posts)):
                     text = cyberformat.shorten(f"{s['title']}\n{s['selftext']}")
-                    embeds.append(discord.Embed(description=text[:2000], colour=self.client.colour))
+                    embeds.append(discord.Embed(description=text[:2000], colour=self.bot.colour))
                     counter += 1
                     if counter == limit:
                         break
@@ -70,7 +70,7 @@ class Fun(commands.Cog):
                 'https://media.discordapp.net/attachments/735325249138065468/735681379387441152/image3.png',
                 'https://media.discordapp.net/attachments/735325249138065468/735682125239681074/image0.png'
                 'http://i.some-random-api.ml/pokemon/weavile.png']
-        embeds = [discord.Embed(colour=self.client.colour).set_image(url=p) for p in pfps]
+        embeds = [discord.Embed(colour=self.bot.colour).set_image(url=p) for p in pfps]
         a = paginator.CatchAllMenu(paginator.EmbedSource(embeds))
         await a.start(ctx)
 
@@ -82,7 +82,7 @@ class Fun(commands.Cog):
     @reply.command(invoke_without_command=True,
                    help="Replies with what you said and deletes your message, but in an embed.")
     async def embed(self, ctx, *, message):
-        await ctx.send(embed=discord.Embed(title=message, colour=self.client.colour))
+        await ctx.send(embed=discord.Embed(title=message, colour=self.bot.colour))
 
     @reply.command(invoke_without_command=True,
                    help="Replies with what you said and deletes your message, but in a different channel.")
@@ -100,7 +100,7 @@ class Fun(commands.Cog):
 
     @reply.command(aliases=['msg'], help="Message a user something. ", invoke_without_command=True)
     async def message(self, ctx, user: discord.Member, *, message):
-        person = self.client.get_user(user.id)
+        person = self.bot.get_user(user.id)
         await person.send(f"{message}\n\n*(Sent by {ctx.message.author})*")
         await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
 
@@ -123,7 +123,7 @@ class Fun(commands.Cog):
     @reply.command()
     async def mock(self, ctx, *, message):
         """Like that spongebob meme"""
-        await ctx.send(await cyberformat.better_random_char(message))
+        await ctx.send(cyberformat.better_random_char(message))
 
     @commands.command(help="Asks the mystical Ouija Board a question...")
     async def askouija(self, ctx, *, question):
@@ -155,9 +155,9 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=['cf'], help="Flips a coin.")
     async def coinflip(self, ctx, *, clause: str = None):
-        tails = discord.Embed(title="Tails!", colour=self.client.colour).set_image(
+        tails = discord.Embed(title="Tails!", colour=self.bot.colour).set_image(
             url='https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Quarter_Reverse_2010.png/220px-Quarter_Reverse_2010.png')
-        heads = discord.Embed(title="Heads!", colour=self.client.colour).set_image(
+        heads = discord.Embed(title="Heads!", colour=self.bot.colour).set_image(
             url='https://upload.wikimedia.org/wikipedia/en/thumb/8/8a/Quarter_Obverse_2010.png/220px-Quarter_Obverse_2010.png')
         embed = random.choice([heads, tails])
         embed.set_author(name=clause, icon_url=ctx.author.avatar_url) if clause else None
@@ -167,7 +167,7 @@ class Fun(commands.Cog):
     async def iq(self, ctx, *, member: discord.Member = None):
         member = member or ctx.message.author
         embed = discord.Embed(
-            colour=self.client.colour, title='IQ Rating Machine <:bigbrain:703735142509969408>',
+            colour=self.bot.colour, title='IQ Rating Machine <:bigbrain:703735142509969408>',
             timestamp=ctx.message.created_at
         )
         embed.set_author(name="{}".format(member.display_name), icon_url=member.avatar_url)
@@ -235,7 +235,7 @@ class Fun(commands.Cog):
                 " but you guys decide to make peace. It's a draw!"
             ])
             embed = discord.Embed(
-                colour=self.client.colour, title='Fight Results! :crossed_swords:', timestamp=ctx.message.created_at
+                colour=self.bot.colour, title='Fight Results! :crossed_swords:', timestamp=ctx.message.created_at
             )
 
             embed.set_author(name="{} vs {}".format(author.display_name, opponent.display_name),
@@ -249,7 +249,7 @@ class Fun(commands.Cog):
     async def who(self, ctx, *, question=None):
         member = random.choice(ctx.guild.members)
         embed = discord.Embed(
-            colour=self.client.colour,
+            colour=self.bot.colour,
             title=f"Answer: {member.display_name}",
         )
         question = question or "?"
@@ -262,14 +262,14 @@ class Fun(commands.Cog):
     async def emoji(self, ctx, *emoji: discord.Emoji):
         a = []
         for item in emoji:
-            a.append(self.client.get_emoji(item.id))
+            a.append(self.bot.get_emoji(item.id))
         await ctx.send("".join([str(a) for a in a]))
 
     @emoji.command()
     async def url(self, ctx, *emoji: discord.Emoji):
         a = []
         for item in emoji:
-            a.append(self.client.get_emoji(item.id))
+            a.append(self.bot.get_emoji(item.id))
         await ctx.send(" ".join([str(a.url) for a in a]))
 
     @commands.command(aliases=['gt'])
@@ -280,7 +280,7 @@ class Fun(commands.Cog):
             f"Greentext story starting! Type `{ctx.prefix}quit` or `{ctx.prefix}exit` to stop the session, or `{ctx.prefix}finish` to see your final story!")
         try:
             while True:
-                message = await self.client.wait_for('message', check=lambda m: m.author == ctx.author, timeout=500)
+                message = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author, timeout=500)
                 async with timeout(500):
                     if message.content == f"{ctx.prefix}quit":
                         await ctx.send("Session exited.")
@@ -318,7 +318,7 @@ class Fun(commands.Cog):
     @commands.command()
     async def owner(self, ctx):
         """Shows you who made this bot"""
-        return await ctx.send(f"it is {self.client.owner}")
+        return await ctx.send(f"it is {self.bot.owner}")
 
     @commands.command()
     async def wink(self, ctx, *, member: discord.Member = None):
@@ -327,10 +327,10 @@ class Fun(commands.Cog):
             async with cs.get("https://some-random-api.ml/animu/wink") as f:
                 res = await f.json()
             if member:
-                await ctx.send(embed=discord.Embed(color=self.client.colour).set_image(url=res['link']).set_author(
+                await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
                     name=f"😉 {ctx.author} winked at {member}!"))
             else:
-                await ctx.send(embed=discord.Embed(color=self.client.colour).set_image(url=res['link']).set_author(
+                await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
                     name=f"😉 {ctx.author} winked!"))
 
     @commands.command()
@@ -339,7 +339,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.ml/animu/pat") as f:
                 res = await f.json()
-            await ctx.send(embed=discord.Embed(color=self.client.colour).set_image(url=res['link']).set_author(
+            await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
                 name=f"{ctx.author} patted {member}!"))
 
     @commands.command()
@@ -348,7 +348,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://some-random-api.ml/animu/hug") as f:
                 res = await f.json()
-            await ctx.send(embed=discord.Embed(color=self.client.colour).set_image(url=res['link']).set_author(
+            await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
                 name=f"{ctx.author} hugged {member}!"))
 
     @commands.command()
@@ -357,7 +357,7 @@ class Fun(commands.Cog):
             naruto = await a.search(search_type='anime', query=query)
         res = naruto['results'][0]
         o = []
-        embed = discord.Embed(color=self.client.colour)
+        embed = discord.Embed(color=self.bot.colour)
         embed.set_thumbnail(url=res['image_url'])
         embed.title = f"{res['title']}"
         embed.url = f"{res['url']}"
@@ -375,9 +375,9 @@ class Fun(commands.Cog):
 
     async def get_all_todo(self, id: int = None):
         if not id:
-            return await self.client.pg_con.fetch("SELECT * FROM todo")
+            return await self.bot.pg_con.fetch("SELECT * FROM todo")
         else:
-            return await self.client.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", id)
+            return await self.bot.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", id)
 
     @commands.group(invoke_without_command=True)
     async def todo(self, ctx):
@@ -388,7 +388,7 @@ class Fun(commands.Cog):
             time = dt.utcfromtimestamp(each['time'])
             since = nt(dt.utcnow() - time)
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items")
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
 
@@ -398,7 +398,7 @@ class Fun(commands.Cog):
         if len(todo) > 50:
             return await ctx.send("Your todo is too long. Please be more consice.")
         id = random.randint(1, 99999)
-        await self.client.pg_con.execute(
+        await self.bot.pg_con.execute(
             "INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(),
             str(ctx.message.jump_url), ctx.author.id)
         await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list! (ID: `{id}`)")
@@ -414,7 +414,7 @@ class Fun(commands.Cog):
         message = []
         for i in id:
             message.append(f"• {todos[ids.index(i)]}")
-            await self.client.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
+            await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
         await ctx.send(
             f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
 
@@ -427,10 +427,44 @@ class Fun(commands.Cog):
             time = dt.utcfromtimestamp(each['time'])
             since = nt(dt.utcnow() - time)
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.client.colour), title="Items")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items")
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
 
+    @todo.command()
+    async def clear(self, ctx):
+        """Clears all of your todos"""
+        num = len((await self.bot.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)))
+        await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1", ctx.author.id)
+        await ctx.send(f"<:tickgreen:732660186560462958> Deleted **{num}** items from your todo list!")
 
-def setup(client):
-    client.add_cog(Fun(client))
+    @todo.command(aliases=['show'])
+    async def info(self, ctx, id: int):
+        """Shows you info on a todo"""
+        results = await self.bot.pg_con.fetch("SELECT * FROM todo WHERE id = $1", id)
+        if not results:
+            raise commands.BadArgument(f'{id} is not a valid todo!')
+        results = results[0]
+        embed = discord.Embed(colour=self.bot.colour)
+        embed.title = f"{results['todo']} » `{results['id']}`"
+        time = dt.utcfromtimestamp(results['time'])
+        since = nt(dt.utcnow() - time)
+        embed.description = f'{results["description"] or ""}\n'
+        embed.description += f"<:clock:738186842343735387> **{since}**\n"
+        embed.description += f"**{time.strftime('%A %B %d, %Y at %I:%M %p')}**"
+        await ctx.send(embed=embed)
+
+    @todo.command(aliases=['add_desc', 'ad'])
+    async def describe(self, ctx, id: int, *, description):
+        """Add a description for your todo"""
+        results = await self.bot.pg_con.fetch("SELECT * FROM todo WHERE id = $1", id)
+        if not results:
+            raise commands.BadArgument(f'{id} is not a valid todo!')
+        if len(description) > 250:
+            return await ctx.send("That description is too long!")
+        await self.bot.pg_con.execute("UPDATE todo SET description = $1 WHERE id = $2", description, id)
+        await ctx.send(f"<:tickgreen:732660186560462958> Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
+
+
+def setup(bot):
+    bot.add_cog(Fun(bot))

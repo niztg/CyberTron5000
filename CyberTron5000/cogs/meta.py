@@ -100,7 +100,7 @@ class Meta(commands.Cog):
         msg = await ctx.send(message)
         end = time.perf_counter()
         duration = round((end - start) * 1000, 3)
-        message += f"\n{check_health(duration, (200, 500))} ⏰ Response Time `{duration}`"
+        message += f"\n{check_health(duration, (200, 500))} <:clock:738186842343735387> Response Time `{duration}`"
         await msg.edit(content=message)
 
     @commands.command(aliases=["sourcecode", "src"], help="Shows source code for a given command")

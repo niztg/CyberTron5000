@@ -412,22 +412,17 @@ class Profile(commands.Cog):
     async def spotify(self, ctx, *, member: discord.Member = None):
         """Shows a member's spotify status"""
         member = member or ctx.author
-        for a in member.activities:
-            if isinstance(a, discord.Spotify):
-                embed = discord.Embed(colour=a.colour)
-                le_bar = cyberformat.bar(stat=(dt.utcnow() - a.start).seconds,
-                                             max=a.duration.seconds,
-                                             filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>', show_stat=True)
-                embed.set_thumbnail(url=a.album_cover_url)
-                embed.description = f"[{a.title}](https://open.spotify.com/track/{a.track_id})\n"
-                embed.description += f"by {a.artist}\n"
-                embed.description += f"on {a.album}\n"
-                embed.description += f"{dt.utcfromtimestamp((dt.utcnow() - a.start).seconds).strftime('%-M:%S')} {le_bar} {dt.utcfromtimestamp(a.duration.seconds).strftime('%-M:%S')}"
-                embed.set_footer(icon_url='https://cdn.discordapp.com/emojis/739983277053706302.png?v=1', text=str(member))
-                return await ctx.send(embed=embed)
-            else:
-                continue
-        return await ctx.send(f"{member} is not listening to Spotify!")
+        if not (spotify := discord.utils.get(member.activities, type=discord.ActivityType.listening)):
+            return await ctx.send(f"{member} is not listening to Spotify!")
+        embed = discord.Embed(colour=spotify.colour)
+        le_bar = cyberformat.bar(stat=(dt.utcnow() - spotify.start).seconds, max=spotify.duration.seconds, filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>', show_stat=True)
+        embed.set_thumbnail(url=spotify.album_cover_url)
+        embed.description = f"[{spotify.title}](https://open.spotify.com/track/{spotify.track_id})\n"
+        embed.description += f"by {spotify.artist}\n"
+        embed.description += f"on {spotify.album}\n"
+        embed.description += f"{dt.utcfromtimestamp((dt.utcnow() - spotify.start).seconds).strftime('%-M:%S')} {le_bar} {dt.utcfromtimestamp(spotify.duration.seconds).strftime('%-M:%S')}"
+        embed.set_footer(icon_url='https://cdn.discordapp.com/emojis/739983277053706302.png?v=1', text=str(member))
+        await ctx.send(embed=embed)
     
     @commands.command(aliases=['channel', 'chan', 'ci'])
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):

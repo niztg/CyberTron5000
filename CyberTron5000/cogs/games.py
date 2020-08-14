@@ -121,7 +121,7 @@ class Games(commands.Cog):
                 async with cs.get('https://dagpi.tk/api/wtp', headers=resp) as r:
                     resp = await r.json()
                 pokemon = resp['pokemon']
-                async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={u(pokemon['name'])}") as r:
+                async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={u(pokemon['name']).lower()}") as r:
                     res = await r.json()
                 await cs.close()
             evo_line = []
@@ -137,7 +137,7 @@ class Games(commands.Cog):
             embed.title = "Who's that Pokémon?"
             embed.description = f"You have 3 attempts | You have 30 seconds\nYou can ask for a hint by doing `{ctx.prefix}hint`, or cancel by doing `{ctx.prefix}cancel`!"
             await ctx.send(embed=embed)
-            dashes = await cyberformat.better_random_char(pokemon['name'], '_')
+            dashes = cyberformat.better_random_char(pokemon['name'], '_')
             hints = [
                 discord.Embed(colour=self.bot.colour, title="Types", description=', '.join(pokemon['type'])),
                 discord.Embed(title=f"`{dashes}`", colour=self.bot.colour),
