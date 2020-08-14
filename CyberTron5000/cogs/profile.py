@@ -392,17 +392,6 @@ class Profile(commands.Cog):
         for k, v in permissions:
             if v:
                 perms.append(f"`{str(k.title()).replace('_', ' ')}`")
-        roles = [f"{a.mention} ←" if a.mention == role.mention else a.mention for a in ctx.guild.roles][::-1]
-        myrole = f"{role.mention} ←"
-        r = roles
-        index = r.index(myrole)
-        if (role.position == len(ctx.guild.roles) - 1) or (role.position == len(ctx.guild.roles) - 2) or (
-                role.position == len(ctx.guild.roles) - 3):
-            one = 0
-        else:
-            one = index - 2
-        two = index + 3
-        embed.add_field(name=f'Position ({index + 1})', value='\u200b' + '\n'.join(r[one:two]), inline=False)
         embed.add_field(name='Permissions', value='\u200b' + ', '.join(perms))
         embed.description += f"\n:paintbrush: **{role.colour}**\n<:member:731190477927219231> **{len(role.members)}**\n<:ping:733142612839628830> {role.mention}"
         embed.set_footer(text=f'Role created {nt(dt.utcnow() - role.created_at)}')
