@@ -192,24 +192,11 @@ class Help(commands.Cog):
     @commands.group(invoke_without_command=True)
     async def cogs(self, ctx):
         """Shows you every cog"""
-        await ctx.send(embed=discord.Embed(colour=self.bot.colour, title=f"All Cogs ({len(self.bot.cogs)})",
-                                           description=f"Do `{ctx.prefix}help <cog>` to know more about them!" + "\n\n" + "\n".join(
-                                               [i for i in self.bot.cogs.keys()])))
-
-    @cogs.command()
-    @commands.is_owner()
-    async def status(self, ctx):
-        """Shows you the status of each cog"""
-        cogs = []
-        for filename in ctx.bot.ext:
-            try:
-                self.bot.reload_extension(filename)
-                cogs.append(f"<:on:732805104620797965> `ext.{filename[18:]}`")
-            except commands.ExtensionNotLoaded:
-                cogs.append(f"<:off:732805190582927410> `ext.{filename[18:]}`")
-
         embed = discord.Embed(colour=self.bot.colour)
-        embed.description = "\n".join(cogs)
+        embed.title = "All Cogs"
+        embed.description = " "
+        for x, y in self.bot.cogs.items():
+            embed.description += f"`{x}` - {y.description} (**{len(y.get_commands())}** commands)\n"
         await ctx.send(embed=embed)
 
     @commands.command(name='paginated_help', aliases=['phelp'])
