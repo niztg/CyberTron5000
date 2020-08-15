@@ -66,7 +66,7 @@ class Moderation(commands.Cog):
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=7)
         await ctx.send(f"<{self.tick}> {str(user)} banned! Reason:\n> {reason}")
 
-    @commands.command()
+    @commands.command(usage='<user id or user name#user discriminator>')
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     async def unban(self, ctx, user, *, reason=None):
@@ -89,7 +89,7 @@ class Moderation(commands.Cog):
             await ctx.guild.unban(user=user, reason=reason)
             return await ctx.send(f"<{self.tick}> {str(user)} was unbanned! Reason:\n> {reason}")
 
-    @commands.group(help="Vote on something.", invoke_without_command=True)
+    @commands.command(help="Vote on something.")
     async def vote(self, ctx, *, message):
         valid_emojis = ['⬆️', '⬇️']
         author = ctx.message.author
@@ -108,28 +108,11 @@ class Moderation(commands.Cog):
                 self.bot.wait_for("reaction_add"),
                 self.bot.wait_for("reaction_remove")
             ], return_when=asyncio.FIRST_COMPLETED)
-            # m = await ctx.channel.fetch_message(e.id)
             res = done.pop().result()
-            # print(res)
             if res[0].emoji in valid_emojis:
                 index = valid_emojis.index(res[0].emoji)
                 embed.set_field_at(index=index, name=names[index], value=f"{res[0].count}", inline=False)
                 await e.edit(embed=embed)
-
-    @vote.command(invoke_without_command=True)
-    @commands.is_owner()
-    async def ct5k(self, ctx, *, message):
-        """[Voting only in the CyberTron5000 help server](https://discord.gg/2fxKxJH)"""
-        author = ctx.message.author
-        embed = discord.Embed(
-            colour=self.bot.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
-        )
-        embed.set_footer(text=f"Started by {author}", icon_url=author.avatar_url)
-        await ctx.message.delete()
-        string = str("<@&724429718882877531>")
-        e = await ctx.send(string, embed=embed)
-        for r in [':upvote:718895913342337036', ':downvote:718895842404335668']:
-            await e.add_reaction(r)
 
     @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'],
                     invoke_without_command=True)
