@@ -84,7 +84,7 @@ class Moderation(commands.Cog):
                 user = self.bot.get_user(user) or await self.bot.fetch_user(user)
             except:
                 return await ctx.send("That user was not found!")
-            if user.id not in [ban.user.id for ban in await bans]:
+            if user.id not in [ban.user.id for ban in bans]:
                 return await ctx.send(f"{str(user)} is not banned!")
             await ctx.guild.unban(user=user, reason=reason)
             return await ctx.send(f"<{self.tick}> {str(user)} was unbanned! Reason:\n> {reason}")
