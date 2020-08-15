@@ -6,7 +6,7 @@ import discord
 import humanize
 from discord.ext import commands
 
-from CyberTron5000.utils import paginator, lists
+from CyberTron5000.utils import paginator, lists, cyberformat
 from CyberTron5000.utils.checks import check_mod_or_owner
 
 
@@ -71,9 +71,9 @@ class Moderation(commands.Cog):
     @commands.bot_has_guild_permissions(ban_members=True)
     async def unban(self, ctx, user, *, reason=None):
         """Unban someone from the guild"""
+        bans = await ctx.guild.bans()
         reason = reason or "No reason provided."
         if not user.isdigit():
-            bans = await ctx.guild.bans()
             for ban in bans:
                 if str(ban.user) == user:
                     await ctx.guild.unban(user=ban.user, reason=reason)
@@ -84,35 +84,54 @@ class Moderation(commands.Cog):
                 user = self.bot.get_user(user) or await self.bot.fetch_user(user)
             except:
                 return await ctx.send("That user was not found!")
-            if user.id not in [ban.user.id for ban in await ctx.guild.bans()]:
+            if user.id not in [ban.user.id for ban in await bans]:
                 return await ctx.send(f"{str(user)} is not banned!")
             await ctx.guild.unban(user=user, reason=reason)
             return await ctx.send(f"<{self.tick}> {str(user)} was unbanned! Reason:\n> {reason}")
 
-    @commands.command(help="Vote on something.")
+    @commands.command(usage='<poll|option1|option2|option3...>', aliases=['poll'])
     async def vote(self, ctx, *, message):
-        valid_emojis = ['⬆️', '⬇️']
-        author = ctx.message.author
-        embed = discord.Embed(
-            colour=self.bot.colour, timestamp=ctx.message.created_at, title="Poll:", description=message
-        )
-        embed.set_footer(text=f"Started by {author}", icon_url=author.avatar_url)
-        embed.add_field(name="Upvotes", value="1", inline=False)
-        embed.add_field(name="Downvotes", value="1", inline=False)
-        e = await ctx.send(embed=embed)
-        for r in valid_emojis:
-            await e.add_reaction(r)
+        if not 3 <= (len(options := message.split("|"))) <= 10:
+            return await ctx.send(
+                f"You must have a minimum of **2** options and a maximum of **9**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
+        question = options[0]
+        options = options[1:]
+        if len(question) >= 100:
+            return await ctx.send("Your question is too long, please make it less than 100 characters.")
+        question += "?" if not (question.endswith(('.', '?', '!'))) else '\u200b'
+        embed = discord.Embed(colour=self.bot.colour)
+        embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+        embed.title = question
+        votes = []
+        for x in range(len(options)):
+            emoji = cyberformat.to_emoji(x)
+            _vote_dict = {'emoji': str(emoji), 'question': options[x], 'votes': 0}
+            votes.append(_vote_dict)
+        _q_format = []
+        for item in votes:
+            _q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
+        embed.description = f"\n".join(_q_format)
+        _msg = await ctx.send(embed=embed)
+        for a in votes:
+            await _msg.add_reaction(a['emoji'])
+
+        def check(reaction, user):
+            return reaction.emoji in [item['emoji'] for item in votes] and user.bot is False and reaction.message.id == _msg.id
+
+        setup = lambda event: self.bot.wait_for(f'{event}', check=check)
+
         while True:
-            names = ['Upvotes', 'Downvotes']
-            done, pending = await asyncio.wait([
-                self.bot.wait_for("reaction_add"),
-                self.bot.wait_for("reaction_remove")
-            ], return_when=asyncio.FIRST_COMPLETED)
-            res = done.pop().result()
-            if res[0].emoji in valid_emojis:
-                index = valid_emojis.index(res[0].emoji)
-                embed.set_field_at(index=index, name=names[index], value=f"{res[0].count}", inline=False)
-                await e.edit(embed=embed)
+            new_q_format = []
+            done, pending = await asyncio.wait([setup('reaction_add'), setup('reaction_remove')], return_when=asyncio.FIRST_COMPLETED)
+            result = done.pop().result()
+            result = result[0]
+            index = [c['emoji'] for c in votes].index(result.emoji)
+            votes[index]['votes'] = result.count - 1
+            for item in sorted(votes, key=lambda x: x['votes'], reverse=True):
+                new_q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
+            embed.description = f"\n".join(new_q_format)
+            await _msg.edit(embed=embed)
+            continue
 
     @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'],
                     invoke_without_command=True)

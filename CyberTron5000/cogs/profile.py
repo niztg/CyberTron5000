@@ -342,10 +342,7 @@ class Profile(commands.Cog):
                     else:
                         emoji = ''
                         if activity.emoji:
-                            emoji = ':thinking:' if activity.emoji.is_custom_emoji() and not ctx.bot.get_emoji(
-                                activity.emoji.id) else activity.emoji
-                            if str(emoji) == ":thinking:":
-                                embed.set_footer(text="🤔 indicates a custom emoji")
+                            emoji = '<:emoji:734231060069613638>' if activity.emoji.is_custom_emoji() and not ctx.bot.get_emoji(activity.emoji.id) else activity.emoji
                         char = "\u200b" if activity.type == discord.ActivityType.custom else " "
                         if str(activity.name) == "None":
                             ac = "\u200b"
