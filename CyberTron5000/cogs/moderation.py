@@ -91,6 +91,7 @@ class Moderation(commands.Cog):
 
     @commands.command(usage='<poll|option1|option2|option3...>', aliases=['poll'])
     async def vote(self, ctx, *, message):
+        """Vote on something"""
         if not 3 <= (len(options := message.split("|"))) <= 10:
             return await ctx.send(
                 f"You must have a minimum of **2** options and a maximum of **9**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
