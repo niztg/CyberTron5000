@@ -96,7 +96,7 @@ class Moderation(commands.Cog):
             return await ctx.send(
                 f"You must have a minimum of **2** options and a maximum of **9**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
         question = options[0]
-        options = options[1:]
+        _options = options[1:]
         if len(question) >= 100:
             return await ctx.send("Your question is too long, please make it less than 100 characters.")
         question += "?" if not (question.endswith(('.', '?', '!'))) else '\u200b'
@@ -104,12 +104,15 @@ class Moderation(commands.Cog):
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.title = question
         votes = []
-        for x in range(len(options)):
+        for x in range(len(_options)):
             emoji = cyberformat.to_emoji(x)
-            _vote_dict = {'emoji': str(emoji), 'question': options[x], 'votes': 0}
+            _vote_dict = {'emoji': str(emoji), 'question': _options[x], 'votes': 0}
             votes.append(_vote_dict)
         _q_format = []
         for item in votes:
+            if not item['question']:
+                votes.remove(item)
+                continue
             _q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
         embed.description = f"\n".join(_q_format)
         _msg = await ctx.send(embed=embed)
