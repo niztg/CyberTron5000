@@ -195,29 +195,6 @@ class Meta(commands.Cog):
             icon_url=ctx.bot.owner.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.group(aliases=["n", "changenickname", "nick"], invoke_without_command=True,
-                    help="Change the bot's nickname to a custom one.")
-    @check_mod_or_owner()
-    async def nickname(self, ctx, *, nickname=None):
-        if nickname:
-            await ctx.guild.me.edit(nick=f"{nickname}")
-            await ctx.message.add_reaction(emoji=self.tick)
-        else:
-            await ctx.guild.me.edit(nick=self.bot.user.name)
-            await ctx.message.add_reaction(emoji=self.tick)
-
-    @nickname.command(invoke_without_command=True, help="Change the bot's nickname back to the default.")
-    @check_mod_or_owner()
-    async def default(self, ctx):
-        await ctx.guild.me.edit(nick=f"{self.bot.user.name}")
-        await ctx.message.add_reaction(emoji=self.tick)
-
-    @nickname.command(invoke_without_command=True, help="Change the bot's nickname to the default, without the prefix.")
-    @check_mod_or_owner()
-    async def client(self, ctx):
-        await ctx.guild.me.edit(nick=self.bot.user.name)
-        await ctx.message.add_reaction(emoji=self.tick)
-
     @commands.group(invoke_without_command=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def suggest(self, ctx, *, idea):
