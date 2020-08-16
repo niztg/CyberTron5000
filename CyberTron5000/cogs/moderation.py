@@ -108,36 +108,36 @@ class Moderation(commands.Cog):
         votes = []
         for x in range(len(_options)):
             emoji = cyberformat.to_emoji(x)
-            _vote_dict = {'emoji': str(emoji), 'question': _options[x], 'votes': 0}
+            _vote_dict = {'emoji': str(emoji), 'question': _options[x]}
             votes.append(_vote_dict)
         _q_format = []
         for item in votes:
             if not item['question']:
                 votes.remove(item)
                 continue
-            _q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
+            _q_format.append(f"{item['emoji']} **{item['question']}**")
         embed.description = f"\n".join(_q_format)
         _msg = await ctx.send(embed=embed)
         for a in votes:
             await _msg.add_reaction(a['emoji'])
-
-        def check(reaction, user):
-            return reaction.emoji in [item['emoji'] for item in votes] and user.bot is False and reaction.message.id == _msg.id
-
-        setup = lambda event: self.bot.wait_for(f'{event}', check=check)
-
-        while True:
-            new_q_format = []
-            done, pending = await asyncio.wait([setup('reaction_add'), setup('reaction_remove')], return_when=asyncio.FIRST_COMPLETED)
-            result = done.pop().result()
-            result = result[0]
-            index = [c['emoji'] for c in votes].index(result.emoji)
-            votes[index]['votes'] = result.count - 1
-            for item in sorted(votes, key=lambda x: x['votes'], reverse=True):
-                new_q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
-            embed.description = f"\n".join(new_q_format)
-            await _msg.edit(embed=embed)
-            continue
+        #
+        # def check(reaction, user):
+        #     return reaction.emoji in [item['emoji'] for item in votes] and user.bot is False and reaction.message.id == _msg.id
+        #
+        # setup = lambda event: self.bot.wait_for(f'{event}', check=check)
+        #
+        # while True:
+        #     new_q_format = []
+        #     done, pending = await asyncio.wait([setup('reaction_add'), setup('reaction_remove')], return_when=asyncio.FIRST_COMPLETED)
+        #     result = done.pop().result()
+        #     result = result[0]
+        #     index = [c['emoji'] for c in votes].index(result.emoji)
+        #     votes[index]['votes'] = result.count - 1
+        #     for item in sorted(votes, key=lambda x: x['votes'], reverse=True):
+        #         new_q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
+        #     embed.description = f"\n".join(new_q_format)
+        #     await _msg.edit(embed=embed)
+        #     continue
 
     @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'],
                     invoke_without_command=True)
