@@ -1,5 +1,5 @@
-import traceback
 import asyncio
+import traceback
 
 import async_cleverbot
 import discord
@@ -7,6 +7,7 @@ import humanize
 from discord.ext import commands
 
 from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr
+
 
 class Events(commands.Cog):
     def __init__(self, bot):
@@ -32,9 +33,18 @@ class Events(commands.Cog):
         elif type(error) in known_errors:
             await ctx.message.add_reaction(self.x_r)
             await ctx.send(f'<{self.x_r}> **{ctx.author.name}**, {m(str(error))}')
+        elif isinstance(error, commands.CommandInvokeError):
+            await ctx.message.add_reaction(self.x_r)
+            await ctx.send(f'<{self.x_r}> **{ctx.author.name}**, {m(str(error))}')
+            embed = discord.Embed(colour=self.bot.colour, title="Unkown Error Occured!")
+            embed.description = f"Error on `{ctx.command}`: `{error.__class__.__name__}`\n```py\n{traceback_text}```\n**Server:** {ctx.guild}\n**Author:** {ctx.author}\n[URL]({ctx.message.jump_url})"
+            embed.description = embed.description[:2000]
+            await ctx.message.add_reaction(self.x_r)
+            await self.bot.logging_channel.send(embed=embed)
         else:
-            embed = discord.Embed(colour=self.bot.colour, title="Unkown Error Occured!",
-                                  description=f"Error on `{ctx.command}`: `{error.__class__.__name__}`\n```py\n{traceback_text}```\n**Server:** {ctx.guild}\n**Author:** {ctx.author}\n[URL]({ctx.message.jump_url})")
+            embed = discord.Embed(colour=self.bot.colour, title="Unkown Error Occured!")
+            embed.description = f"Error on `{ctx.command}`: `{error.__class__.__name__}`\n```py\n{traceback_text}```\n**Server:** {ctx.guild}\n**Author:** {ctx.author}\n[URL]({ctx.message.jump_url})"
+            embed.description = embed.description[:2000]
             await ctx.message.add_reaction(self.x_r)
             await self.bot.logging_channel.send(embed=embed)
             await ctx.send(content="The error has been sent to my creator! It will be fixed as soon as possible!",

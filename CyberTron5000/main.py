@@ -26,8 +26,8 @@ import os
 import asyncpg
 import discord
 from discord.ext import commands, tasks as t
-from CyberTron5000.config import config as cfg
 
+from CyberTron5000.config import config as cfg
 
 print("INITIALISATION COMPLETE")
 print("-----------------------")

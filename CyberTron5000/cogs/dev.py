@@ -6,6 +6,7 @@ import sys
 import aiohttp
 import discord
 from discord.ext import commands
+
 from CyberTron5000.utils import cyberformat
 
 tick = "<:tickgreen:732660186560462958>"
@@ -250,6 +251,20 @@ class Developer(commands.Cog):
         statement = cyberformat.codeblock(statement, lang='sql')
         res = await self.bot.pg_con.fetch(statement)
         await ctx.send(res)
+
+    @commands.command()
+    async def timer(self, ctx, seconds: int = 60):
+        le_seconds = list(range(seconds))
+        embed = discord.Embed(colour=0x5643fd, title="Ur Mom", description=f'{seconds}')
+        msg = await ctx.send(embed=embed)
+        for num in le_seconds[::-1]:
+            embed.description = f'{num}'
+            await msg.edit(embed=embed)
+            if num != 0:
+                await asyncio.sleep(1)
+            continue
+        embed.description = f"Done!\nCounted from **{seconds}** successfully"
+        await msg.edit(embed=embed)
 
 
 def setup(bot):

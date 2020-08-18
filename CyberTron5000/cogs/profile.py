@@ -3,10 +3,10 @@ from datetime import datetime as dt
 from typing import Union
 
 import discord
-from humanize import naturaltime as nt
 import matplotlib
 import matplotlib.pyplot as plt
 from discord.ext import commands
+from humanize import naturaltime as nt
 
 from CyberTron5000.utils import paginator, cyberformat, checks
 from CyberTron5000.utils.lists import REGIONS, sl, status_mapping, badge_mapping
@@ -320,7 +320,7 @@ class Profile(commands.Cog):
                 embed.description = f'{is_bot}{" ".join(a)}{char}{le}\n→ ID **{m.id}**\n'
             embed.description += f'→ Created Account **{nt(dt.utcnow() - m.created_at)}**\n'
             embed.description += f'→ Joined Guild **{nt(dt.utcnow() - m.joined_at)}**\n'
-            embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)]) if m != ctx.bot.user else f"bro this is literally the bot ({len(ctx.bot.guilds)})"}**'
+            embed.description += f'→ Guilds Shared With Bot **{len([g for g in ctx.bot.guilds if g.get_member(m.id)])}**'
             if m.top_role.id == ctx.guild.id:
                 pass
             else:
@@ -363,9 +363,9 @@ class Profile(commands.Cog):
         all = dict(member.permissions_in(ctx.channel)).items()
         for key, value in all:
             if value:
-                perms.append(f"<:tickgreen:732660186560462958> `{str(key.title()).replace('_', ' ')}`")
+                perms.append(f"<:tickgreen:732660186560462958> **{str(key.title()).replace('_', ' ')}**")
             else:
-                negperms.append(f"<:redx:732660210132451369> `{str(key.title()).replace('_', ' ')}`")
+                negperms.append(f"<:redx:732660210132451369> **{str(key.title()).replace('_', ' ')}**")
         
         embed2 = discord.Embed(colour=self.bot.colour).set_author(name=embed.author.name, icon_url=member.avatar_url)
         embed.description = '\n'.join(perms)
@@ -388,8 +388,8 @@ class Profile(commands.Cog):
         perms = []
         for k, v in permissions:
             if v:
-                perms.append(f"`{str(k.title()).replace('_', ' ')}`")
-        embed.add_field(name='Permissions', value='\u200b' + ', '.join(perms))
+                perms.append(f"{str(k.title()).replace('_', ' ')}")
+        embed.add_field(name='Permissions', value='**\u200b' + ', '.join(perms) + '**')
         embed.description += f"\n:paintbrush: **{role.colour}**\n<:member:731190477927219231> **{len(role.members)}**\n<:ping:733142612839628830> {role.mention}"
         embed.set_footer(text=f'Role created {nt(dt.utcnow() - role.created_at)}')
         await ctx.send(embed=embed)

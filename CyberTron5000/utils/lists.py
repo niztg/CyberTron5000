@@ -200,11 +200,22 @@ audit_actions = {
     discord.AuditLogAction.member_update: "**updated member**"
 }
 
-engineer_bagdes = ["<:engineer1:732745844339638334>", "<:engineer2:732745844633370684>",
-                   "<:engineer3:732745844716994690>", "<:engineer4:732745844754743306>"]
+engineer_bagdes = ["<:engineer1:732745844339638334>", "<:engineer2:732745844633370684>", "<:engineer3:732745844716994690>", "<:engineer4:732745844754743306>"]
+popular_badges = ['<:popular1:732745781660090459>', '<:popular2:732745781856960634>', '<:popular3:732745782054092840>', '<:popular4:732745781714354198>']
+legend_badges = ['<:legend1:732745816564826212>', '<:legend2:732745816590123041>', '<:legend3:73274581659838', '<:legend4:732745816758026381>']
 
-popular_badges = ['<:popular1:732745781660090459>', '<:popular2:732745781856960634>', '<:popular3:732745782054092840>',
-                  '<:popular4:732745781714354198>']
-
-legend_badges = ['<:legend1:732745816564826212>', '<:legend2:732745816590123041>', '<:legend3:73274581659838',
-                 '<:legend4:732745816758026381>']
+ANIMALS = {
+    'cat': '🐱',
+    'dog': '🐶',
+    'koala': '🐨',
+    'fox': '🦊',
+    'bird': '🐦',
+    'birb': '🐦',
+    'red_panda': '🔴',
+    'elephant': '🐘',
+    'panda': '🐼',
+    'racoon': '🦝',
+    'kangaroo': '🦘',
+    'giraffe': '🦒',
+    'whale': '🐋'
+}

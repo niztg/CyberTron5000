@@ -68,7 +68,8 @@ class Reddit(commands.Cog):
             embed.set_author(name=f"{k['data']['subreddit']['title']}",
                              url=f"https://reddit.com/user/{user}") if f"{k['data']['subreddit']['title']}" else None
             embed.title = k['data']['name'] + cake
-            embed.description = f"<:karma:704158558547214426> **{k['data']['link_karma'] + k['data']['comment_karma']:,}** | 🔗 **{k['data']['link_karma']:,}** 💬 **{k['data']['comment_karma']:,}**"
+            embed.description = k['data']['subreddit']['public_description'] + '\n'
+            embed.description += f"<:karma:704158558547214426> **{k['data']['link_karma'] + k['data']['comment_karma']:,}** | 🔗 **{k['data']['link_karma']:,}** 💬 **{k['data']['comment_karma']:,}**"
             embed.description += f"\n<:asset:734531316741046283> [Icon URL]({icon})"
             if banner:
                 embed.description += f" | [Banner URL]({banner})"

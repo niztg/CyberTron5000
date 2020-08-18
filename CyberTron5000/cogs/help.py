@@ -93,7 +93,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
 
         for i in valid_reactions:
             await msg.add_reaction(i)
-        with suppress(Exception):
+        with suppress(asyncio.TimeoutError):
             while True:
                 done, pending = await asyncio.wait(
                     [self.context.bot.wait_for('reaction_add', timeout=300, check=check),

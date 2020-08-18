@@ -1,10 +1,11 @@
 """
 Dedicated to thag
 """
-import discord
-
-from discord.ext import commands
 from asyncio import TimeoutError
+
+import discord
+from discord.ext import commands
+
 from CyberTron5000.utils.paginator import CatchAllMenu, IndexedListSource
 
 

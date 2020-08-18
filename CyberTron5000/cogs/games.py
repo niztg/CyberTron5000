@@ -9,6 +9,7 @@ from unidecode import unidecode as u
 
 from CyberTron5000.utils import cyberformat, lists
 
+
 class Games(commands.Cog):
     """Games!"""
 

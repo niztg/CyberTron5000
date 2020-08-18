@@ -19,7 +19,7 @@ import psutil
 from discord.ext import commands
 
 from CyberTron5000.utils import cyberformat
-from CyberTron5000.utils.checks import check_mod_or_owner, beta_squad
+from CyberTron5000.utils.checks import beta_squad
 
 start_time = datetime.datetime.utcnow()
 

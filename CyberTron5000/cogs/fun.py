@@ -1,18 +1,21 @@
 import asyncio
 import random
 import string
-from time import time
 from datetime import datetime as dt
-from humanize import naturaltime as nt
+from io import BytesIO
+from time import time
 
 import aiohttp
 import discord
 from async_timeout import timeout
 from discord.ext import commands
+from humanize import naturaltime as nt
 from jikanpy import AioJikan
+from sr_api import Client
 
 from CyberTron5000.utils import paginator, cyberformat
-from CyberTron5000.utils.lists import INDICATOR_LETTERS
+from CyberTron5000.utils.lists import INDICATOR_LETTERS, ANIMALS
+
 
 class Fun(commands.Cog):
     """Fun commands"""
@@ -20,6 +23,7 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.tick = ":tickgreen:732660186560462958"
+        self.sr = Client()
 
     @commands.command()
     async def horror(self, ctx, limit: int = 5):
@@ -452,7 +456,37 @@ class Fun(commands.Cog):
         if len(description) > 250:
             return await ctx.send("That description is too long!")
         await self.bot.pg_con.execute("UPDATE todo SET description = $1 WHERE id = $2", description, id)
-        await ctx.send(f"<:tickgreen:732660186560462958> Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
+        await ctx.send(
+            f"<:tickgreen:732660186560462958> Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
+
+    @commands.command(aliases=['af'])
+    async def animalfact(self, ctx, animal=None):
+        """Shows a fact about an animal of your choice."""
+        if not animal:
+            return await ctx.send(
+                f"**Valid Animal Choices:**\ncat, dog, koala, fox, bird, elephant, panda, racoon, kangaroo, giraffe, whale")
+        try:
+            animal = str(animal).lower().replace(' ', '_')
+            em = ANIMALS.get(animal)
+            fact = await self.sr.get_fact(animal)
+            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Fact:**\n{fact}")
+        except Exception as error:
+            return await ctx.send(error)
+
+    @commands.command(aliases=['aimg'])
+    async def animalimg(self, ctx, *, animal=None):
+        """Shows an image of an animal of your choice."""
+        if not animal:
+            return await ctx.send(
+                f"**Valid Animal Choices:**\ncat, dog, koala, fox, birb, red panda, panda, racoon, kangaroo")
+        try:
+            animal = str(animal).lower().replace(' ', '_')
+            em = ANIMALS.get(animal, '')
+            image = await self.sr.get_image(animal)
+            final = BytesIO(await image.read())
+            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Image:**", file=discord.File(final, f'{animal}_image.png'))
+        except Exception as error:
+            return await ctx.send(error)
 
 
 def setup(bot):

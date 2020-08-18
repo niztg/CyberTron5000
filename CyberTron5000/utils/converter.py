@@ -9,7 +9,6 @@ emoji_converter = commands.EmojiConverter()
 
 class ImageConverter(commands.Converter):
     """Huge thanks to Daggy1234 for making this converter!"""
-    
     async def convert(self, ctx, argument):
         with suppress(Exception):
             mem = await member_converter.convert(ctx, argument)
@@ -23,5 +22,5 @@ class ImageConverter(commands.Converter):
         elif checkers.is_url(str(argument)):
             return str(argument)
         else:
-            return 'error'
+            raise commands.BadArgument()
 
