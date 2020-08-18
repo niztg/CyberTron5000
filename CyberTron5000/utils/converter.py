@@ -9,6 +9,7 @@ emoji_converter = commands.EmojiConverter()
 
 class ImageConverter(commands.Converter):
     """Huge thanks to Daggy1234 for making this converter!"""
+
     async def convert(self, ctx, argument):
         with suppress(Exception):
             mem = await member_converter.convert(ctx, argument)
@@ -24,3 +25,11 @@ class ImageConverter(commands.Converter):
         else:
             raise commands.BadArgument()
 
+
+class RTFSObject(commands.Converter):
+    async def convert(self, ctx, argument):
+        items = ['discord.', 'commands.', 'utils.']
+        for word in items:
+            if argument.startswith(word):
+                return argument[len(word):]
+        return argument

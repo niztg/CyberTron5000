@@ -6,7 +6,7 @@ import async_cse
 import discord
 from discord.ext import commands, flags
 
-from CyberTron5000.utils import paginator, cyberformat
+from CyberTron5000.utils import paginator, cyberformat, converter
 from CyberTron5000.utils.http import *
 from CyberTron5000.utils.lists import STAT_NAMES, TYPES
 
@@ -32,9 +32,6 @@ async def fetch_rtfs(res):
 
 class Api(commands.Cog):
     """Interact with various API's"""
-
-    #  'http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10'
-    # http://api.urbandictionary.com/v0/define', params={'term': terms}
     def __init__(self, bot):
         self.bot = bot
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
@@ -236,33 +233,24 @@ class Api(commands.Cog):
         await paginator.CatchAllMenu(source=source).start(ctx)
 
     @commands.command()
-    async def rtfs(self, ctx, *, query: str = None):
+    async def rtfs(self, ctx, *, query: converter.RTFSObject = None):
         """Shows results from the discord.py sourcecode"""
-        if not query:
-            return await ctx.send("https://discordpy.readthedocs.io/en/latest/")
-        if query.startswith("discord."):
-            query = query[8:]
-        elif query.startswith("commands."):
-            query = query[9:]
-        else:
-            query = query
         async with self.http as h:
             try:
-                data = await h.get(f"https://rtfs.eviee.me/dpy?search={query}")
+                res = await h.get(f"https://rtfs.eviee.me/dpy?search={query}")
             except Exception as error:
-                raise APIError(error)
+                print(error)
         await h.close()
-        if not data:
+        if not res:
             return await ctx.send("No results.")
         embed = discord.Embed(color=self.bot.colour)
-        data = await fetch_rtfs(data)
+        data = await fetch_rtfs(res)
         source = paginator.IndexedListSource(data, embed=embed, per_page=5, show_index=False)
         await paginator.CatchAllMenu(source=source).start(ctx)
 
     @commands.command(aliases=['gif'])
     @commands.is_nsfw()
     async def giphy(self, ctx, *, query):
-        # f"https://rtfs.eviee.me/dpy?search={query}"
         """Get a random gif based on your query"""
         async with self.http as h:
             try:
@@ -280,9 +268,6 @@ class Api(commands.Cog):
         source = paginator.EmbedSource(embeds)
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
-
-
-#
 
 def setup(bot):
     bot.add_cog(Api(bot))
