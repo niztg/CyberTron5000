@@ -1,18 +1,14 @@
 """
 MIT License
-
 Copyright (c) 2020 nizcomix
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,9 +25,25 @@ from discord.ext import commands, tasks as t
 
 from CyberTron5000.config import config as cfg
 
-print("INITIALISATION COMPLETE")
-print("-----------------------")
+print(
+  r"""
+ ______             __                         ________                              _______    ______    ______    ______  
+ /      \           |  \                       |        \                            |       \  /      \  /      \  /      \ 
+|  $$$$$$\ __    __ | $$____    ______    ______\$$$$$$$$______    ______   _______  | $$$$$$$ |  $$$$$$\|  $$$$$$\|  $$$$$$\
+| $$   \$$|  \  |  \| $$    \  /      \  /      \ | $$  /      \  /      \ |       \ | $$____  | $$$\| $$| $$$\| $$| $$$\| $$
+| $$      | $$  | $$| $$$$$$$\|  $$$$$$\|  $$$$$$\| $$ |  $$$$$$\|  $$$$$$\| $$$$$$$\| $$    \ | $$$$\ $$| $$$$\ $$| $$$$\ $$
+| $$   __ | $$  | $$| $$  | $$| $$    $$| $$   \$$| $$ | $$   \$$| $$  | $$| $$  | $$ \$$$$$$$\| $$\$$\$$| $$\$$\$$| $$\$$\$$
+| $$__/  \| $$__/ $$| $$__/ $$| $$$$$$$$| $$      | $$ | $$      | $$__/ $$| $$  | $$|  \__| $$| $$_\$$$$| $$_\$$$$| $$_\$$$$
+ \$$    $$ \$$    $$| $$    $$ \$$     \| $$      | $$ | $$       \$$    $$| $$  | $$ \$$    $$ \$$  \$$$ \$$  \$$$ \$$  \$$$
+  \$$$$$$  _\$$$$$$$ \$$$$$$$   \$$$$$$$ \$$       \$$  \$$        \$$$$$$  \$$   \$$  \$$$$$$   \$$$$$$   \$$$$$$   \$$$$$$ 
+          |  \__| $$                                                                                                         
+           \$$    $$                                                                                                         
+            \$$$$$$                                                                                                          
+"""
+)
 
+print("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+print("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 
 class CyberTron5000(commands.Bot):
     def __init__(self):
@@ -88,14 +100,12 @@ class CyberTron5000(commands.Bot):
     async def startup(self):
         await self.wait_until_ready()
         print(f"{self.user.name.upper()} IS ONLINE")
-        print("-----------------------")
         for file in self.ext:
             try:
                 self.load_extension(name=file)
             except Exception as error:
                 print(f"Could not load {file}: {error}")
         print(f"COGS HAVE BEEN LOADED")
-        print("-----------------------")
         prefix_data = await self.pg_con.fetch("SELECT guild_id, array_agg(prefix) FROM prefixes GROUP BY guild_id")
         for entry in prefix_data:
             self.prefixes[entry['guild_id']] = entry['array_agg']
@@ -103,8 +113,9 @@ class CyberTron5000(commands.Bot):
             activity=discord.Activity(type=discord.ActivityType.watching,
                                       name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
         print("PREFIXES AND PRESENCE SETUP")
-        print("-----------------------")
-        print("Ready!")
+        print("READY!")
+        print(
+            "──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 
     async def _init_tags(self):
         await self.wait_until_ready()
@@ -121,7 +132,6 @@ class CyberTron5000(commands.Bot):
                                                                      'uses': query2['uses'] or 0,
                                                                      'author': query2['user_id']}
         print("TAGS HAVE BEEN INITIALIZED")
-        print("-----------------------")
 
 
 CyberTron5000().run()
