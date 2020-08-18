@@ -8,7 +8,6 @@ from discord.ext import commands
 
 from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr
 
-
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -52,20 +51,23 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def on_user_mention(self, message):
-        if message.content in ("<@!697678160577429584>", "<@697678160577429584>"):
-            DEFAULT_PREFIX = ["c$"]
-            a = self.bot.prefixes.get(message.guild.id, DEFAULT_PREFIX)
-            embed = discord.Embed(colour=self.bot.colour,
-                                  description=f'**My prefixes for {message.guild} are** {f"{self.bot.user.mention}, " + ", ".join([f"`{a}`" for a in a])}\n\n**Do** '
-                                              f'{f"{self.bot.user.mention} help, " + ", ".join([f"`{a}help`" for a in a])} **for a full list of commands**\n\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)')
-            embed.set_thumbnail(url=self.bot.user.avatar_url)
+        if self.bot.user in message.mentions:
+            prefixes = self.bot.prefixes.get(message.guild.id, ['c$'])
+            all_prefixes = ['`@CyberTron5000#1758`'] + [f'`{pref}`' for pref in prefixes]
+            MENTION_MESSAGE = "≫ **Prefixes** :: " + ", ".join(all_prefixes) + "\n"
+            MENTION_MESSAGE += f"≫ **Uptime** :: {', '.join([f'**{value}** {key}' for key, value in self.bot.uptime.items()])}\n"
+            MENTION_MESSAGE += f"≫ **Latency** :: **{round(self.bot.latency*1000, 3)}** ms"
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.title = self.bot.user.name
             embed.set_author(name=f"Developed by {self.bot.owner}", icon_url=self.bot.owner.avatar_url)
+            embed.description = MENTION_MESSAGE
+            embed.set_thumbnail(url=self.bot.user.avatar_url)
+            embed.add_field(name="Links", value=f"[Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)")
             await message.channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        ml = "\n".join([f"{member.mention} • `{member.top_role.name}`" for member in guild.members if
-                        member.guild_permissions.administrator and not member.bot])
+        ml = "\n".join([f"{member.mention} • `{member.top_role.name}`" for member in guild.members if member.guild_permissions.administrator and not member.bot])
         botno = len([member for member in guild.members if member.bot])
         text_channels = guild.text_channels
         voice_channels = guild.voice_channels
@@ -76,32 +78,17 @@ class Events(commands.Cog):
             self.bot.prefixes[guild.id] = ["c$"]
         except BaseException:
             pass
-        embed = discord.Embed(colour=0x00ff00, title=f'{guild}',
-                              description=f"**{guild.id}**"f"\n<:member:716339965771907099>**{len(guild.members):,}\n**Owner:** {guild.owner.mention}\n\n<:category:716057680548200468> **{len(categories)}** | <:text_channel:703726554018086912>**{len(text_channels)}** • <:voice_channel:703726554068418560>**{len(voice_channels)}**\n😔🤔😳 **{len(emojis)}**\n<:bot:703728026512392312> **{botno}**\n**Admins:**\n{ml}")
+        embed = discord.Embed(colour=0x00ff00, title=f'{guild}', description=f"**{guild.id}**"f"\n<:member:716339965771907099>**{len(guild.members):,}\n**Owner:** {guild.owner.mention}\n\n<:category:716057680548200468> **{len(categories)}** | <:text_channel:703726554018086912>**{len(text_channels)}** • <:voice_channel:703726554068418560>**{len(voice_channels)}**\n😔🤔😳 **{len(emojis)}**\n<:bot:703728026512392312> **{botno}**\n**Admins:**\n{ml}")
         embed.set_thumbnail(url=guild.icon_url)
-        embed.set_footer(
-            text=f"Guild created" f"{humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
+        embed.set_footer(text=f"Guild created" f"{humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
         await guild.me.edit(nick=f"(c$) {self.bot.user.name}")
-        channels = sorted([t for t in guild.text_channels if t.permissions_for(guild.me).send_messages],
-                          key=lambda x: x.position)
-        c = [channel for channel in guild.text_channels if guild.me.permissions_in(channel).view_audit_log]
-        if not c:
-            pass
-        else:
-            async for action in guild.audit_logs(limit=10):
-                if action.action == discord.AuditLogAction.bot_add and action.target == self.bot.user:
-                    embed.add_field(name="Added By", value=action.user)
-                    break
-                else:
-                    continue
-        await channels[0].send(embed=discord.Embed(color=self.bot.colour,
-                                                   description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
+        channels = sorted([t for t in guild.text_channels if t.permissions_for(guild.me).send_messages], key=lambda x: x.position)
+        await channels[0].send(embed=discord.Embed(color=self.bot.colour, description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
         await self.bot.logging_channel.send(f"Joined Guild! This is guild **#{len(self.bot.guilds)}**", embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        ml = "\n".join([f"{member.mention} • `{member.top_role.name}`" for member
-                        in guild.members if member.guild_permissions.administrator and not member.bot])
+        ml = "\n".join([f"{member.mention} • `{member.top_role.name}`" for member in guild.members if member.guild_permissions.administrator and not member.bot])
         botno = len([member for member in guild.members if member.bot])
         text_channels = guild.text_channels
         voice_channels = guild.voice_channels

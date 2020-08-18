@@ -21,9 +21,6 @@ from discord.ext import commands
 from CyberTron5000.utils import cyberformat
 from CyberTron5000.utils.checks import beta_squad
 
-start_time = datetime.datetime.utcnow()
-
-
 # ≫
 def lines_of_code():
     """
@@ -74,13 +71,10 @@ class Meta(commands.Cog):
 
     @commands.command()
     async def uptime(self, ctx):
-        delta_uptime = datetime.datetime.utcnow() - start_time
-        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        days, hours = divmod(hours, 24)
-        a = f"**{days}** days\n**{hours}** hours\n**{minutes}** minutes\n**{seconds}** seconds"
-        await ctx.send(embed=discord.Embed(description=a, colour=self.bot.colour).set_author(
-            name=f"I have been up for {str(humanize.naturaltime(datetime.datetime.utcnow() - start_time)).split('ago')[0]}"))
+        uptime = []
+        for key, value in self.bot.uptime.items():
+            uptime.append(f'**{value}** {key}')
+        await ctx.send(embed=discord.Embed(description='\n'.join(uptime), colour=self.bot.colour).set_author(name=f"I have been up for {str(humanize.naturaltime(datetime.datetime.utcnow() - self.bot.start_time)).split('ago')[0]}"))
 
     @commands.command()
     async def ping(self, ctx):
@@ -175,11 +169,10 @@ class Meta(commands.Cog):
     @commands.command(aliases=['ab', 'info'])
     async def about(self, ctx):
         """Shows you information regarding the bot"""
-        delta_uptime = datetime.datetime.utcnow() - start_time
-        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        days, hours = divmod(hours, 24)
-        a = f"**{days}** days, **{hours}** hours, **{minutes}** minutes, **{seconds}** seconds"
+        uptime = []
+        for key, value in self.bot.uptime.items():
+            uptime.append(f'**{value}** {key}')
+        uptime = '\n'.join(uptime)
         lines = lines_of_code()
         news = await self.bot.pg_con.fetch("SELECT message, number FROM news")
         embed = discord.Embed(colour=self.bot.colour)
@@ -187,7 +180,7 @@ class Meta(commands.Cog):
         embed.description = f"→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"
         embed.description += f"→ Latest Commits: {'|'.join(await self.get_commits(limit=3, author=False, names=False))}\n"
         embed.description += f"→ Used Memory | {cyberformat.bar(stat=psutil.virtual_memory()[2], max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}\n→ CPU | {cyberformat.bar(stat=psutil.cpu_percent(), max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}"
-        embed.description += f"\n→ Uptime | {a}"
+        embed.description += f"\n→ Uptime | {uptime}"
         embed.description += f"\n**{lines.get('lines'):,}** lines of code | **{lines.get('files'):,}** files\n{self.softwares[0]} {discord.__version__}\n{self.softwares[1]} {platform.python_version()}"
         embed.add_field(name=f"<:news:730866149109137520> News Update #{news[0][1]}", value=news[0][0], inline=False)
         embed.set_footer(
