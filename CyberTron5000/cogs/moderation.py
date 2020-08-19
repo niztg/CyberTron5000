@@ -139,8 +139,7 @@ class Moderation(commands.Cog):
         #     await _msg.edit(embed=embed)
         #     continue
 
-    @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'],
-                    invoke_without_command=True)
+    @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'], invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def user_nick(self, ctx, member: discord.Member, *, name):
         if not self.hierarchy(member):
@@ -225,13 +224,12 @@ class Moderation(commands.Cog):
     @commands.group(invoke_without_command=True, aliases=['pre', 'prefix'], name='changeprefix')
     async def _prefix(self, ctx):
         """View the guild's current prefixes."""
-        prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
+        prefixes = self.bot.prefixes.get(ctx.guild.id, ['c$'])
+        all_prefixes = ['`@CyberTron5000#1758` 🔒'] + [f'`{pref}`' for pref in prefixes]
         embed = discord.Embed(color=self.bot.colour)
         embed.set_author(name=f"Prefixes for {ctx.guild}", icon_url=ctx.guild.icon_url)
-        embed.add_field(name="Prefixes",
-                        value=f"{self.bot.user.mention}, " + ", ".join([f"`{pre}`" for pre in prefixes]))
-        embed.set_footer(
-            text=f'Do "{ctx.prefix}prefix add" to add a new prefix, or "{ctx.prefix}prefix remove" to remove a prefix!')
+        embed.description = "\n".join([f'{i}. {v}' for i, v in enumerate(all_prefixes, 1)])
+        embed.set_footer(text=f"Total {len(all_prefixes)}")
         await ctx.send(embed=embed)
 
     @_prefix.command()

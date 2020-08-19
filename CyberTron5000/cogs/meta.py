@@ -172,7 +172,7 @@ class Meta(commands.Cog):
         uptime = []
         for key, value in self.bot.uptime.items():
             uptime.append(f'**{value}** {key}')
-        uptime = '\n'.join(uptime)
+        uptime = ', '.join(uptime)
         lines = lines_of_code()
         news = await self.bot.pg_con.fetch("SELECT message, number FROM news")
         embed = discord.Embed(colour=self.bot.colour)
@@ -308,7 +308,6 @@ class Meta(commands.Cog):
                          icon_url=self.bot.user.avatar_url)
         embed.description = f"<@!561688948259422228> - Thank you for drawing {self.bot.user.name}'s amazing avatar!\n\n"
         embed.description += f"<@!357918459058978816> - Thank you for helping me in the beginning and teaching me the ropes!\n[His Bot](https://discord.com/oauth2/authorize?client_id=675542011457044512&permissions=1611000896&scope=bot) | [GitHub](https://github.com/DankDumpster) | [Support Server](https://discord.com/invite/TWjxyhC)\n\n"
-        embed.description += f"<@!574870314928832533> - Thank you for helping and giving inspiration for many commands on the bot!\n[Their Bot](https://discord.com/oauth2/authorize?client_id=628824408521441291&scope=bot&permissions=1476521159) | [GitHub](https://github.com/spinfish) | [Support Server](https://discord.gg/q3eVHeU)\n\n"
         embed.description += f"<@!491174779278065689> - Thank you for helping a bunch on the bot and inspiring the Images cog!\n[His Bot](https://discord.com/oauth2/authorize?client_id=675589737372975124&permissions=1611000896&scope=bot) | [GitHub](https://github.com/Daggy1234) | [Support Server](https://discord.com/invite/5Y2ryNq)"
         embed.add_field(name="And thanks to the Beta Squad for testing ct5k's beta commands!",
                         value='\n'.join([f'<@{a}>' for a in beta_squad]))

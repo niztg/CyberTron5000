@@ -54,9 +54,9 @@ class Events(commands.Cog):
         if self.bot.user in message.mentions:
             prefixes = self.bot.prefixes.get(message.guild.id, ['c$'])
             all_prefixes = ['`@CyberTron5000#1758`'] + [f'`{pref}`' for pref in prefixes]
-            MENTION_MESSAGE = "≫ **Prefixes** :: " + ", ".join(all_prefixes) + "\n"
-            MENTION_MESSAGE += f"≫ **Uptime** :: {', '.join([f'**{value}** {key}' for key, value in self.bot.uptime.items()])}\n"
-            MENTION_MESSAGE += f"≫ **Latency** :: **{round(self.bot.latency*1000, 3)}** ms"
+            MENTION_MESSAGE = "≫ **Prefixes**: " + ", ".join(all_prefixes) + "\n"
+            MENTION_MESSAGE += f"≫ **Uptime**: {', '.join([f'**{value}** {key}' for key, value in self.bot.uptime.items()])}\n"
+            MENTION_MESSAGE += f"≫ **Latency**: **{round(self.bot.latency*1000, 3)}** ms"
             embed = discord.Embed(colour=self.bot.colour)
             embed.title = self.bot.user.name
             embed.set_author(name=f"Developed by {self.bot.owner}", icon_url=self.bot.owner.avatar_url)

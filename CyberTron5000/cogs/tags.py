@@ -56,6 +56,7 @@ class Tags(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def add(self, ctx, tag, *, content):
         """Adds a tag"""
+        print(tag)
         if str(tag) in self.forbidden:
             return await ctx.send(
                 "You have created a tag with a forbidden word! Forbidden words include: " + ", ".join(self.forbidden))
@@ -103,11 +104,8 @@ class Tags(commands.Cog):
         if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
             return await ctx.send("This guild doesn't have any tags!")
         tags = guild_tags.items()
-        for tag in tags:
-            if tag[1]['author'] != member.id:
-                tags = tags.remove(tag)
         tags = sorted(tags, key=lambda x: x[1]['uses'], reverse=True)
-        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags]
+        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1]['author'] == member.id] # only add to list comp if belongs to author instead of removing from dict items in above lines
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=f"All of {ctx.author}'s Tags in {ctx.guild}", icon_url=ctx.author.avatar_url)
         source = IndexedListSource(data=data, embed=embed, title="Tags")
@@ -120,11 +118,8 @@ class Tags(commands.Cog):
         if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
             return await ctx.send("This guild doesn't have any tags!")
         tags = guild_tags.items()
-        for tag in tags:
-            if tag[1]['author'] != member.id:
-                tags = tags.remove(tag)
         tags = sorted(tags, key=lambda x: x[1]['uses'], reverse=True)
-        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags]
+        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1]['author'] == member.id] # only add to list comp if belongs to author instead of removing from dict items in above lines
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=f"All of {ctx.author}'s Tags in {ctx.guild}", icon_url=ctx.author.avatar_url)
         source = IndexedListSource(data=data, embed=embed, title="Tags")
@@ -141,6 +136,8 @@ class Tags(commands.Cog):
             message1 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=30)
         except TimeoutError:
             return await ctx.send("<:redx:732660210132451369> Boo, you ran out of time!")
+        if message1.content in self.forbidden:
+            return await ctx.send(f"<:redx:732660210132451369> That is a forbidden word!")
         if self._tag_dict.get(ctx.guild.id).get(message1.content):
             return await ctx.send("This tag already exists for this guild!")
         await ctx.send(
