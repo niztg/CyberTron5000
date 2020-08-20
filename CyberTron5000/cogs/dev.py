@@ -37,7 +37,11 @@ class Developer(commands.Cog):
     async def cog_check(self, ctx):
         return ctx.author == ctx.bot.owner
     
-    @commands.group(aliases=["e", "evaluate"], name='eval', invoke_without_command=True, help="Evaluates a function.")
+    @commands.group(invoke_without_command=True, aliases=['developer', 'd'], help="Developer commands")
+    async def dev(self, ctx):
+        pass
+    
+    @dev.command(aliases=["e", "evaluate"], name='eval', help="Evaluates a function.")
     async def eval_fn(self, ctx, *, cmd):
         global result
         try:
@@ -80,7 +84,7 @@ class Developer(commands.Cog):
         await ctx.send(embed=embed)
         self._ = result
         
-    @commands.command()
+    @dev.command()
     async def repl(self, ctx):
         """Starts a REPL session"""
         global result
@@ -128,7 +132,7 @@ class Developer(commands.Cog):
             await ctx.send(f'{result}')
             self._ = result
 
-    @commands.command(help="Loads Cogs", aliases=['l'])
+    @dev.command(help="Loads Cogs", aliases=['l'])
     async def load(self, ctx, *extension):
         if not extension:
             for file in self.bot.ext:
@@ -160,7 +164,7 @@ class Developer(commands.Cog):
             await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
-    @commands.command(help="Unloads Cogs", aliases=['ul'])
+    @dev.command(help="Unloads Cogs", aliases=['ul'])
     async def unload(self, ctx, *extension):
         if not extension:
             for file in self.bot.ext:
@@ -192,7 +196,7 @@ class Developer(commands.Cog):
             await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
-    @commands.command(help="Reloads Cogs", aliases=['rl'])
+    @dev.command(help="Reloads Cogs", aliases=['rl'])
     async def reload(self, ctx, *extension):
         if not extension:
             for file in self.bot.ext:
@@ -224,20 +228,20 @@ class Developer(commands.Cog):
             await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
-    @commands.command(help="Logs CyberTron5000 out.")
+    @dev.command(help="Logs CyberTron5000 out.")
     async def logout(self, ctx):
         await ctx.send(
             embed=discord.Embed(title=f"{self.bot.user.name} logging out. Goodbye World! 🌍",
                                 color=self.bot.colour))
         await self.bot.logout()
     
-    @commands.command()
+    @dev.command()
     async def restart(self, ctx):
         await ctx.message.add_reaction(emoji=self.tick)
         await self.bot.logout()
         subprocess.call([sys.executable, "main.py"])
     
-    @commands.command(aliases=['nu', 'update'])
+    @dev.command(aliases=['nu', 'update'])
     async def news_update(self, ctx, *, message):
         """Update the current news."""
         number = await self.bot.pg_con.fetch("SELECT number FROM news")
@@ -246,13 +250,14 @@ class Developer(commands.Cog):
         await self.bot.pg_con.execute("UPDATE news SET message = $1, number = $2", message, number)
         await ctx.send(f"News updated to: ```{message}```")
 
-    @commands.command()
+    @dev.command()
     async def sql(self, ctx, *, statement):
         statement = cyberformat.codeblock(statement, lang='sql')
         res = await self.bot.pg_con.fetch(statement)
         await ctx.send(res)
 
-    @commands.command()
+    @dev.command()
+    @commands.cooldown(1, 45, commands.BucketType.channel)
     async def timer(self, ctx, seconds: int = 60):
         le_seconds = list(range(seconds))
         embed = discord.Embed(colour=0x5643fd, title="Ur Mom", description=f'{seconds}')
@@ -260,8 +265,9 @@ class Developer(commands.Cog):
         for num in le_seconds[::-1]:
             embed.description = f'{num}'
             await msg.edit(embed=embed)
-            if num != 0:
-                await asyncio.sleep(1)
+            if num == 1:
+                break
+            await asyncio.sleep(1)
             continue
         embed.description = f"Done!\nCounted from **{seconds}** successfully"
         await msg.edit(embed=embed)

@@ -46,7 +46,7 @@ class Api(commands.Cog):
             try:
                 data = await http.get('https://complimentr.com/api')
             except APIError:
-                raise APIError()
+                raise commands.BadArgument()
         await http.close()
         return await ctx.send(f":heart: **{user}, {data['compliment']}**")
 
@@ -79,7 +79,7 @@ class Api(commands.Cog):
             await ctx.send(embed=embed)
         except Exception as error:
             if isinstance(error, APIError) or isinstance(error, IndexError):
-                raise APIError(f"city not found!")
+                raise commands.BadArgument(f"city not found!")
 
     @commands.command(help="Shows you info about a Pokémon", aliases=['pokemon', 'poke', 'pokémon', 'pokédex'])
     async def pokedex(self, ctx, pokemon):
@@ -109,7 +109,7 @@ class Api(commands.Cog):
                             inline=False)
             await ctx.send(embed=embed)
         except (IndexError, APIError):
-            raise APIError('Pokémon not found!')
+            raise commands.BadArgument('Pokémon not found!')
 
     @commands.command(help="Urban Dictionary", aliases=['urban', 'define', 'def'])
     @commands.is_nsfw()
@@ -135,7 +135,7 @@ class Api(commands.Cog):
             menu.add_info_fields({"<:author:734991429843157042>": "The author of the post", ":thumbsup:": "How many thumbs up the post has", ":thumbsdown:": "How many thumbs down the post has"})
             await menu.start(ctx)
         except (APIError, IndexError):
-            raise APIError(f"term not found on urban dictionary.")
+            raise commands.BadArgument(f"term not found on urban dictionary.")
 
     @commands.command()
     async def fact(self, ctx):
@@ -144,7 +144,7 @@ class Api(commands.Cog):
             try:
                 data = await http.get(f"https://useless-facts.sameerkumar.website/api")
             except APIError:
-                raise APIError()
+                raise commands.BadArgument()
         await http.close()
         await ctx.send(embed=discord.Embed(title=data['data'], colour=self.bot.colour))
 
@@ -156,7 +156,7 @@ class Api(commands.Cog):
                 res = await http.get(f"https://pypi.org/pypi/{package}/json")
             await http.close()
         except:
-            raise APIError(f'package **{package}** not found!')
+            raise commands.BadArgument(f'package **{package}** not found!')
         embed = discord.Embed(colour=self.bot.colour)
         char = '\u200b' if not res['info']['author_email'] else f' • {res["info"]["author_email"]}'
         embed.title = f"`pip install {res['info']['name']}=={res['info']['version']}`"
@@ -256,7 +256,7 @@ class Api(commands.Cog):
             try:
                 res = await h.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10')
             except Exception as error:
-                raise APIError(error)
+                raise commands.BadArgument(error)
         await h.close()
         data = res.get('data')
         embeds = []

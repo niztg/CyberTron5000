@@ -4,9 +4,11 @@ Dedicated to thag
 from asyncio import TimeoutError
 
 import discord
+from random import randint
 from discord.ext import commands
 
 from CyberTron5000.utils.paginator import CatchAllMenu, IndexedListSource
+from CyberTron5000.utils.cyberformat import better_random_char
 
 
 class Tags(commands.Cog):
@@ -32,7 +34,7 @@ class Tags(commands.Cog):
         try:
             return guild_tags[tag]['content']
         except KeyError:
-            raise commands.BadArgument('This tag does not exist for this guild! (Note that tags are case-sensitive)')
+            raise commands.BadArgument(f'This tag does not exist for this guild! (Note that tags are {better_random_char("case-sensitive")})')
 
     @commands.group(invoke_without_command=True)
     async def tag(self, ctx, *, tag=None):
@@ -56,18 +58,18 @@ class Tags(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def add(self, ctx, tag, *, content):
         """Adds a tag"""
-        print(tag)
-        if str(tag) in self.forbidden:
-            return await ctx.send(
-                "You have created a tag with a forbidden word! Forbidden words include: " + ", ".join(self.forbidden))
+        for i in self.forbidden:
+            if str(tag).strip().startswith(i):
+                raise commands.BadArgument(f"that tag starts with a forbidden word!")
         if not self._tag_dict.get(ctx.guild.id):
             self._tag_dict[ctx.guild.id] = {}
         if self._tag_dict.get(ctx.guild.id).get(tag):
             return await ctx.send("This tag already exists for this guild!")
-        self._tag_dict[ctx.guild.id][tag] = {'content': content, 'uses': 0, 'author': ctx.author.id}
+        id = randint(1, 99_999)
+        self._tag_dict[ctx.guild.id][tag] = {'content': content, 'uses': 0, 'author': ctx.author.id, 'id': id}
         await self.bot.pg_con.execute(
-            "INSERT INTO tags (user_id, guild_id, name, content, uses) VALUES ($1, $2, $3, $4, $5)", ctx.author.id,
-            ctx.guild.id, tag, content, 0)
+            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
+            ctx.guild.id, tag, content, 0, id)
         await ctx.send(f"<:tickgreen:732660186560462958> Success! `{tag}` is now a tag in **{ctx.guild.name}**")
 
     @tag.command()
@@ -127,8 +129,10 @@ class Tags(commands.Cog):
 
     @tag.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def make(self, ctx):
+    async def make(self, ctx, *args):
         """Makes a tag"""
+        if args:
+            return await ctx.send(f"Just call `{ctx.prefix}tag make`")
         if not self._tag_dict.get(ctx.guild.id):
             self._tag_dict[ctx.guild.id] = {}
         await ctx.send(f"<a:loading:743537226503421973> Please enter a name for your tag...")
@@ -136,8 +140,9 @@ class Tags(commands.Cog):
             message1 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=30)
         except TimeoutError:
             return await ctx.send("<:redx:732660210132451369> Boo, you ran out of time!")
-        if message1.content in self.forbidden:
-            return await ctx.send(f"<:redx:732660210132451369> That is a forbidden word!")
+        for i in self.forbidden:
+            if str(message1.content).strip().startswith(i):
+                raise commands.BadArgument(f"that tag starts with a forbidden word!")
         if self._tag_dict.get(ctx.guild.id).get(message1.content):
             return await ctx.send("This tag already exists for this guild!")
         await ctx.send(
@@ -146,11 +151,12 @@ class Tags(commands.Cog):
             message2 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=30)
         except TimeoutError:
             return await ctx.send("<:redx:732660210132451369> Boo, you ran out of time!")
+        id = randint(1, 99_999)
         self._tag_dict[ctx.guild.id][message1.content] = {'content': message2.content, 'uses': 0,
-                                                          'author': ctx.author.id}
+                                                          'author': ctx.author.id, 'id': id}
         await self.bot.pg_con.execute(
-            "INSERT INTO tags (user_id, guild_id, name, content, uses) VALUES ($1, $2, $3, $4, $5)", ctx.author.id,
-            ctx.guild.id, message1.content, message2.content, 0)
+            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
+            ctx.guild.id, message1.content, message2.content, 0, id)
         await ctx.send(f"<:tickgreen:732660186560462958> Success! Tag `{message1.content}` created!")
 
     @tag.command(aliases=['rm', 'remove'])
@@ -179,7 +185,8 @@ class Tags(commands.Cog):
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = tag
         embed.description = f"<:author:734991429843157042> **{author}**\n"
-        embed.description += f"Uses: **{data['uses']}**"
+        embed.description += f"Uses: **{data['uses']}**\n"
+        embed.description += f"ID: **{data['id']}**"
         embed.set_author(name=str(author), icon_url=author.avatar_url)
         await ctx.send(embed=embed)
 
