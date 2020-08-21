@@ -33,3 +33,12 @@ class RTFSObject(commands.Converter):
             if argument.startswith(word):
                 return argument[len(word):]
         return argument
+
+
+class Prefix(commands.Converter):
+    async def convert(self, ctx, argument):
+        if argument in ("<@350349365937700864>", "<@!350349365937700864>"):
+            raise commands.BadArgument(f"that prefix is reserved!")
+        if len(argument) > 15:
+            raise commands.BadArgument(f"that prefix is too long! The maximum is **{15}** characters.") # big brain
+        return argument

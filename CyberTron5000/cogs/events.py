@@ -54,6 +54,7 @@ class Events(commands.Cog):
             return
 
         if known_value:
+            await ctx.message.add_reaction(self.x_r)
             return await ctx.send(self.format_error(ctx, error))
 
         embed = discord.Embed(colour=self.bot.colour)
@@ -65,7 +66,8 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def on_user_mention(self, message):
-        if self.bot.user in message.mentions:
+        id = self.bot.user.id
+        if message.content in (f"<@!{id}>", f"<@{id}>"):
             prefixes = self.bot.prefixes.get(message.guild.id, ['c$'])
             all_prefixes = ['`@CyberTron5000#1758`'] + [f'`{pref}`' for pref in prefixes]
             MENTION_MESSAGE = "≫ **Prefixes**: " + ", ".join(all_prefixes) + "\n"

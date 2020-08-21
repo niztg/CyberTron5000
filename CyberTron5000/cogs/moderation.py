@@ -7,6 +7,7 @@ import humanize
 from discord.ext import commands
 
 from CyberTron5000.utils import paginator, lists, cyberformat
+from CyberTron5000.utils.converter import Prefix
 from CyberTron5000.utils.checks import check_mod_or_owner
 
 
@@ -234,7 +235,7 @@ class Moderation(commands.Cog):
 
     @_prefix.command()
     @check_mod_or_owner()
-    async def add(self, ctx, *, prefix):
+    async def add(self, ctx, *, prefix: Prefix):
         """Add a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
         if prefix in prefixes:
@@ -251,7 +252,7 @@ class Moderation(commands.Cog):
 
     @_prefix.command(aliases=['sp-add'])
     @check_mod_or_owner()
-    async def spaceprefix_add(self, ctx, *, prefix):
+    async def spaceprefix_add(self, ctx, *, prefix: Prefix):
         """Add a prefix for the guild that ends in a space."""
         prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
         if prefix in prefixes:
@@ -268,7 +269,7 @@ class Moderation(commands.Cog):
 
     @_prefix.command(aliases=['rm'])
     @check_mod_or_owner()
-    async def remove(self, ctx, *, prefix):
+    async def remove(self, ctx, *, prefix: Prefix):
         """Remove a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id)
         if prefix not in prefixes:
@@ -283,7 +284,7 @@ class Moderation(commands.Cog):
 
     @_prefix.command(aliases=['sp-rm'])
     @check_mod_or_owner()
-    async def spaceprefix_remove(self, ctx, *, prefix):
+    async def spaceprefix_remove(self, ctx, *, prefix: Prefix):
         """Remove a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id)
         if f"{prefix} " not in prefixes:
