@@ -275,7 +275,7 @@ class VibeSchool(commands.Cog):
     @commands.command(help="Vote when it's voting time")
     async def votev(self, ctx, person, *, reason):
         await ctx.bot.owner.send(f"Hey, {ctx.message.author.display_name} just voted for {person}. Reason:\n```{reason}```")
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
     
     @commands.group(invoke_without_command=True,
                     help="contact management if there's anything you want to say to them")
@@ -283,7 +283,7 @@ class VibeSchool(commands.Cog):
         channel = self.bot.get_channel(id=734171313253515274)
         await channel.send(
             f"Hey, {ctx.message.author} contacted you <@&689613285170872575>\n```{message}```")
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
     
     @management.command(invoke_without_command=True, help="reply to someone contacting management")
     @check_channel(channel=734171313253515274)
@@ -291,7 +291,7 @@ class VibeSchool(commands.Cog):
         try:
             user = self.bot.get_user(id=member.id)
             await user.send(f"Hey, Management got back to you for {ctx.guild}.\n```{message}```")
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
         except Exception as error:
             await ctx.send(error)
     

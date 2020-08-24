@@ -4,7 +4,7 @@ from traceback import format_exception
 import async_cleverbot
 import discord
 import humanize
-from discord.ext import commands
+from discord.ext import commands, flags
 
 from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr
 
@@ -39,24 +39,24 @@ class Events(commands.Cog):
             discord.Forbidden
         ]
         # errors that the bot already knows/recognizes. Don't need fixing.
-
         pass_errors = [
             commands.CommandNotFound,
             commands.CheckFailure,
             commands.BadUnionArgument,
-            asyncio.TimeoutError
+            asyncio.TimeoutError,
+            flags.ArgumentParsingError
         ]
         # i don't have the effort to care about these
-
         known_value, return_value = any(type(error) == e for e in known_errors), any(type(error) == e for e in pass_errors)
-
+        if isinstance(error, flags.ArgumentParsingError):
+            return await ctx.send(f'<{self.x_r}> **{ctx.author}**, {m(str(error))}. See `{ctx.prefix}help {ctx.command}`')
+        # :crii:
         if return_value:
             return
 
         if known_value:
             await ctx.message.add_reaction(self.x_r)
             return await ctx.send(self.format_error(ctx, error))
-
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = f"Error on `{ctx.command}`"
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"

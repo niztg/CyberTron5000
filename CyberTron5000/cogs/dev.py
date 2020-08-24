@@ -10,9 +10,7 @@ from discord.ext import commands
 
 from CyberTron5000.utils import cyberformat
 
-tick = "<:tickgreen:732660186560462958>"
 null = '<:ticknull:732660186057015317>'
-redx = "<:redx:732660210132451369>"
 reload = '<:reload:732674920873459712>'
 
 
@@ -32,7 +30,6 @@ def insert_returns(body):
 class Developer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.tick = ":tickgreen:732660186560462958"
         self._ = None
         
     async def cog_check(self, ctx):
@@ -81,7 +78,7 @@ class Developer(commands.Cog):
         
         embed = discord.Embed(color=self.bot.colour)
         embed.description = f"```py\n{result}\n```"
-        await ctx.message.add_reaction(emoji=self.tick)
+        await ctx.message.add_reaction(emoji=ctx.tick())
         await ctx.send(embed=embed)
         self._ = result
         
@@ -142,10 +139,10 @@ class Developer(commands.Cog):
                 except:
                     continue
             embed = discord.Embed(
-                description="\n".join([f"{tick} `cogs.{f[19:]}`" for f in self.bot.ext]),
+                description="\n".join([f"{ctx.tick()} `cogs.{f[19:]}`" for f in self.bot.ext]),
                 colour=self.bot.colour)
             await ctx.send(embed=embed)
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
 
         else:
             cogs = [c[19:] for c in self.bot.ext]
@@ -158,11 +155,11 @@ class Developer(commands.Cog):
             a = []
             for x in cogs:
                 if x in extension:
-                    a.append(f"{tick} `cogs.{x}`")
+                    a.append(f"{ctx.tick()} `cogs.{x}`")
                 else:
                     a.append(f"{null} `cogs.{x}`")
 
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
     @dev.command(help="Unloads Cogs", aliases=['ul'])
@@ -174,10 +171,10 @@ class Developer(commands.Cog):
                 except:
                     continue
             embed = discord.Embed(
-                description="\n".join([f"{redx} `cogs.{f[19:]}`" for f in self.bot.ext]),
+                description="\n".join([f"{ctx.tick(False)} `cogs.{f[19:]}`" for f in self.bot.ext]),
                 colour=self.bot.colour)
             await ctx.send(embed=embed)
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
         
         else:
             cogs = [c[19:] for c in self.bot.ext]
@@ -190,11 +187,11 @@ class Developer(commands.Cog):
             a = []
             for x in cogs:
                 if x in extension:
-                    a.append(f"{redx} `cogs.{x}`")
+                    a.append(f"{ctx.tick(False)} `cogs.{x}`")
                 else:
                     a.append(f"{null} `cogs.{x}`")
             
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
     @dev.command(help="Reloads Cogs", aliases=['rl'])
@@ -209,7 +206,7 @@ class Developer(commands.Cog):
                 description="\n".join([f"{reload} `cogs.{f[19:]}`" for f in self.bot.ext]),
                 colour=self.bot.colour)
             await ctx.send(embed=embed)
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
 
         else:
             cogs = [c[19:] for c in self.bot.ext]
@@ -226,7 +223,7 @@ class Developer(commands.Cog):
                 else:
                     a.append(f"{null} `cogs.{x}`")
 
-            await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+            await ctx.message.add_reaction(emoji=ctx.tick())
             await ctx.send(embed=discord.Embed(description="\n".join(a), colour=self.bot.colour))
     
     @dev.command(help="Logs CyberTron5000 out.")
@@ -238,7 +235,7 @@ class Developer(commands.Cog):
     
     @dev.command()
     async def restart(self, ctx):
-        await ctx.message.add_reaction(emoji=self.tick)
+        await ctx.message.add_reaction(emoji=ctx.tick())
         await self.bot.logout()
         subprocess.call([sys.executable, "main.py"])
     

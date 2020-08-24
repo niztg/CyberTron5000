@@ -198,23 +198,19 @@ class Games(commands.Cog):
             r, u = await self.bot.wait_for('reaction_add', check=check, timeout=15)
             if str(r.emoji) == correct:
                 await msg.edit(embed=discord.Embed(colour=self.bot.colour,
-                                                   description=f"<:tickgreen:732660186560462958> Correct! The answer was {correct}, **{question.answer}**"))
+                                                   description=f"{ctx.tick()} Correct! The answer was {correct}, **{question.answer}**"))
             else:
                 await msg.edit(embed=discord.Embed(colour=self.bot.colour,
-                                                   description=f"<:redx:732660210132451369> Incorrect! The correct answer was {correct}, **{question.answer}**"))
+                                                   description=f"{ctx.tick(False)} Incorrect! The correct answer was {correct}, **{question.answer}**"))
         except asyncio.TimeoutError:
             await msg.edit(embed=discord.Embed(colour=self.bot.colour,
-                                               description=f"<:redx:732660210132451369> You ran out of time! The correct answer was {correct}, **{question.answer}**"))
+                                               description=f"{ctx.tick(False)} You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
     @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
     async def guesslogo(self, ctx):
         """
         Guess a random logo!
         """
-        td = {
-            True: "<:tickgreen:732660186560462958>",
-            False: "<:redx:732660210132451369>",
-        }
         daggy = self.bot.get_user(self.daggy) or await self.bot.fetch_user(self.daggy)
         async with ctx.typing():
             resp = {'token': self.bot.config.dagpi_token}
@@ -228,7 +224,7 @@ class Games(commands.Cog):
                 title="Which company is this?", colour=self.bot.colour).set_image(
                 url=resp['question']).set_footer(
                 text=f"Much thanks to {str(daggy)} for this amazing API!", icon_url=daggy.avatar_url)
-            embed.add_field(name=f'**Difficulty**', value=f'{td[easy]} | **Easy?**\n{td[hard]} | **Hard?**')
+            embed.add_field(name=f'**Difficulty**', value=f'{ctx.tick(easy)} **Easy?**\n{ctx.tick(hard)} **Hard?**')
             try:
                 embed.add_field(name="**Company Description**", value=resp['clue'])
             except KeyError:

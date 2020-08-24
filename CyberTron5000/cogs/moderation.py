@@ -4,7 +4,7 @@ from typing import Union
 
 import discord
 import humanize
-from discord.ext import commands
+from discord.ext import commands, flags
 
 from CyberTron5000.utils import paginator, lists, cyberformat
 from CyberTron5000.utils.converter import Prefix
@@ -19,7 +19,6 @@ class Moderation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.tick = ":tickgreen:732660186560462958"
 
     async def cog_check(self, ctx):
         return ctx.message.guild is not None
@@ -28,13 +27,18 @@ class Moderation(commands.Cog):
         # check if I can action this user
         return member.guild.me.top_role > member.top_role and member != member.guild.owner
 
-    @commands.command(aliases=['clear'])
+    @flags.add_flag("--user", type=discord.User)
+    @flags.command(aliases=['clear'])
     @commands.has_permissions(manage_messages=True)
     @commands.bot_has_permissions(manage_messages=True)
-    async def purge(self, ctx, amount: int = 5):
-        """ Purges a given amount of messages with the default being 5 """
-        await ctx.channel.purge(limit=(amount + 1))
-        await ctx.send(f"{amount} messages have been cleared.", delete_after=3)
+    async def purge(self, ctx, amount: int, **flags):
+        """Purges a given amount of messages."""
+        amount += 1
+        if user := flags.get('user'):
+            await ctx.channel.purge(limit=amount, check=lambda msg: msg.author == user)
+            return await ctx.send(f'{ctx.tick()} **{amount-1}** messages by {user} have been purged', delete_after=3)
+        await ctx.channel.purge(limit=amount)
+        return await ctx.send(f"{ctx.tick()} **{amount-1}** messages have purged", delete_after=3)
 
     @commands.command()
     @commands.has_guild_permissions(kick_members=True)
@@ -47,7 +51,7 @@ class Moderation(commands.Cog):
         await member.kick(reason=r)
         await member.send(
             f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
-        await ctx.message.add_reaction(self.tick)
+        await ctx.message.add_reaction(ctx.tick())
 
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
@@ -65,7 +69,7 @@ class Moderation(commands.Cog):
             user = user
         reason = reason or "No reason provided."
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=7)
-        await ctx.send(f"<{self.tick}> {str(user)} banned! Reason:\n> {reason}")
+        await ctx.send(f"{ctx.tick()} {str(user)} banned! Reason:\n> {reason}")
 
     @commands.command(usage='<user id or user name#user discriminator>')
     @commands.has_guild_permissions(ban_members=True)
@@ -78,7 +82,7 @@ class Moderation(commands.Cog):
             for ban in bans:
                 if str(ban.user) == user:
                     await ctx.guild.unban(user=ban.user, reason=reason)
-                    return await ctx.send(f"<{self.tick}> {str(user)} was unbanned! Reason:\n> {reason}")
+                    return await ctx.send(f"{ctx.tick()} {str(user)} was unbanned! Reason:\n> {reason}")
             return await ctx.send("That user was not found in this guild's bans!")
         else:
             try:
@@ -88,7 +92,7 @@ class Moderation(commands.Cog):
             if user.id not in [ban.user.id for ban in bans]:
                 return await ctx.send(f"{str(user)} is not banned!")
             await ctx.guild.unban(user=user, reason=reason)
-            return await ctx.send(f"<{self.tick}> {str(user)} was unbanned! Reason:\n> {reason}")
+            return await ctx.send(f"{ctx.tick()} {str(user)} was unbanned! Reason:\n> {reason}")
 
     @commands.command(usage='<poll|option1|option2|option3...>', aliases=['poll'])
     async def vote(self, ctx, *, message):
@@ -146,7 +150,7 @@ class Moderation(commands.Cog):
         if not self.hierarchy(member):
             return await ctx.send('I cannot moderate that user')
         await member.edit(nick=name)
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
 
     @user_nick.command(invoke_without_command=True)
     @commands.has_permissions(administrator=True)
@@ -155,7 +159,7 @@ class Moderation(commands.Cog):
         if not self.hierarchy(member):
             return await ctx.send('I cannot moderate that user')
         await member.edit(nick=member.name)
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
 
     @commands.command()
     @check_mod_or_owner()
@@ -202,7 +206,8 @@ class Moderation(commands.Cog):
             return await ctx.send("Member already muted!")
         else:
             await member.add_roles(role)
-            await ctx.message.add_reaction(emoji=self.tick)
+            await ctx.message.add_reaction(emoji=ctx.tick())
+
             await asyncio.sleep(min)
             if role not in member.roles:
                 await ctx.send(f"{member.mention} unmuted automatically.")
@@ -219,7 +224,8 @@ class Moderation(commands.Cog):
         if role not in member.roles:
             return await ctx.send("This user is not muted!")
         await member.remove_roles(role)
-        await ctx.message.add_reaction(emoji=self.tick)
+        await ctx.message.add_reaction(emoji=ctx.tick())
+
         await ctx.send(f"{member.mention} has been unmuted.")
 
     @commands.group(invoke_without_command=True, aliases=['pre', 'prefix'], name='changeprefix')
@@ -248,7 +254,7 @@ class Moderation(commands.Cog):
             self.bot.prefixes[ctx.guild.id].append(prefix)
         except KeyError:
             self.bot.prefixes[ctx.guild.id] = ["c$", prefix]
-        await ctx.send(f'Success! `{prefix}` is now a prefix in {ctx.guild}!')
+        await ctx.send(f'{ctx.tick()} Success! `{prefix}` is now a prefix in {ctx.guild}!')
 
     @_prefix.command(aliases=['sp-add'])
     @check_mod_or_owner()
@@ -265,7 +271,7 @@ class Moderation(commands.Cog):
             self.bot.prefixes[ctx.guild.id].append(f"{prefix} ")
         except KeyError:
             self.bot.prefixes[ctx.guild.id] = [f"{prefix} ", "c$"]
-        await ctx.send(f'Success! `{prefix} ` is now a prefix in {ctx.guild}!')
+        await ctx.send(f'{ctx.tick()} Success! `{prefix} ` is now a prefix in {ctx.guild}!')
 
     @_prefix.command(aliases=['rm'])
     @check_mod_or_owner()
@@ -280,7 +286,7 @@ class Moderation(commands.Cog):
             self.bot.prefixes[ctx.guild.id].remove(prefix)
         except KeyError:
             self.bot.prefixes[ctx.guild.id] = []
-        await ctx.send(f'`{prefix}` is no longer a prefix for {ctx.guild}')
+        await ctx.send(f'{ctx.tick()} `{prefix}` is no longer a prefix for {ctx.guild}')
 
     @_prefix.command(aliases=['sp-rm'])
     @check_mod_or_owner()
@@ -295,7 +301,7 @@ class Moderation(commands.Cog):
             self.bot.prefixes[ctx.guild.id].remove(f"{prefix} ")
         except KeyError:
             self.bot.prefixes[ctx.guild.id] = []
-        await ctx.send(f'`{prefix} ` is no longer a prefix for {ctx.guild}')
+        await ctx.send(f'{ctx.tick()} `{prefix} ` is no longer a prefix for {ctx.guild}')
 
     @add.error
     async def on_command_error(self, ctx, error):
@@ -334,7 +340,7 @@ class Moderation(commands.Cog):
         nickname = nickname or self.bot.user.name
         try:
             await ctx.guild.me.edit(nick=nickname)
-            await ctx.message.add_reaction(self.tick)
+            await ctx.message.add_reaction(ctx.tick())
         except:
             return await ctx.send("I can't change my nickname in this guild.")
 

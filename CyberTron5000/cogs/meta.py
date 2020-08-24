@@ -64,7 +64,6 @@ class Meta(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.tick = ":tickgreen:732660186560462958"
         self.version = f"{self.bot.user.name} Beta v3.0.0"
         self.softwares = ['<:dpy:708479036518694983>', '<:python:706850228652998667>', '<:JSON:710927078513442857>',
                           '<:psql:733848802334736395>']
@@ -192,8 +191,6 @@ class Meta(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def suggest(self, ctx, *, idea):
         """Suggest an idea for the bot."""
-        tick = "<:tickgreen:732660186560462958>"
-        redx = "<:redx:732660210132451369>"
         sugid = str(uuid4())[:8]
         embed = discord.Embed(title=f"Suggestion → {sugid}", description=f"```{idea}```",
                               colour=self.bot.colour)
@@ -208,12 +205,12 @@ class Meta(commands.Cog):
         with open("json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
         ms = await ctx.send(
-            f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{tick} | **Yes**\n{redx} | **No**\n(You have 15 seconds)")
+            f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{ctx.tick()} | **Yes**\n{ctx.tick(False)} | **No**\n(You have 15 seconds)")
         await self.bot.pg_con.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
         try:
             async with async_timeout.timeout(15):
-                await ms.add_reaction(tick)
-                await ms.add_reaction(redx)
+                for emoji in (ctx.tick(True, True), ctx.tick(False, True)):
+                    await ms.add_reaction(emoji)
                 r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda r, u: u.bot is False)
                 if r.emoji.name == "tickgreen":
                     with open("json_files/suggestions.json", "r") as f:
@@ -285,7 +282,7 @@ class Meta(commands.Cog):
     async def error(self, ctx, *, error):
         """Report an error for this bot."""
         await ctx.bot.owner.send(f"You should fix ```{error}```")
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
 
     @commands.command(aliases=['stats'])
     async def statistics(self, ctx):

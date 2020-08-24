@@ -1,13 +1,12 @@
-import asyncio
 import random
 import string
+from asyncio import TimeoutError
 from datetime import datetime as dt
 from io import BytesIO
 from time import time
 
 import aiohttp
 import discord
-from async_timeout import timeout
 from discord.ext import commands
 from humanize import naturaltime as nt
 from jikanpy import AioJikan
@@ -22,7 +21,6 @@ class Fun(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.tick = ":tickgreen:732660186560462958"
         self.sr = Client()
 
     @commands.command()
@@ -81,7 +79,7 @@ class Fun(commands.Cog):
                    help="Replies with what you said and deletes your message, but in a different channel.")
     async def echo(self, ctx, channel: discord.TextChannel, *, message):
         await channel.send(message)
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
 
     @reply.command(invoke_without_command=True, help="Replies with what you said and deletes your message, but UwU.")
     async def owo(self, ctx, *, message):
@@ -95,7 +93,7 @@ class Fun(commands.Cog):
     async def message(self, ctx, user: discord.Member, *, message):
         person = self.bot.get_user(user.id)
         await person.send(f"{message}\n\n*(Sent by {ctx.message.author})*")
-        await ctx.message.add_reaction(emoji=":tickgreen:732660186560462958")
+        await ctx.message.add_reaction(emoji=ctx.tick())
 
     @reply.command(help="Spams a message.", invoke_without_command=True)
     async def spam(self, ctx, *, message):
@@ -269,28 +267,18 @@ class Fun(commands.Cog):
     async def greentext(self, ctx):
         """Write a greentext story"""
         story = []
-        await ctx.send(
-            f"Greentext story starting! Type `{ctx.prefix}quit` or `{ctx.prefix}exit` to stop the session, or `{ctx.prefix}finish` to see your final story!")
-        try:
-            while True:
-                message = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author, timeout=500)
-                async with timeout(500):
-                    if message.content == f"{ctx.prefix}quit":
-                        await ctx.send("Session exited.")
-                        return
-                    elif message.content == f"{ctx.prefix}exit":
-                        await ctx.send("Session exited.")
-                        return
-                    elif message.content == f"{ctx.prefix}finish":
-                        final_story = "\n".join(story)
-                        await ctx.send(f"**{ctx.author}**'s story\n```css\n" + final_story + "```")
-                        return
-                    else:
-                        story.append(">" + message.content)
-                        await message.add_reaction(emoji=self.tick)
-        except asyncio.TimeoutError:
-            final_story = "\n".join(story)
-            await ctx.send(f"**{ctx.author}**'s story\n```css\n" + final_story + "```")
+        await ctx.send(f"Greentext story starting! Type `{ctx.prefix}quit`, `{ctx.prefix}exit`, or `{ctx.prefix}finish` to see your final story!")
+        while True:
+            try:
+                msg = await self.bot.wait_for('message', timeout=300, check=lambda x: x.author == ctx.author)
+                if msg.content in (f'{ctx.prefix}quit', f'{ctx.prefix}exit', f'{ctx.prefix}finish'):
+                    break
+                story.append(msg.content.replace('```', '\u200b'))
+                await msg.add_reaction(ctx.tick())
+            except TimeoutError:
+                break
+        story = '\n'.join([f'>{line}' for line in story])
+        return await ctx.send(embed=discord.Embed(colour=discord.Color.green(), description=f"**{ctx.author}**'s story```css\n{story}\n```"))
 
     @commands.command(aliases=['bin'])
     async def binary(self, ctx, *, message):
@@ -394,7 +382,7 @@ class Fun(commands.Cog):
         await self.bot.pg_con.execute(
             "INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(),
             str(ctx.message.jump_url), ctx.author.id)
-        await ctx.send(f"<:tickgreen:732660186560462958> Inserted `{todo}` into your todo list! (ID: `{id}`)")
+        await ctx.send(f"{ctx.tick()} Inserted `{todo}` into your todo list! (ID: `{id}`)")
 
     @todo.command(aliases=['rm', 'remove'])
     async def resolve(self, ctx, *id: int):
@@ -409,7 +397,7 @@ class Fun(commands.Cog):
             message.append(f"• {todos[ids.index(i)]}")
             await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
         await ctx.send(
-            f"<:tickgreen:732660186560462958> Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
+            f"{ctx.tick()} Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
 
     @todo.command()
     async def list(self, ctx):
@@ -429,7 +417,7 @@ class Fun(commands.Cog):
         """Clears all of your todos"""
         num = len((await self.bot.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)))
         await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1", ctx.author.id)
-        await ctx.send(f"<:tickgreen:732660186560462958> Deleted **{num}** items from your todo list!")
+        await ctx.send(f"{ctx.tick()} Deleted **{num}** items from your todo list!")
 
     @todo.command(aliases=['show'])
     async def info(self, ctx, id: int):
@@ -457,7 +445,7 @@ class Fun(commands.Cog):
             return await ctx.send("That description is too long!")
         await self.bot.pg_con.execute("UPDATE todo SET description = $1 WHERE id = $2", description, id)
         await ctx.send(
-            f"<:tickgreen:732660186560462958> Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
+            f"{ctx.tick()} Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
 
     @commands.command(aliases=['af'])
     async def animalfact(self, ctx, animal=None):
@@ -484,15 +472,15 @@ class Fun(commands.Cog):
             em = ANIMALS.get(animal, '')
             image = await self.sr.get_image(animal)
             final = BytesIO(await image.read())
-            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Image:**", file=discord.File(final, f'{animal}_image.png'))
+            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Image:**",
+                           file=discord.File(final, f'{animal}_image.png'))
         except Exception as error:
             return await ctx.send(error)
 
     @commands.group(invoke_without_command=True)
-    async def math(self, ctx):
-        pass
+    async def math(self, ctx, user: discord.User):
+        await ctx.send(user.name)
 
- 
 
 def setup(bot):
     bot.add_cog(Fun(bot))

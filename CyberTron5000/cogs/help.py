@@ -83,13 +83,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
         valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']
 
         def check(reaction, user):
-            str_reaction = ''
-            for x in str(reaction):
-                if x in ('<', '>'):
-                    continue
-                else:
-                    str_reaction += x
-            return str_reaction in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
+            return str(reaction).strip('<>') in valid_reactions and user == self.context.author and user.bot is False and reaction.message.id == msg.id
 
         for i in valid_reactions:
             await msg.add_reaction(i)
@@ -102,7 +96,7 @@ class CyberTronHelpCommand(commands.HelpCommand):
                 data = done.pop().result()
                 if str(data[0]) == '<:stop_button:731316755485425744>':
                     await msg.delete()
-                    await self.context.message.add_reaction(emoji=":tickgreen:732660186560462958")
+                    await self.context.message.add_reaction(emoji=self.context.tick())
                     break
                 else:
                     str_reaction = ''

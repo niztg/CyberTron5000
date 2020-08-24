@@ -11,7 +11,6 @@ emoji_converter = commands.EmojiConverter()
 class Images(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.tick = ":tickgreen:732660186560462958"
 
     @property
     def daggy(self):

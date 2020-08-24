@@ -363,9 +363,9 @@ class Profile(commands.Cog):
         all = dict(member.permissions_in(ctx.channel)).items()
         for key, value in all:
             if value:
-                perms.append(f"<:tickgreen:732660186560462958> **{str(key.title()).replace('_', ' ')}**")
+                perms.append(f"{ctx.tick()} **{str(key.title()).replace('_', ' ')}**")
             else:
-                negperms.append(f"<:redx:732660210132451369> **{str(key.title()).replace('_', ' ')}**")
+                negperms.append(f"{ctx.tick(False)} **{str(key.title()).replace('_', ' ')}**")
         
         embed2 = discord.Embed(colour=self.bot.colour).set_author(name=embed.author.name, icon_url=member.avatar_url)
         embed.description = '\n'.join(perms)
@@ -376,14 +376,10 @@ class Profile(commands.Cog):
     @commands.command(aliases=['ri'])
     async def roleinfo(self, ctx, *, role: discord.Role):
         """Gives you roleinfo"""
-        td = {
-            True: "<:tickgreen:732660186560462958>",
-            False: "<:redx:732660210132451369>",
-        }
         embed = discord.Embed(colour=role.colour).set_author(name=f"{role.name} | {role.id}")
-        embed.description = f"{td[role.hoist]} **Hoisted**\n"
-        embed.description += f"{td[role.managed]} **Managed**\n"
-        embed.description += f"{td[role.mentionable]} **Mentionable**\n"
+        embed.description = f"{ctx.tick(role.hoist)} **Hoisted**\n"
+        embed.description += f"{ctx.tick(role.managed)} **Managed**\n"
+        embed.description += f"{ctx.tick(role.mentionable)} **Mentionable**\n"
         permissions = dict(role.permissions).items()
         perms = []
         for k, v in permissions:
