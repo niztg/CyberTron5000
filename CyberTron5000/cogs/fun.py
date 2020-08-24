@@ -488,6 +488,11 @@ class Fun(commands.Cog):
         except Exception as error:
             return await ctx.send(error)
 
+    @commands.group(invoke_without_command=True)
+    async def math(self, ctx):
+        pass
+
+ 
 
 def setup(bot):
     bot.add_cog(Fun(bot))

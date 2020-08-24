@@ -62,7 +62,7 @@ class Events(commands.Cog):
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"
         embed.description += f"```py\n{self.format_error(ctx, error, not known_value)}\n```"
         await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!", embed=embed)
-        await self.bot.logging_channel.send(embed=embed)
+        await self.bot.logging_channel[0].send(embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def on_user_mention(self, message):
@@ -106,7 +106,7 @@ class Events(commands.Cog):
                           key=lambda x: x.position)
         await channels[0].send(embed=discord.Embed(color=self.bot.colour,
                                                    description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
-        await self.bot.logging_channel.send(f"Joined Guild! This is guild **#{len(self.bot.guilds)}**", embed=embed)
+        await self.bot.logging_channel[1].send(f"Joined Guild! This is guild **#{len(self.bot.guilds)}**", embed=embed)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -127,7 +127,7 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(
             text=f"Guild created {humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
-        await self.bot.logging_channel.send(f"Left guild. We're down to **{len(self.bot.guilds)}** guilds", embed=embed)
+        await self.bot.logging_channel[1].send(f"Left guild. We're down to **{len(self.bot.guilds)}** guilds", embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):

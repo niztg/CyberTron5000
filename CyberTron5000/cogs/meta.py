@@ -195,11 +195,11 @@ class Meta(commands.Cog):
         tick = "<:tickgreen:732660186560462958>"
         redx = "<:redx:732660210132451369>"
         sugid = str(uuid4())[:8]
-        embed = discord.Embed(title=f"Suggestion → {sugid}", description=f"```diff\n! {idea}\n```",
+        embed = discord.Embed(title=f"Suggestion → {sugid}", description=f"```{idea}```",
                               colour=self.bot.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'Do "suggest follow {sugid}" to follow this suggestion!')
-        mes = await self.bot.logging_channel.send(embed=embed)
+        mes = await self.bot.logging_channel[2].send(embed=embed)
         for r in ['⬆️', '⬇️']:
             await mes.add_reaction(r)
         with open("json_files/suggestions.json", "r") as f:
@@ -228,8 +228,8 @@ class Meta(commands.Cog):
         except asyncio.TimeoutError:
             await ms.edit(
                 content=f"You ran out of time! Suggestion not followed. If you want to follow this suggestion, do `{ctx.prefix}suggest follow {sugid}`")
-            if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
-                await ms.clear_reactions()
+        if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
+            await ms.clear_reactions()
 
     @suggest.command()
     async def follow(self, ctx, id: str):

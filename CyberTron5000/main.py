@@ -22,6 +22,7 @@ SOFTWARE.
 """
 import os
 from datetime import datetime as dt
+from typing import List
 
 import asyncpg
 import discord
@@ -68,11 +69,11 @@ class CyberTron5000(Bot):
         return self.get_user(350349365937700864)
 
     @property
-    def logging_channel(self) -> discord.TextChannel:
-        return self.get_channel(727277234666078220)
+    def logging_channel(self) -> List[discord.TextChannel]:
+        return [self.get_channel(727277234666078220), self.get_channel(746935543144644650), self.get_channel(746935661201981510)]
 
     @property
-    def uptime(self):
+    def uptime(self) -> dict:
         delta_uptime = dt.utcnow() - self.start_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
@@ -80,7 +81,7 @@ class CyberTron5000(Bot):
         return {'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds}
 
     @property
-    def config_attrs(self):
+    def config_attrs(self) -> dict:
         return {
             'command_prefix': self.get_prefix,
             'pm_help': None,

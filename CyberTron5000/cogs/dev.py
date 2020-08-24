@@ -2,6 +2,7 @@ import ast
 import asyncio
 import subprocess
 import sys
+import random
 
 import aiohttp
 import discord
@@ -272,6 +273,9 @@ class Developer(commands.Cog):
         embed.description = f"Done!\nCounted from **{seconds}** successfully"
         await msg.edit(embed=embed)
 
+    @dev.command()
+    async def rng(self, ctx, no: int, no2: int):
+        await ctx.send(random.randint(no, no2))
 
 def setup(bot):
     bot.add_cog(Developer(bot))
