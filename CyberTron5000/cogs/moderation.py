@@ -134,7 +134,7 @@ class Moderation(commands.Cog):
         if not gvotes.get(channel_id):
             gvotes[channel_id] = {} # if the channel isn't already in the dict, add it.
         gvotes[channel_id][_msg.id] = {'embed': embed, 'data': votes}
-        # the rest of le magic happens in events.py
+        # the rest of le magic happens in https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/events.py/#L159-217
 
     @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
     @commands.has_permissions(administrator=True)
