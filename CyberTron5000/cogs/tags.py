@@ -7,7 +7,10 @@ import discord
 from random import randint
 from discord.ext import commands
 
-from CyberTron5000.utils.paginator import CatchAllMenu, IndexedListSource
+from CyberTron5000.utils.paginator import (
+    CatchAllMenu,
+    IndexedListSource
+)
 from CyberTron5000.utils.cyberformat import better_random_char
 
 

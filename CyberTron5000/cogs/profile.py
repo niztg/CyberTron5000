@@ -8,8 +8,17 @@ import matplotlib.pyplot as plt
 from discord.ext import commands
 from humanize import naturaltime as nt
 
-from CyberTron5000.utils import paginator, cyberformat, checks
-from CyberTron5000.utils.lists import REGIONS, sl, status_mapping, badge_mapping
+from CyberTron5000.utils import (
+    paginator,
+    cyberformat,
+    checks
+)
+from CyberTron5000.utils.lists import (
+    REGIONS,
+    sl,
+    status_mapping,
+    badge_mapping
+)
 
 matplotlib.use('Agg')
 
@@ -31,13 +40,10 @@ class GuildStats:
     def status_counter(self):
         return collections.Counter([m.status for m in self.context.guild.members])
     
-    @property
     def guild_graph(self):
         status_counts = self.status_counter
         labels = f'Online ({status_counts[discord.Status.online]:,})', f'Do Not Disturb ({status_counts[discord.Status.dnd]:,})', f'Idle ({status_counts[discord.Status.idle]:,})', f'Offline ({status_counts[discord.Status.offline]:,})'
-        sizes = [status_counts[discord.Status.online], status_counts[discord.Status.dnd],
-                 status_counts[discord.Status.idle],
-                 status_counts[discord.Status.offline]]
+        sizes = [status_counts[discord.Status.online], status_counts[discord.Status.dnd], status_counts[discord.Status.idle], status_counts[discord.Status.offline]]
         colors = ['#42B581', '#E34544', '#FAA619', '#747F8D']
         explode = (0.0, 0, 0, 0)
         
@@ -139,11 +145,14 @@ class Profile(commands.Cog):
     @guildinfo.command(invoke_without_command=True, aliases=['graph'])
     async def chart(self, ctx):
         """Shows a chart of the guild's activity"""
-        gs = GuildStats(ctx)
-        embed = discord.Embed(colour=self.bot.colour,
-                              name=f"Status Chart for{ctx.guild}", icon_url=ctx.guild.icon_url)
+        guild = GuildStats(ctx)
+        try:
+            image = await self.bot.loop.run_in_executor(None, guild.guild_graph)
+        except:
+            raise
+        embed = discord.Embed(colour=self.bot.colour, name=f"Status Chart for{ctx.guild}", icon_url=ctx.guild.icon_url)
         embed.set_image(url="attachment://guild.png")
-        await ctx.send(embed=embed, file=gs.guild_graph)
+        await ctx.send(embed=embed, file=image)
     
     @guildinfo.command(aliases=['chan'])
     @checks.bruh()

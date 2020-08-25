@@ -12,8 +12,14 @@ from humanize import naturaltime as nt
 from jikanpy import AioJikan
 from sr_api import Client
 
-from CyberTron5000.utils import paginator, cyberformat
-from CyberTron5000.utils.lists import INDICATOR_LETTERS, ANIMALS
+from CyberTron5000.utils import (
+    paginator,
+    cyberformat
+)
+from CyberTron5000.utils.lists import (
+    INDICATOR_LETTERS,
+    ANIMALS
+)
 
 
 class Fun(commands.Cog):

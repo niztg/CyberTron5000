@@ -4,9 +4,16 @@ from traceback import format_exception
 import async_cleverbot
 import discord
 import humanize
-from discord.ext import commands, flags
+from discord.ext import (
+    commands,
+    flags
+)
 
-from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr, bar
+from CyberTron5000.utils.cyberformat import (
+    minimalize,
+    hyper_replace,
+    bar
+)
 
 
 class Events(commands.Cog):
@@ -23,7 +30,7 @@ class Events(commands.Cog):
             TRACEBACK_LINES = format_exception(ERROR_TYPE, error, ERROR_TRACEBACK, ERROR_VERBOSITY)
             ERROR = "".join(TRACEBACK_LINES)
             return ERROR
-        return f"<{self.x_r}> **{ctx.author}**, {m(str(error))}"
+        return f"<{self.x_r}> **{ctx.author}**, {minimalize(str(error))}"
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -51,7 +58,7 @@ class Events(commands.Cog):
             type(error) == e for e in pass_errors)
         if isinstance(error, flags.ArgumentParsingError):
             return await ctx.send(
-                f'<{self.x_r}> **{ctx.author}**, {m(str(error))}. See `{ctx.prefix}help {ctx.command}`')
+                f'<{self.x_r}> **{ctx.author}**, {minimalize(str(error))}. See `{ctx.prefix}help {ctx.command}`')
         # :crii:
         if return_value:
             return
@@ -142,12 +149,12 @@ class Events(commands.Cog):
                     return await message.channel.send(
                         f"**{message.author.name}**, text must be below 100 characters and over 2.")
                 resp = await self.clever.ask(message.content, message.author.id)
-                r = str(resp) if str(resp).startswith("I") else m(str(resp))
+                r = str(resp) if str(resp).startswith("I") else minimalize(str(resp))
                 if str(r)[-1] not in ['.', '?', '!']:
                     suff = "?" if any(s in str(r) for s in ['who', 'what', 'when', 'where', 'why', 'how']) else "."
                 else:
                     suff = "\u200b"
-                send = hr(str(r), old=[' i ', "i'm", "i'll"], new=[' I ', "I'm", "I'll"])
+                send = hyper_replace(str(r), old=[' i ', "i'm", "i'll"], new=[' I ', "I'm", "I'll"])
                 await message.channel.send(f"**{message.author.name}**, {send}{suff}")
 
     @commands.Cog.listener(name='on_message')
@@ -173,7 +180,7 @@ class Events(commands.Cog):
             return
         # this whole thing ^^ can probably be better written
         index = [c['emoji'] for c in data].index(reaction.emoji)
-        data[index]['votes'] += reaction.count-1
+        data[index]['votes'] += reaction.count - 1
         total = sum(i['votes'] for i in data)
         embed = vote_message['embed']
         new_q_format = []

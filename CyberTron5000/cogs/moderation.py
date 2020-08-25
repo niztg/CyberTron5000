@@ -6,7 +6,11 @@ import discord
 import humanize
 from discord.ext import commands, flags
 
-from CyberTron5000.utils import paginator, lists, cyberformat
+from CyberTron5000.utils import (
+    paginator,
+    lists,
+    cyberformat
+)
 from CyberTron5000.utils.converter import Prefix
 from CyberTron5000.utils.checks import check_mod_or_owner
 

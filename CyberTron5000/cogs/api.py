@@ -6,9 +6,16 @@ import async_cse
 import discord
 from discord.ext import commands, flags
 
-from CyberTron5000.utils import paginator, cyberformat, converter
+from CyberTron5000.utils import (
+    paginator,
+    cyberformat,
+    converter
+)
 from CyberTron5000.utils.http import *
-from CyberTron5000.utils.lists import STAT_NAMES, TYPES
+from CyberTron5000.utils.lists import (
+    STAT_NAMES,
+    TYPES
+)
 
 
 # ≫
@@ -32,6 +39,7 @@ async def fetch_rtfs(res):
 
 class Api(commands.Cog):
     """Interact with various API's"""
+
     def __init__(self, bot):
         self.bot = bot
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
@@ -60,7 +68,8 @@ class Api(commands.Cog):
         """
         try:
             async with self.http as http:
-                data = await http.get(f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}")
+                data = await http.get(
+                    f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}")
             await http.close()
             if not str(unit := flags.get('unit') or 'c').startswith(('c', 'k', 'f')):
                 return await ctx.send(
@@ -102,7 +111,7 @@ class Api(commands.Cog):
             embed.add_field(name='Evolution Line',
                             value=f'{" → ".join(evo_line)}' or "**{0}**".format(str(pokemon).capitalize()),
                             inline=False)
-            embed.add_field(name='Abilities', value='**'+', '.join([f'{i}' for i in data[0]['abilities']]) + '**',
+            embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data[0]['abilities']]) + '**',
                             inline=False)
             embed.add_field(name='Base Stats',
                             value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data[0]['stats'].items()])}",
@@ -132,7 +141,9 @@ class Api(commands.Cog):
                 embeds.append(embed)
             source = paginator.EmbedSource(embeds)
             menu = paginator.CatchAllMenu(source=source)
-            menu.add_info_fields({"<:author:734991429843157042>": "The author of the post", ":thumbsup:": "How many thumbs up the post has", ":thumbsdown:": "How many thumbs down the post has"})
+            menu.add_info_fields({"<:author:734991429843157042>": "The author of the post",
+                                  ":thumbsup:": "How many thumbs up the post has",
+                                  ":thumbsdown:": "How many thumbs down the post has"})
             await menu.start(ctx)
         except (APIError, IndexError):
             raise commands.BadArgument(f"term not found on urban dictionary.")
@@ -254,7 +265,8 @@ class Api(commands.Cog):
         """Get a random gif based on your query"""
         async with self.http as h:
             try:
-                res = await h.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10')
+                res = await h.get(
+                    'http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10')
             except Exception as error:
                 raise commands.BadArgument(error)
         await h.close()
@@ -268,6 +280,7 @@ class Api(commands.Cog):
         source = paginator.EmbedSource(embeds)
         menu = paginator.CatchAllMenu(source=source)
         await menu.start(ctx)
+
 
 def setup(bot):
     bot.add_cog(Api(bot))
