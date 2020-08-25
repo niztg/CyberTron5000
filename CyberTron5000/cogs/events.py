@@ -6,7 +6,7 @@ import discord
 import humanize
 from discord.ext import commands, flags
 
-from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr
+from CyberTron5000.utils.cyberformat import minimalize as m, hyper_replace as hr, bar
 
 
 class Events(commands.Cog):
@@ -47,9 +47,11 @@ class Events(commands.Cog):
             flags.ArgumentParsingError
         ]
         # i don't have the effort to care about these
-        known_value, return_value = any(type(error) == e for e in known_errors), any(type(error) == e for e in pass_errors)
+        known_value, return_value = any(type(error) == e for e in known_errors), any(
+            type(error) == e for e in pass_errors)
         if isinstance(error, flags.ArgumentParsingError):
-            return await ctx.send(f'<{self.x_r}> **{ctx.author}**, {m(str(error))}. See `{ctx.prefix}help {ctx.command}`')
+            return await ctx.send(
+                f'<{self.x_r}> **{ctx.author}**, {m(str(error))}. See `{ctx.prefix}help {ctx.command}`')
         # :crii:
         if return_value:
             return
@@ -127,7 +129,8 @@ class Events(commands.Cog):
         embed.set_thumbnail(url=guild.icon_url)
         embed.set_footer(
             text=f"Guild created {humanize.naturaltime(__import__('datetime').datetime.utcnow() - guild.created_at)}")
-        await self.bot.logging_channel[1].send(f"Left guild. We're down to **{len(self.bot.guilds)}** guilds", embed=embed)
+        await self.bot.logging_channel[1].send(f"Left guild. We're down to **{len(self.bot.guilds)}** guilds",
+                                               embed=embed)
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):
@@ -152,6 +155,66 @@ class Events(commands.Cog):
         if (message.channel.id == 735694049700347954) or (message.channel.id == 735690974340317216):
             for i in ['🇲', '🇴', '🇳', '🇰', '🇪']:
                 await message.add_reaction(i)
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: discord.Reaction, user):
+        # The votes are cached globally, but not stored in a db
+        # if the bot gets hard resetted, the votes would be deleted
+        # F
+        votes = self.bot.global_votes
+        message = reaction.message
+        if not (vote_channel := votes.get(message.channel.id)):
+            return
+        if not (vote_message := vote_channel.get(message.id)):
+            return
+        data = vote_message['data']
+        emojis = [x['emoji'] for x in data]
+        if reaction.emoji not in emojis:
+            return
+        # this whole thing ^^ can probably be better written
+        index = [c['emoji'] for c in data].index(reaction.emoji)
+        data[index]['votes'] += reaction.count-1
+        total = sum(i['votes'] for i in data)
+        embed = vote_message['embed']
+        new_q_format = []
+        for item in data:
+            try:
+                votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
+            except ZeroDivisionError:
+                votebar = bar(0, 10, '■', '□')
+            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+        embed.description = f"\n".join(new_q_format)
+        await message.edit(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_reaction_remove(self, reaction: discord.Reaction, user):
+        # The votes are cached globally, but not stored in a db
+        # if the bot gets hard resetted, the votes would be deleted
+        # F
+        votes = self.bot.global_votes
+        message = reaction.message
+        if not (vote_channel := votes.get(message.channel.id)):
+            return
+        if not (vote_message := vote_channel.get(message.id)):
+            return
+        data = vote_message['data']
+        emojis = [x['emoji'] for x in data]
+        if reaction.emoji not in emojis:
+            return
+        # this whole thing ^^ can probably be better written
+        index = [c['emoji'] for c in data].index(reaction.emoji)
+        data[index]['votes'] -= 1
+        total = sum(i['votes'] for i in data)
+        embed = vote_message['embed']
+        new_q_format = []
+        for item in data:
+            try:
+                votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
+            except ZeroDivisionError:
+                votebar = bar(0, 10, '■', '□')
+            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+        embed.description = f"\n".join(new_q_format)
+        await message.edit(embed=embed)
 
 
 def setup(bot):

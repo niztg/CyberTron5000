@@ -209,7 +209,7 @@ class Meta(commands.Cog):
         await self.bot.pg_con.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
         try:
             async with async_timeout.timeout(15):
-                for emoji in (ctx.tick(True, True), ctx.tick(False, True)):
+                for emoji in (ctx.tick(True), ctx.tick(False)):
                     await ms.add_reaction(emoji)
                 r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda r, u: u.bot is False)
                 if r.emoji.name == "tickgreen":

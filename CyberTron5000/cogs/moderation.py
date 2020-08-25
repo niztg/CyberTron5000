@@ -34,11 +34,12 @@ class Moderation(commands.Cog):
     async def purge(self, ctx, amount: int, **flags):
         """Purges a given amount of messages."""
         amount += 1
+        await ctx.message.delete()
         if user := flags.get('user'):
             await ctx.channel.purge(limit=amount, check=lambda msg: msg.author == user)
-            return await ctx.send(f'{ctx.tick()} **{amount-1}** messages by {user} have been purged', delete_after=3)
+            return await ctx.send(f'{ctx.tick()} **{amount - 1}** messages by {user} have been purged', delete_after=3)
         await ctx.channel.purge(limit=amount)
-        return await ctx.send(f"{ctx.tick()} **{amount-1}** messages have purged", delete_after=3)
+        return await ctx.send(f"{ctx.tick()} **{amount - 1}** messages have been purged", delete_after=3)
 
     @commands.command()
     @commands.has_guild_permissions(kick_members=True)
@@ -105,7 +106,8 @@ class Moderation(commands.Cog):
         if len(question) >= 100:
             return await ctx.send("Your question is too long, please make it less than 100 characters.")
         if any(len(v) > 80 for v in _options):
-            return await ctx.send("One of your options is too long. Note that each option must be less than 80 characters.")
+            return await ctx.send(
+                "One of your options is too long. Note that each option must be less than 80 characters.")
         question += "?" if not (question.endswith(('.', '?', '!'))) else '\u200b'
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
@@ -113,52 +115,34 @@ class Moderation(commands.Cog):
         votes = []
         for x in range(len(_options)):
             emoji = cyberformat.to_emoji(x)
-            _vote_dict = {'emoji': str(emoji), 'question': _options[x]}
+            _vote_dict = {'emoji': str(emoji), 'question': _options[x], 'votes': 0}
             votes.append(_vote_dict)
         _q_format = []
         for item in votes:
             if not item['question']:
                 votes.remove(item)
                 continue
-            _q_format.append(f"{item['emoji']} **{item['question']}**")
+            _q_format.append(f"{item['emoji']} **{item['question']}** • {cyberformat.bar(0, 10, '■', '□')}")
         embed.description = f"\n".join(_q_format)
         _msg = await ctx.send(embed=embed)
         for a in votes:
             await _msg.add_reaction(a['emoji'])
-        #
-        # def check(reaction, user):
-        #     return reaction.emoji in [item['emoji'] for item in votes] and user.bot is False and reaction.message.id == _msg.id
-        #
-        # setup = lambda event: self.bot.wait_for(f'{event}', check=check)
-        #
-        # while True:
-        #     new_q_format = []
-        #     done, pending = await asyncio.wait([setup('reaction_add'), setup('reaction_remove')], return_when=asyncio.FIRST_COMPLETED)
-        #     result = done.pop().result()
-        #     result = result[0]
-        #     index = [c['emoji'] for c in votes].index(result.emoji)
-        #     votes[index]['votes'] = result.count - 1
-        #     for item in sorted(votes, key=lambda x: x['votes'], reverse=True):
-        #         new_q_format.append(f"{item['emoji']} **{item['question']}** ({item['votes']} votes)")
-        #     embed.description = f"\n".join(new_q_format)
-        #     await _msg.edit(embed=embed)
-        #     continue
+        # first we write the channel id to the dict
+        # this is because to fetch a message (and edit it), we need to fetch by channel, since `bot.get_channel` doesnt exist
+        gvotes = self.bot.global_votes # convenience
+        channel_id = ctx.channel.id
+        if not gvotes.get(channel_id):
+            gvotes[channel_id] = {} # if the channel isn't already in the dict, add it.
+        gvotes[channel_id][_msg.id] = {'embed': embed, 'data': votes}
+        # the rest of le magic happens in events.py
 
-    @commands.group(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'], invoke_without_command=True)
+    @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
     @commands.has_permissions(administrator=True)
-    async def user_nick(self, ctx, member: discord.Member, *, name):
+    async def user_nick(self, ctx, member: discord.Member, *, name=None):
+        nick = name or member.name
         if not self.hierarchy(member):
             return await ctx.send('I cannot moderate that user')
-        await member.edit(nick=name)
-        await ctx.message.add_reaction(emoji=ctx.tick())
-
-    @user_nick.command(invoke_without_command=True)
-    @commands.has_permissions(administrator=True)
-    async def default(self, ctx, member: discord.Member):
-        """Change nickname back to default."""
-        if not self.hierarchy(member):
-            return await ctx.send('I cannot moderate that user')
-        await member.edit(nick=member.name)
+        await member.edit(nick=nick)
         await ctx.message.add_reaction(emoji=ctx.tick())
 
     @commands.command()
@@ -187,7 +171,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, member: discord.Member, time: int = 10):
-        min = time * 60
+        time *= 60
         role = discord.utils.get(ctx.guild.roles, name='CyberMute')
         if not role:
             try:
@@ -207,13 +191,12 @@ class Moderation(commands.Cog):
         else:
             await member.add_roles(role)
             await ctx.message.add_reaction(emoji=ctx.tick())
-
-            await asyncio.sleep(min)
-            if role not in member.roles:
+            await asyncio.sleep(time)
+            if role in member.roles:
                 await ctx.send(f"{member.mention} unmuted automatically.")
                 await member.remove_roles(role)
             else:
-                pass
+                return
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -225,7 +208,6 @@ class Moderation(commands.Cog):
             return await ctx.send("This user is not muted!")
         await member.remove_roles(role)
         await ctx.message.add_reaction(emoji=ctx.tick())
-
         await ctx.send(f"{member.mention} has been unmuted.")
 
     @commands.group(invoke_without_command=True, aliases=['pre', 'prefix'], name='changeprefix')

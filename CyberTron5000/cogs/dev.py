@@ -3,6 +3,7 @@ import asyncio
 import subprocess
 import sys
 import random
+import praw
 
 import aiohttp
 import discord
