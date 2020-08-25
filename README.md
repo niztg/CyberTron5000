@@ -15,8 +15,8 @@ These are only some of CyberTron's commands!
   
 ### <em>Relevant URL's</em>
 <ul>
-  <li>Invite the Bot! → https://cybertron-5k.netlify.app/invite</li>
-    <li>Join the Support Server! → https://cybertron-5k.netlify.app/server</li>
+  <li>Invite the Bot! → https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632</li>
+    <li>Join the Support Server! → https://discord.com/invite/2fxKxJH</li>
     <li>Check out the website! → https://cybertron-5k.netlify.app</li>
   </ul>
 
