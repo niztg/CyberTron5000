@@ -170,29 +170,28 @@ class Events(commands.Cog):
         # F
         votes = self.bot.global_votes
         message = reaction.message
-        if not (vote_channel := votes.get(message.channel.id)):
-            return
-        if not (vote_message := vote_channel.get(message.id)):
+        if not (vote_message := votes.get(message.id)):
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]
         if reaction.emoji not in emojis:
             return
         # this whole thing ^^ can probably be better written
-        index = [c['emoji'] for c in data].index(reaction.emoji)
-        data[index]['votes'] += 1
-        total = sum(i['votes'] for i in data)
-        print(total)
-        embed = vote_message['embed']
-        new_q_format = []
-        for item in data:
-            try:
-                votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
-            except ZeroDivisionError:
-                votebar = bar(0, 10, '■', '□')
-            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
-        embed.description = f"\n".join(new_q_format)
-        await message.edit(embed=embed)
+        if not user.bot:
+            index = [c['emoji'] for c in data].index(reaction.emoji)
+            data[index]['votes'] += 1
+            total = sum(i['votes'] for i in data)
+            print(total)
+            embed = vote_message['embed']
+            new_q_format = []
+            for item in data:
+                try:
+                    votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
+                except ZeroDivisionError:
+                    votebar = bar(0, 10, '■', '□')
+                new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+            embed.description = f"\n".join(new_q_format)
+            await message.edit(embed=embed)
 
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user):
@@ -201,29 +200,28 @@ class Events(commands.Cog):
         # F
         votes = self.bot.global_votes
         message = reaction.message
-        if not (vote_channel := votes.get(message.channel.id)):
-            return
-        if not (vote_message := vote_channel.get(message.id)):
+        if not (vote_message := votes.get(message.id)):
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]
         if reaction.emoji not in emojis:
             return
         # this whole thing ^^ can probably be better written
-        index = [c['emoji'] for c in data].index(reaction.emoji)
-        data[index]['votes'] -= 1
-        total = sum(i['votes'] for i in data)
-        print(total)
-        embed = vote_message['embed']
-        new_q_format = []
-        for item in data:
-            try:
-                votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
-            except ZeroDivisionError:
-                votebar = bar(0, 10, '■', '□')
-            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
-        embed.description = f"\n".join(new_q_format)
-        await message.edit(embed=embed)
+        if not user.bot:
+            index = [c['emoji'] for c in data].index(reaction.emoji)
+            data[index]['votes'] -= 1
+            total = sum(i['votes'] for i in data)
+            print(total)
+            embed = vote_message['embed']
+            new_q_format = []
+            for item in data:
+                try:
+                    votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
+                except ZeroDivisionError:
+                    votebar = bar(0, 10, '■', '□')
+                new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+            embed.description = f"\n".join(new_q_format)
+            await message.edit(embed=embed)
 
 
 def setup(bot):

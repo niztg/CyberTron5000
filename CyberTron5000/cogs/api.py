@@ -58,7 +58,7 @@ class Api(commands.Cog):
         await http.close()
         return await ctx.send(f":heart: **{user}, {data['compliment']}**")
 
-    @flags.add_flag("-unit", type=str)
+    @flags.add_flag("-unit", type=str, default='c')
     @flags.command(usage='<city>,[country]')
     async def weather(self, ctx, city, **flags):
         """
@@ -71,7 +71,7 @@ class Api(commands.Cog):
                 data = await http.get(
                     f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}")
             await http.close()
-            if not str(unit := flags.get('unit') or 'c').startswith(('c', 'k', 'f')):
+            if not str(unit := flags.get('unit')).startswith(('c', 'k', 'f')):
                 return await ctx.send(
                     f"**{unit}** is an invalid unit! Please make sure your unit starts with either **c**, **k** or **f**")
             embed = discord.Embed(colour=self.bot.colour)
