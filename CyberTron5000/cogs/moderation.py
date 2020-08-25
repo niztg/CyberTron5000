@@ -54,8 +54,7 @@ class Moderation(commands.Cog):
             return await ctx.send('I cannot moderate that user')
         r = reason or "No reason specified"
         await member.kick(reason=r)
-        await member.send(
-            f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
+        await member.send(f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
         await ctx.message.add_reaction(ctx.tick())
 
     @commands.command()
