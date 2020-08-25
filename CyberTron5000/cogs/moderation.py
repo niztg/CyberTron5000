@@ -99,18 +99,18 @@ class Moderation(commands.Cog):
             return await ctx.send(f"{ctx.tick()} {str(user)} was unbanned! Reason:\n> {reason}")
 
     @commands.command(usage='<poll|option1|option2|option3...>', aliases=['poll'])
-    async def vote(self, ctx, message):
-        """
+    @commands.cooldown(1, 60, commands.BucketType.guild)
+    async def vote(self, ctx, *, message):
+        """.
         Vote on something.
         """
-        if not 3 <= (len(options := message.split("|"))) <= 21:
-            return await ctx.send(
-                f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
+        if not 3 <= (len(options := message.split("|"))) < 21:
+            return await ctx.send(f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
         question = options[0]
         _options = options[1:]
         if len(question) >= 100:
             return await ctx.send("Your question is too long, please make it less than 100 characters.")
-        if any(len(v) > 80 for v in _options):
+        if any(len(v) > 40 for v in _options):
             return await ctx.send(
                 "One of your options is too long. Note that each option must be less than 80 characters.")
         question += "?" if not (question.endswith(('.', '?', '!'))) else '\u200b'
@@ -135,19 +135,19 @@ class Moderation(commands.Cog):
         gvotes = self.bot.global_votes # convenience
         gvotes[_msg.id] = {'embed': embed, 'data': votes}
         # the rest of le magic happens in https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/events.py/#L159-217
-        if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
-            __msg = await ctx.send(f"**Add the appropriate reaction**\n{ctx.tick()} Users should be allowed to react only once\n{ctx.tick(False)} Users should be allowed to react more than once\n*You have 15 seconds*")
-            for v in (True, False):
-                await __msg.add_reaction(ctx.tick(v))
-            try:
-                r, u = await self.bot.wait_for('reaction_add', check=lambda x, y: x.emoji in (ctx.tick(True), ctx.tick(False)) and y.id == ctx.author.id and x.message.id == __msg.id, timeout=15)
-                if r.emoji == ctx.tick():
-                    gvotes[_msg.id]['users'] = []
-                    await __msg.edit(content=f"{ctx.tick()} **Users can now vote only once**", delete_after=3)
-                else:
-                    await __msg.delete()
-            except asyncio.TimeoutError:
-                await __msg.delete()
+        # if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
+        #     __msg = await ctx.send(f"**Add the appropriate reaction**\n{ctx.tick()} Users should be allowed to react only once\n{ctx.tick(False)} Users should be allowed to react more than once\n*You have 15 seconds*")
+        #     for v in (True, False):
+        #         await __msg.add_reaction(ctx.tick(v))
+        #     try:
+        #         r, u = await self.bot.wait_for('reaction_add', check=lambda x, y: x.emoji in (ctx.tick(True), ctx.tick(False)) and y.id == ctx.author.id and x.message.id == __msg.id, timeout=15)
+        #         if r.emoji == ctx.tick():
+        #             gvotes[_msg.id]['users'] = []
+        #             await __msg.edit(content=f"{ctx.tick()} **Users can now vote only once**", delete_after=3)
+        #         else:
+        #             await __msg.delete()
+        #     except asyncio.TimeoutError:
+        #         await __msg.delete()
 
     @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
     @commands.has_permissions(administrator=True)

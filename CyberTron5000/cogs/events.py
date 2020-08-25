@@ -181,7 +181,6 @@ class Events(commands.Cog):
             index = [c['emoji'] for c in data].index(reaction.emoji)
             data[index]['votes'] += 1
             total = sum(i['votes'] for i in data)
-            print(total)
             embed = vote_message['embed']
             new_q_format = []
             for item in data:
@@ -211,7 +210,6 @@ class Events(commands.Cog):
             index = [c['emoji'] for c in data].index(reaction.emoji)
             data[index]['votes'] -= 1
             total = sum(i['votes'] for i in data)
-            print(total)
             embed = vote_message['embed']
             new_q_format = []
             for item in data:
