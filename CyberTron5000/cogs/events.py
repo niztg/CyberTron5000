@@ -164,21 +164,25 @@ class Events(commands.Cog):
                 await message.add_reaction(i)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user):
-        # The votes are cached globally, but not stored in a db
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        # The votes are cached globally, but not .stored in a db
         # if the bot gets hard resetted, the votes would be deleted
         # F
         votes = self.bot.global_votes
-        message = reaction.message
-        if not (vote_message := votes.get(message.id)):
+        if not (vote_message := votes.get(payload.message_id)):
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]
-        if reaction.emoji not in emojis:
+        member: discord.Member = payload.member
+        guild: discord.Guild = member.guild
+        channel: discord.TextChannel = guild.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        # dont comment on all the type hints please
+        if str(payload.emoji) not in emojis:
             return
         # this whole thing ^^ can probably be better written
-        if not user.bot:
-            index = [c['emoji'] for c in data].index(reaction.emoji)
+        if not member.bot:
+            index = [c['emoji'] for c in data].index(str(payload.emoji))
             data[index]['votes'] += 1
             total = sum(i['votes'] for i in data)
             embed = vote_message['embed']
@@ -193,33 +197,35 @@ class Events(commands.Cog):
             await message.edit(embed=embed)
 
     @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction: discord.Reaction, user):
-        # The votes are cached globally, but not stored in a db
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+        # The votes are cached globally, but not .stored in a db
         # if the bot gets hard resetted, the votes would be deleted
         # F
         votes = self.bot.global_votes
-        message = reaction.message
-        if not (vote_message := votes.get(message.id)):
+        if not (vote_message := votes.get(payload.message_id)):
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]
-        if reaction.emoji not in emojis:
+        guild = self.bot.get_guild(payload.guild_id)
+        channel: discord.TextChannel = guild.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        # dont comment on all the type hints please
+        if str(payload.emoji) not in emojis:
             return
         # this whole thing ^^ can probably be better written
-        if not user.bot:
-            index = [c['emoji'] for c in data].index(reaction.emoji)
-            data[index]['votes'] -= 1
-            total = sum(i['votes'] for i in data)
-            embed = vote_message['embed']
-            new_q_format = []
-            for item in data:
-                try:
-                    votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
-                except ZeroDivisionError:
-                    votebar = bar(0, 10, '■', '□')
-                new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
-            embed.description = f"\n".join(new_q_format)
-            await message.edit(embed=embed)
+        index = [c['emoji'] for c in data].index(str(payload.emoji))
+        data[index]['votes'] -= 1
+        total = sum(i['votes'] for i in data)
+        embed = vote_message['embed']
+        new_q_format = []
+        for item in data:
+            try:
+                votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
+            except ZeroDivisionError:
+                votebar = bar(0, 10, '■', '□')
+            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+        embed.description = f"\n".join(new_q_format)
+        await message.edit(embed=embed)
 
 
 def setup(bot):
