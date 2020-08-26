@@ -136,8 +136,7 @@ class CyberTron5000(Bot):
                                                              name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
         print("PREFIXES AND PRESENCE SETUP")
         print("READY!")
-        print(
-            "──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+        print("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 
     async def _init_tags(self):
         await self.wait_until_ready()
@@ -155,6 +154,7 @@ class CyberTron5000(Bot):
                                                                      'author': query2['user_id'], 'id': query2['id']}
         print("TAGS HAVE BEEN INITIALIZED")
         print(self._tag_dict)
+
 # 4,993
 # that's how many lines we were on when that was written
 # pretty crazy, huh?
