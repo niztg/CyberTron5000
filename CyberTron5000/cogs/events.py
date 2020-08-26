@@ -35,6 +35,8 @@ class Events(commands.Cog):
         data = self.snipes()
         channel_id = str(message.channel.id)
         msg_data = {"author": str(message.author.id), "content": message.content, "created_at": str(message.created_at), "id": str(message.id)}
+        if message.embeds:
+            msg_data['embed'] = True
         try:
             data[channel_id].append(msg_data)
         except KeyError:

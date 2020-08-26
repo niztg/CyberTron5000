@@ -75,8 +75,9 @@ class CatchAllMenu(menus.MenuPages, inherit_buttons=False):
 
 
 class EmbedSource(menus.ListPageSource):
-    def __init__(self, data):
+    def __init__(self, data, footer: bool = True, ):
         super().__init__(data, per_page=1)
+        self.footer = footer
 
     async def format_page(self, menu, entries: discord.Embed):
         entries.set_footer(text=f'({menu.current_page + 1}/{menu._source.get_max_pages()})')

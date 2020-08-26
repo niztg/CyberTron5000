@@ -484,8 +484,8 @@ class Fun(commands.Cog):
         except Exception as error:
             return await ctx.send(error)
 
-    @flags.add_flag("-limit", type=int, default=10)
-    @flags.add_flag("-channel", type=discord.TextChannel)
+    @flags.add_flag("--limit", type=int, default=500)
+    @flags.add_flag("--channel", type=discord.TextChannel)
     @flags.command()
     async def snipe(self, ctx, **flags):
         """Shows the most recently deleted messages in a given channel"""
@@ -498,15 +498,18 @@ class Fun(commands.Cog):
         except KeyError:
             return await ctx.send(f"{channel} has no deleted messages.")
         embeds = []
-        for snipe in channel_snipes[:flags.get('limit')]:
+        for snipe in reversed(channel_snipes[:flags.get('limit')]):
             author = self.bot.get_user(int(snipe['author'])) or await self.bot.fetch_user(int(snipe['author']))
             embed = discord.Embed(colour=self.bot.colour)
-            embed.description = snipe['content']
+            desc = snipe['content']
+            if not desc and snipe.get('embed'):
+                desc = '`<Embedded Message>`'
+            embed.description = desc
             since = dt.strptime(snipe['created_at'], '%Y-%m-%d %H:%M:%S.%f')
-            final_since = nt(dt.utcnow()-since)
-            embed.set_author(name=f"{author} said in {str(channel)} {final_since}", icon_url=author.avatar_url)
+            embed.set_author(name=f"{author} said in {str(channel)}", icon_url=author.avatar_url)
+            embed.timestamp = since
             embeds.append(embed)
-        source = paginator.EmbedSource(embeds)
+        source = paginator.EmbedSource(embeds, footer=False)
         await paginator.CatchAllMenu(source).start(ctx)
 
 def setup(bot):

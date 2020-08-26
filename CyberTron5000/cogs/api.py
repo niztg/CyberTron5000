@@ -3,6 +3,7 @@ from datetime import datetime as dt
 import aiogoogletrans
 import async_cleverbot
 import async_cse
+import aiowiki
 import discord
 from discord.ext import commands, flags
 
@@ -58,7 +59,7 @@ class Api(commands.Cog):
         await http.close()
         return await ctx.send(f":heart: **{user}, {data['compliment']}**")
 
-    @flags.add_flag("-unit", type=str, default='c')
+    @flags.add_flag("--unit", type=str, default='c')
     @flags.command(usage='<city>,[country]')
     async def weather(self, ctx, city, **flags):
         """
@@ -87,7 +88,7 @@ class Api(commands.Cog):
             embed.set_thumbnail(url="https://i.dlpng.com/static/png/6552264_preview.png")
             await ctx.send(embed=embed)
         except Exception as error:
-            if isinstance(error, APIError) or isinstance(error, IndexError):
+            if isinstance(error, (IndexError, APIError)):
                 raise commands.BadArgument(f"city not found!")
 
     @commands.command(help="Shows you info about a Pokémon", aliases=['pokemon', 'poke', 'pokémon', 'pokédex'])
@@ -147,6 +148,20 @@ class Api(commands.Cog):
             await menu.start(ctx)
         except (APIError, IndexError):
             raise commands.BadArgument(f"term not found on urban dictionary.")
+
+    @commands.command(aliases=['wiki'])
+    async def wikipedia(self, ctx, *, search):
+        embeds = []
+        async with ctx.typing():
+            wiki = aiowiki.Wiki.wikipedia()
+            for page in (await wiki.opensearch(search)):
+                embed = discord.Embed(colour=self.bot.colour)
+                embed.title = page.title
+                embed.url = (await page.urls())[0].split("(")[0]
+                embed.description = (await page.summary())[:2000] + "..."
+                embeds.append(embed)
+        source = paginator.EmbedSource(embeds)
+        await paginator.CatchAllMenu(source).start(ctx)
 
     @commands.command()
     async def fact(self, ctx):
