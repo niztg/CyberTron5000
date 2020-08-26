@@ -155,6 +155,14 @@ class CyberTron5000(Bot):
                                                                      'author': query2['user_id'], 'id': query2['id']}
         print("TAGS HAVE BEEN INITIALIZED")
         print(self._tag_dict)
+# 4,993
+# that's how many lines we were on when that was written
+# pretty crazy, huh?
+# 4,996 now
+# 997
+# 998
+# Thanks to everyone over the past 139 days for helping on CyberTron5000. It has become a huge part of me, and I couldn't have done it without most of you. <3
+# 5,000!
 
 
 CyberTron5000().run()

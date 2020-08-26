@@ -101,16 +101,14 @@ class Moderation(commands.Cog):
     @commands.command(usage='<poll|option1|option2|option3...>', aliases=['poll'])
     @commands.cooldown(1, 60, commands.BucketType.guild)
     async def vote(self, ctx, *, message):
-        """.
-        Vote on something.
-        """
+        """Vote on something."""
         if not 3 <= (len(options := message.split("|"))) < 21:
             return await ctx.send(f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
         question = options[0]
         _options = options[1:]
         if len(question) >= 100:
             return await ctx.send("Your question is too long, please make it less than 100 characters.")
-        if any(len(v) > 40 for v in _options):
+        if any(len(v) > 80 for v in _options):
             return await ctx.send(
                 "One of your options is too long. Note that each option must be less than 80 characters.")
         question += "?" if not (question.endswith(('.', '?', '!'))) else '\u200b'

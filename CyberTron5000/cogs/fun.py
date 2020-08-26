@@ -3,11 +3,12 @@ import string
 from asyncio import TimeoutError
 from datetime import datetime as dt
 from io import BytesIO
+import json
 from time import time
 
 import aiohttp
 import discord
-from discord.ext import commands
+from discord.ext import commands, flags
 from humanize import naturaltime as nt
 from jikanpy import AioJikan
 from sr_api import Client
@@ -483,10 +484,30 @@ class Fun(commands.Cog):
         except Exception as error:
             return await ctx.send(error)
 
-    @commands.group(invoke_without_command=True)
-    async def math(self, ctx, user: discord.User):
-        await ctx.send(user.name)
-
+    @flags.add_flag("-limit", type=int, default=10)
+    @flags.add_flag("-channel", type=discord.TextChannel)
+    @flags.command()
+    async def snipe(self, ctx, **flags):
+        """Shows the most recently deleted messages in a given channel"""
+        # i know i shouldnt be using json for this
+        channel = flags.get('channel') or ctx.channel
+        with open('json_files/snipes.json', 'r') as f:
+            snipes = json.load(f)
+        try:
+            channel_snipes = snipes[str(channel.id)]
+        except KeyError:
+            return await ctx.send(f"{channel} has no deleted messages.")
+        embeds = []
+        for snipe in channel_snipes[:flags.get('limit')]:
+            author = self.bot.get_user(int(snipe['author'])) or await self.bot.fetch_user(int(snipe['author']))
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.description = snipe['content']
+            since = dt.strptime(snipe['created_at'], '%Y-%m-%d %H:%M:%S.%f')
+            final_since = nt(dt.utcnow()-since)
+            embed.set_author(name=f"{author} said in {str(channel)} {final_since}", icon_url=author.avatar_url)
+            embeds.append(embed)
+        source = paginator.EmbedSource(embeds)
+        await paginator.CatchAllMenu(source).start(ctx)
 
 def setup(bot):
     bot.add_cog(Fun(bot))

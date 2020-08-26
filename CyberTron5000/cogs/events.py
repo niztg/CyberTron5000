@@ -1,4 +1,6 @@
 import asyncio
+import json
+import time
 from traceback import format_exception
 
 import async_cleverbot
@@ -22,6 +24,24 @@ class Events(commands.Cog):
         self.x_r = ":warning:727013811571261540"
         self.clever = async_cleverbot.Cleverbot(self.bot.config.cleverbot)
         self.clever.set_context(async_cleverbot.DictContext(self.clever))
+
+    @staticmethod
+    def snipes():
+        with open('json_files/snipes.json', 'r') as f:
+            data = json.load(f)
+        return data
+
+    def append_snipe(self, message: discord.Message):
+        data = self.snipes()
+        channel_id = str(message.channel.id)
+        msg_data = {"author": str(message.author.id), "content": message.content, "created_at": str(message.created_at), "id": str(message.id)}
+        try:
+            data[channel_id].append(msg_data)
+        except KeyError:
+            data[channel_id] = [msg_data]
+        with open('json_files/snipes.json', 'w') as f:
+            json.dump(data, f, indent=4)
+        return
 
     def format_error(self, ctx: commands.Context, error: Exception, serious: bool = False):
         """Dealing with errors"""
@@ -226,6 +246,13 @@ class Events(commands.Cog):
             new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
         embed.description = f"\n".join(new_q_format)
         await message.edit(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: discord.Message):
+        _snipes = self.snipes()
+        if not _snipes.get(str(message.channel.id)):
+            _snipes[str(message.channel.id)] = []
+        self.append_snipe(message)
 
 
 def setup(bot):
