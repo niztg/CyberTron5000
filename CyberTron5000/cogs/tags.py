@@ -105,16 +105,8 @@ class Tags(commands.Cog):
     @tag.command()
     async def list(self, ctx, member: discord.Member = None):
         """Shows you all the tags of you or another member"""
-        member = member or ctx.author
-        if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
-            return await ctx.send("This guild doesn't have any tags!")
-        tags = guild_tags.items()
-        tags = sorted(tags, key=lambda x: x[1]['uses'], reverse=True)
-        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1]['author'] == member.id] # only add to list comp if belongs to author instead of removing from dict items in above lines
-        embed = discord.Embed(colour=self.bot.colour)
-        embed.set_author(name=f"All of {ctx.author}'s Tags in {ctx.guild}", icon_url=ctx.author.avatar_url)
-        source = IndexedListSource(data=data, embed=embed, title="Tags")
-        await CatchAllMenu(source=source).start(ctx)
+        command = self.bot.get_command('tags')
+        await ctx.invoke(command)
 
     @commands.command()
     async def tags(self, ctx, member: discord.Member = None):

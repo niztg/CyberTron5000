@@ -19,7 +19,8 @@ from CyberTron5000.utils import (
 )
 from CyberTron5000.utils.lists import (
     INDICATOR_LETTERS,
-    ANIMALS
+    ANIMALS,
+    EMOTIONS
 )
 
 
@@ -274,7 +275,8 @@ class Fun(commands.Cog):
     async def greentext(self, ctx):
         """Write a greentext story"""
         story = []
-        await ctx.send(f"Greentext story starting! Type `{ctx.prefix}quit`, `{ctx.prefix}exit`, or `{ctx.prefix}finish` to see your final story!")
+        await ctx.send(
+            f"Greentext story starting! Type `{ctx.prefix}quit`, `{ctx.prefix}exit`, or `{ctx.prefix}finish` to see your final story!")
         while True:
             try:
                 msg = await self.bot.wait_for('message', timeout=300, check=lambda x: x.author == ctx.author)
@@ -285,7 +287,8 @@ class Fun(commands.Cog):
             except TimeoutError:
                 break
         story = '\n'.join([f'>{line}' for line in story])
-        return await ctx.send(embed=discord.Embed(colour=discord.Color.green(), description=f"**{ctx.author}**'s story```css\n{story}\n```"))
+        return await ctx.send(embed=discord.Embed(colour=discord.Color.green(),
+                                                  description=f"**{ctx.author}**'s story```css\n{story}\n```"))
 
     @commands.command(aliases=['bin'])
     async def binary(self, ctx, *, message):
@@ -307,37 +310,6 @@ class Fun(commands.Cog):
     async def owner(self, ctx):
         """Shows you who made this bot"""
         return await ctx.send(f"it is {self.bot.owner}")
-
-    @commands.command()
-    async def wink(self, ctx, *, member: discord.Member = None):
-        """Wink at someone! 😉"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/wink") as f:
-                res = await f.json()
-            if member:
-                await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
-                    name=f"😉 {ctx.author} winked at {member}!"))
-            else:
-                await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
-                    name=f"😉 {ctx.author} winked!"))
-
-    @commands.command()
-    async def pat(self, ctx, *, member: discord.Member):
-        """Pat someone!"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/pat") as f:
-                res = await f.json()
-            await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
-                name=f"{ctx.author} patted {member}!"))
-
-    @commands.command()
-    async def hug(self, ctx, *, member: discord.Member):
-        """Hug someone! 💗"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://some-random-api.ml/animu/hug") as f:
-                res = await f.json()
-            await ctx.send(embed=discord.Embed(color=self.bot.colour).set_image(url=res['link']).set_author(
-                name=f"{ctx.author} hugged {member}!"))
 
     @commands.command()
     async def anime(self, ctx, *, query):
@@ -409,15 +381,8 @@ class Fun(commands.Cog):
     @todo.command()
     async def list(self, ctx):
         """Shows your todo list"""
-        items = []
-        results = sorted((await self.get_all_todo(ctx.author.id)), key=lambda x: x['time'])
-        for each in results:
-            time = dt.utcfromtimestamp(each['time'])
-            since = nt(dt.utcnow() - time)
-            items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items")
-        menu = paginator.CatchAllMenu(source=source)
-        await menu.start(ctx)
+        command = self.bot.get_command('todo')
+        await ctx.invoke(command)
 
     @todo.command()
     async def clear(self, ctx):
@@ -454,36 +419,6 @@ class Fun(commands.Cog):
         await ctx.send(
             f"{ctx.tick()} Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
 
-    @commands.command(aliases=['af'])
-    async def animalfact(self, ctx, animal=None):
-        """Shows a fact about an animal of your choice."""
-        if not animal:
-            return await ctx.send(
-                f"**Valid Animal Choices:**\ncat, dog, koala, fox, bird, elephant, panda, racoon, kangaroo, giraffe, whale")
-        try:
-            animal = str(animal).lower().replace(' ', '_')
-            em = ANIMALS.get(animal)
-            fact = await self.sr.get_fact(animal)
-            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Fact:**\n{fact}")
-        except Exception as error:
-            return await ctx.send(error)
-
-    @commands.command(aliases=['aimg'])
-    async def animalimg(self, ctx, *, animal=None):
-        """Shows an image of an animal of your choice."""
-        if not animal:
-            return await ctx.send(
-                f"**Valid Animal Choices:**\ncat, dog, koala, fox, birb, red panda, panda, racoon, kangaroo")
-        try:
-            animal = str(animal).lower().replace(' ', '_')
-            em = ANIMALS.get(animal, '')
-            image = await self.sr.get_image(animal)
-            final = BytesIO(await image.read())
-            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Image:**",
-                           file=discord.File(final, f'{animal}_image.png'))
-        except Exception as error:
-            return await ctx.send(error)
-
     @flags.add_flag("--limit", type=int, default=500)
     @flags.add_flag("--channel", type=discord.TextChannel)
     @flags.command()
@@ -511,6 +446,69 @@ class Fun(commands.Cog):
             embeds.append(embed)
         source = paginator.EmbedSource(embeds, footer=False)
         await paginator.CatchAllMenu(source).start(ctx)
+
+    @commands.command(aliases=['af'])
+    async def animalfact(self, ctx, animal=None):
+        """Shows a fact about an animal of your choice."""
+        if not animal:
+            return await ctx.send(
+                f"**Valid Animal Choices:**\ncat, dog, koala, fox, bird, elephant, panda, racoon, kangaroo, giraffe, whale")
+        try:
+            animal = str(animal).lower().replace(' ', '_')
+            em = ANIMALS.get(animal)
+            fact = await self.sr.get_fact(animal)
+            await ctx.send(f"{em} **Random {animal.replace('_', ' ').title()} Fact:**\n{fact}")
+        except Exception as error:
+            return await ctx.send(error)
+
+    async def sr_image(self, image, ext='png') -> discord.File:
+        """
+        Returns a discord.File of a sr_api image
+        :param image:
+        :param ext:
+        :return:
+        """
+        image = BytesIO(await image.read())
+        return discord.File(image, filename=f"somerandom.{ext}")
+
+    @commands.command(aliases=['aimg'])
+    async def animalimg(self, ctx, *, animal=None):
+        """Shows an image of an animal of your choice."""
+        if not animal:
+            return await ctx.send(
+                f"**Valid Animal Choices:**\ncat, dog, koala, fox, birb, red panda, panda, racoon, kangaroo")
+        try:
+            async with ctx.typing():
+                animal = str(animal).lower().replace(' ', '_')
+                await ctx.send(f"{ANIMALS.get(animal, '')} **Random {animal.replace('_', ' ').title()} Image:**",
+                               file=await self.sr_image(await self.sr.get_image(animal)))
+        except Exception as error:
+            return await ctx.send(error)
+
+    @commands.command()
+    async def hug(self, ctx, member: discord.Member):
+        async with ctx.typing():
+            file = await self.sr_image(await self.sr.get_gif('hug'), 'gif')
+        await ctx.send(f"{EMOTIONS['hug']} **{ctx.author.display_name}** hugged **{member.display_name}**!", file=file)
+
+    @commands.command()
+    async def pat(self, ctx, member: discord.Member):
+        async with ctx.typing():
+            file = await self.sr_image(await self.sr.get_gif('pat'), 'gif')
+        await ctx.send(f"{EMOTIONS['pat']} **{ctx.author.display_name}** patted **{member.display_name}**!", file=file)
+
+    @commands.command()
+    async def facepalm(self, ctx):
+        async with ctx.typing():
+            file = await self.sr_image(await self.sr.get_gif('face-palm'), 'gif')
+        await ctx.send(f"{EMOTIONS['face-palm']} **{ctx.author.display_name}** facepalmed!", file=file)
+
+    @commands.command()
+    async def wink(self, ctx):
+        async with ctx.typing():
+            file = await self.sr_image(await self.sr.get_gif('wink'), 'gif')
+        await ctx.send(f"{EMOTIONS['wink']} **{ctx.author.display_name}** winked!", file=file)
+
 
 def setup(bot):
     bot.add_cog(Fun(bot))
