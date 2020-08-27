@@ -132,7 +132,7 @@ class Tags(commands.Cog):
             self._tag_dict[ctx.guild.id] = {}
         await ctx.send(f"<a:loading:743537226503421973> Please enter a name for your tag...")
         try:
-            message1 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=30)
+            message1 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=300)
         except TimeoutError:
             return await ctx.send(f"{ctx.tick(False)} Boo, you ran out of time!")
         for i in self.forbidden:
@@ -143,7 +143,7 @@ class Tags(commands.Cog):
         await ctx.send(
             f"<a:loading:743537226503421973> Your tag is called `{message1.content}`. Please enter the content of your tag...")
         try:
-            message2 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=30)
+            message2 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=300)
         except TimeoutError:
             return await ctx.send(f"{ctx.tick(False)} Boo, you ran out of time!")
         id = randint(1, 99_999)

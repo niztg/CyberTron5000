@@ -192,7 +192,7 @@ class Meta(commands.Cog):
     async def suggest(self, ctx, *, idea):
         """Suggest an idea for the bot."""
         sugid = str(uuid4())[:8]
-        embed = discord.Embed(title=f"Suggestion → {sugid}", description=f"```{idea}```",
+        embed = discord.Embed(title=f"Suggestion → {sugid}", description=f"```fix\n{idea}```",
                               colour=self.bot.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'Do "suggest follow {sugid}" to follow this suggestion!')

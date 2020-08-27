@@ -2,11 +2,13 @@ import ast
 import asyncio
 import subprocess
 import sys
+import json
 import random
 
 import aiohttp
 import discord
 from discord.ext import commands
+
 
 from CyberTron5000.utils import cyberformat
 
@@ -273,6 +275,15 @@ class Developer(commands.Cog):
     @dev.command()
     async def rng(self, ctx, no: int, no2: int):
         await ctx.send(random.randint(no, no2))
+
+    @dev.command()
+    async def snipe_cache(self, ctx):
+        l = list()
+        with open('json_files/snipes.json') as f:
+            data = json.load(f)
+        for x in data.values():
+            l += x
+        await ctx.send(f"I have cached **{len(l)}** deleted messages across **{len(data.keys())}** channels!")
 
 def setup(bot):
     bot.add_cog(Developer(bot))

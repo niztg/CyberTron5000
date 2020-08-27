@@ -347,9 +347,14 @@ class Fun(commands.Cog):
         for each in results:
             time = dt.utcfromtimestamp(each['time'])
             since = nt(dt.utcnow() - time)
-            items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since})")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items")
+            if each['description']:
+                desc_em = "❔"
+            else:
+                desc_em = ""
+            items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since}) {desc_em}")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items (`❔` indicates that the todo has a description)")
         menu = paginator.CatchAllMenu(source=source)
+        menu.add_info_fields({"❔": "Indicates that the todo has a description"})
         await menu.start(ctx)
 
     @todo.command()

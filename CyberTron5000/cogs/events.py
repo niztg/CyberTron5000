@@ -1,6 +1,5 @@
 import asyncio
 import json
-import time
 from traceback import format_exception
 
 import async_cleverbot
