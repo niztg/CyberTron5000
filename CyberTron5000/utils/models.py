@@ -52,6 +52,10 @@ class InfractionUser:
         return [i for i in self.all_infractions() if not bool(i)]
 
     @property
+    def num_infractions(self):
+        return len(self.all_infractions())
+
+    @property
     def num_valid_infractions(self):
         """The number of valid infractions they have."""
         return len(self.valid_infractions)
