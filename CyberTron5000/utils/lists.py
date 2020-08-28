@@ -202,3 +202,9 @@ EMOTIONS = {
     'face-palm': '🤦‍♂️',
     'pat': '<:pat:748316152123359322>'
 }
+
+INFRACTION_DESCRIPTIONS = {
+    "mute": "This will indefinitely mute the user by addding to them the `CyberMute` role, which restricts them from seeing any channels. To unmute them, manually remove the role from them or do `{0}unumute <user>`\nI need **Manage Channels** and **Manage Roles** permissions for this.",
+    "kick": "This will kick the user from the server.\nI need the **Kick Members** permission for this.",
+    "ban": "This will ban the user from the server. To unban a user, do `{0}unban <user id or username#user discriminator>`"
+}

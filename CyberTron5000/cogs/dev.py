@@ -285,5 +285,6 @@ class Developer(commands.Cog):
             l += x
         await ctx.send(f"I have cached **{len(l)}** deleted messages across **{len(data.keys())}** channels!")
 
+
 def setup(bot):
     bot.add_cog(Developer(bot))
