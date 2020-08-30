@@ -365,21 +365,13 @@ class Profile(commands.Cog):
     @commands.command(aliases=['perms'], help="Gets a user's permissions in the current channel.")
     async def permissions(self, ctx, *, member: discord.Member = None):
         member = member or ctx.author
-        perms = []
-        negperms = []
-        embed = discord.Embed(colour=self.bot.colour).set_author(name=f"{member}'s permissions in {ctx.channel}",
-                                                                 icon_url=member.avatar_url)
+        all_perms = list()
+        embed = discord.Embed(colour=self.bot.colour).set_author(name=f"{member}'s permissions in {ctx.channel}", icon_url=member.avatar_url)
         all = dict(member.permissions_in(ctx.channel)).items()
         for key, value in all:
-            if value:
-                perms.append(f"{ctx.tick()} **{str(key.title()).replace('_', ' ')}**")
-            else:
-                negperms.append(f"{ctx.tick(False)} **{str(key.title()).replace('_', ' ')}**")
-        
-        embed2 = discord.Embed(colour=self.bot.colour).set_author(name=embed.author.name, icon_url=member.avatar_url)
-        embed.description = '\n'.join(perms)
-        embed2.description = '\n'.join(negperms)
-        source = paginator.EmbedSource([embed, embed2])
+            all_perms.append((f"{ctx.tick(value)} **{key.title().replace('_', ' ')}**", value))
+        perms = sorted(all_perms, key=lambda x: x[1], reverse=True)
+        source = paginator.IndexedListSource(data=[perm[0] for perm in perms], show_index=False, title="Permissions", per_page=16, embed=embed)
         await paginator.CatchAllMenu(source=source).start(ctx)
     
     @commands.command(aliases=['ri'])
