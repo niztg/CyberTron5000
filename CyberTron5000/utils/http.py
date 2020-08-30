@@ -25,7 +25,7 @@ class CyberHTTP:
                     raise APIError()
                 data = await r.json()
         except Exception as error:
-            raise error
+            raise APIError(f"{error.__class__.__name__}: {error}")
         return data
 
     async def close(self):

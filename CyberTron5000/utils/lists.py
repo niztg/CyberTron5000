@@ -3,6 +3,8 @@
 For JSON lists.
 
 """
+# I need to use yaml for all of this
+# excuse me
 
 import discord
 from string import ascii_uppercase
