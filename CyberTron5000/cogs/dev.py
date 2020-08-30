@@ -1,14 +1,13 @@
 import ast
 import asyncio
-import subprocess
-import sys
 import json
 import random
+import subprocess
+import sys
 
 import aiohttp
 import discord
 from discord.ext import commands
-
 
 from CyberTron5000.utils import cyberformat
 

@@ -1,13 +1,13 @@
+import json
 import random
 import string
 from asyncio import TimeoutError
 from datetime import datetime as dt
 from io import BytesIO
-import json
-import dictionary
 from time import time
 
 import aiohttp
+import dictionary
 import discord
 from discord.ext import commands, flags
 from humanize import naturaltime as nt

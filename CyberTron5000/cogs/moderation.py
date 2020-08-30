@@ -1,10 +1,10 @@
 import asyncio
+from datetime import datetime as dt
 from math import ceil
 from typing import Union
 
 import discord
 import humanize
-from datetime import datetime as dt
 from discord.ext import commands, flags
 
 from CyberTron5000.utils import (
@@ -12,8 +12,8 @@ from CyberTron5000.utils import (
     lists,
     cyberformat
 )
-from CyberTron5000.utils.converter import Prefix
 from CyberTron5000.utils.checks import check_mod_or_owner
+from CyberTron5000.utils.converter import Prefix
 from CyberTron5000.utils.models import Infraction, InfractionUser, set_infraction_punishments
 
 

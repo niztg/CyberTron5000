@@ -1,9 +1,9 @@
 from datetime import datetime as dt
 
 import aiogoogletrans
+import aiowiki
 import async_cleverbot
 import async_cse
-import aiowiki
 import discord
 from discord.ext import commands, flags
 
