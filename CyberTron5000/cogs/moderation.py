@@ -4,6 +4,7 @@ from typing import Union
 
 import discord
 import humanize
+from datetime import datetime as dt
 from discord.ext import commands, flags
 
 from CyberTron5000.utils import (
@@ -13,6 +14,7 @@ from CyberTron5000.utils import (
 )
 from CyberTron5000.utils.converter import Prefix
 from CyberTron5000.utils.checks import check_mod_or_owner
+from CyberTron5000.utils.models import Infraction, InfractionUser, set_infraction_punishments
 
 
 # ≫
@@ -54,7 +56,8 @@ class Moderation(commands.Cog):
             return await ctx.send('I cannot moderate that user')
         r = reason or "No reason specified"
         await member.kick(reason=r)
-        await member.send(f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
+        await member.send(
+            f"Hello, you have been kicked from participating in {ctx.guild}. Please see your reason for removal: `{r}`")
         await ctx.message.add_reaction(ctx.tick())
 
     @commands.command()
@@ -103,7 +106,8 @@ class Moderation(commands.Cog):
     async def vote(self, ctx, *, message):
         """Vote on something."""
         if not 3 <= (len(options := message.split("|"))) < 21:
-            return await ctx.send(f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
+            return await ctx.send(
+                f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
         question = options[0]
         _options = options[1:]
         if len(question) >= 100:
@@ -130,7 +134,7 @@ class Moderation(commands.Cog):
         _msg = await ctx.send(embed=embed)
         for a in votes:
             await _msg.add_reaction(a['emoji'])
-        gvotes = self.bot.global_votes # convenience
+        gvotes = self.bot.global_votes  # convenience
         gvotes[_msg.id] = {'embed': embed, 'data': votes}
         # the rest of le magic happens in https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/cogs/events.py/#L159-217
         # if ctx.guild.me.permissions_in(ctx.channel).manage_messages:
@@ -337,9 +341,90 @@ class Moderation(commands.Cog):
         except:
             return await ctx.send("I can't change my nickname in this guild.")
 
+    @commands.group(invoke_without_command=True)
+    @commands.is_owner()
+    async def warn(self, ctx, member: discord.Member, *, reason="No reason provided."):
+        user = InfractionUser(guild_id=ctx.guild.id, user_id=member.id)
+        infraction = user.add_infraction(reason=reason)
+        embed = discord.Embed(
+            colour=self.bot.colour,
+            description=f"""
+{ctx.tick()} {member} has received a warning.
+> {reason}
+**Infraction Number:** {infraction.infraction_number}
+**Valid Infractions:** {user.num_valid_infractions}
+{ctx.tick(infraction.is_null)} **Is Null?**
+""",
+            timestamp=infraction.created
+        )
+        await ctx.send(embed=embed)
+
+    @warn.command()
+    async def list(self, ctx, member: discord.Member = None):
+        command = self.bot.get_command('infractions')
+        await ctx.invoke(command, member)
+
+    @commands.command()
+    async def infractions(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        user = InfractionUser(ctx.guild.id, member.id)
+        embed = discord.Embed(
+            colour=self.bot.colour
+        )
+        for infraction in user.all_infractions():
+            embed.add_field(name=f"**Infraction #{infraction.infraction_number}:**", value=f"> {infraction.reason}\nIssued **{humanize.naturaltime(dt.utcnow() - infraction.created)}**\n{ctx.tick(infraction.is_null)} **Is Null?**")
+        embed.set_author(name=f"All of {member.display_name}'s warnings", icon_url=member.avatar_url)
+        embed.description = f"All Infractions: `{user.num_infractions}`\nValid Infractions: `{user.num_valid_infractions}`\n\n"
+        try:
+            await ctx.send(embed=embed)
+        except discord.HTTPException:
+            embed.remove_field(len(embed.fields)-1)
+
+    @warn.command()
+    async def nullify(self, ctx, member: discord.Member, infraction_no: int):
+        try:
+            infraction = Infraction.by_infraction_no(ctx.guild.id, member.id, infraction_no)
+            null = infraction.is_null
+            infraction.nullify()
+        except Exception as error:
+            return await ctx.send(error)
+        if null:
+            await ctx.send(f"{ctx.tick(not null)} Infraction #{infraction.infraction_number} for {member}: `un-nullified`")
+        else:
+            await ctx.send(f"{ctx.tick(not null)} Infraction #{infraction.infraction_number} for {member}: `nullified`")
+
+    @warn.command()
+    async def edit(self, ctx, member: discord.Member, number: int, *, reason):
+        try:
+            infraction = Infraction.by_infraction_no(ctx.guild.id, member.id, number)
+            infraction.edit(reason=reason)
+        except Exception as error:
+            return await ctx.send(error)
+        await ctx.send(f"{ctx.tick()} Infraction #{infraction.infraction_number} edited to:\n> {infraction.reason}")
+
+    @flags.add_flag("--mute", type=int)
+    @flags.add_flag("--kick", type=int)
+    @flags.add_flag("--ban", type=int)
+    @flags.group(invoke_without_command=True, aliases=['sgp'])
+    @commands.is_owner()
+    async def set_guild_punishments(self, ctx, **flags):
+        new_dict = {key: value for key, value in flags.items() if value}
+        set_infraction_punishments(ctx.guild.id, **new_dict)
+        single, double = "'", '"'
+        await ctx.send("Infraction Punishments edited to:\n" + f"```json\n{str(new_dict).replace(single, double)}\n```")
+
+    @set_guild_punishments.command()
+    async def info(self, ctx):
+        embed = discord.Embed(
+            colour=self.bot.colour,
+            title=f"Infraction Punishment Info",
+            description="\n\n".join([f"**{key}**:\n{value.format(ctx.prefix)}" for key, value in lists.INFRACTION_DESCRIPTIONS.items()])
+        )
+        await ctx.send(embed=embed)
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, discord.Forbidden):
-            return await ctx.send("I dont have the permissions to do that!")
+            return await ctx.send("I don't have the permissions to do that!")
 
 
 def setup(bot):

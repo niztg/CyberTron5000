@@ -5,8 +5,9 @@ import aiohttp
 import discord
 import humanize
 from discord.ext import commands
+from textwrap import dedent
 
-from CyberTron5000.utils import paginator
+from CyberTron5000.utils import paginator, http
 from CyberTron5000.utils.lists import REDDIT_EMOJIS
 
 
@@ -17,6 +18,7 @@ class Reddit(commands.Cog):
         self.bot = bot
         self.up = "<:upvote:718895913342337036>"
         self.share = "<:share:730823872265584680>"
+        self.http = self.bot._http
 
     # noinspection PyBroadException
 
@@ -172,34 +174,48 @@ class Reddit(commands.Cog):
     @commands.command(aliases=['ms'])
     async def modstats(self, ctx, user):
         """Shows you the moderated subreddits of a specific user."""
-        async with ctx.typing():
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://www.reddit.com/user/{user}/moderated_subreddits/.json") as r:
-                    res = await r.json()
-                await cs.close()
-                if r.status != 200:
-                    return await ctx.send("Whoops, something went wrong. Error Code: {}".format(r.status))
-                subreddits = res['data']
-                reddits = [
-                    f"[{subreddit['sr_display_name_prefixed']}](https://reddit.com{subreddit['url']}) • <:member:731190477927219231> **{subreddit['subscribers']:,}**"
-                    for subreddit in subreddits]
-                numbas = [s['subscribers'] for s in subreddits]
-                msg = "Top 15 Subreddits" if len(reddits) > 15 else "Moderated Subreddits"
-                modstats = [f"{i}. {v}" for i, v in enumerate(reddits, 1)]
-                final_ms = "\n".join(modstats[:15])
-                zero_subs = len([item for item in numbas if item == 0])
-                one_subs = len([item for item in numbas if item == 1])
-                hundred_subs = len([item for item in numbas if item >= 100])
-                thousand_subs = len([item for item in numbas if item >= 1000])
-                hundred_thousand_subs = len([item for item in numbas if item >= 100_000])
-                million = len([item for item in numbas if item >= 1_000_000])
-                ten_million = len([item for item in numbas if item >= 10_000_000])
-                embed = discord.Embed(
-                    description=f"u/{user} mods **{len(reddits):,}** subreddits with **{sum(numbas)}** total readers\n\n*{msg}*\n\n{final_ms}",
-                    colour=self.bot.colour)
-                embed.add_field(name="Advanced Statistics",
-                                value=f"Subreddits with 0 subscribers: **{zero_subs}**\nSubreddits with 1 subscriber: **{one_subs}**\nSubreddits with 100 or more subscribers: **{hundred_subs}**\nSubreddits with 1,000 or more subscribers: **{thousand_subs}**\nSubreddits with 100,000 or more subscribers: **{hundred_thousand_subs}**\nSubreddits with 1,000,000 or more subscribers: **{million}**\nSubreddits with 10,000,000 or more subscribers: **{ten_million}**\n\nAverage Subscribers Per Subreddit: **{humanize.intcomma(round(sum(numbas) / len(numbas)))}**")
-            await ctx.send(embed=embed)
+        async with self.http as h, ctx.typing():
+            try:
+                subreddit, user = await h.get(
+                    f"https://www.reddit.com/user/{user}/moderated_subreddits/.json"), await h.get(
+                    f"https://www.reddit.com/user/{user}/about/.json")
+            except http.APIError:
+                raise commands.BadArgument(f'user **{user}** not found!')
+            await h.close()
+            embed = discord.Embed(colour=self.bot.colour)
+            sub_numb = 0
+            data = subreddit.get('data')
+            numb_subs = [s['subscribers'] for s in data]
+            if not data:
+                raise commands.BadArgument("this user doesn't mod any subreddits!")
+            subreddits = sorted(data, key=lambda s: s['subscribers'], reverse=True)
+            embed.description = f"<:member:731190477927219231> **Total Subscribers: {sum(numb_subs):,}**\n<:reddit:749433072549625897> **Total Subreddits: {len(data)}**\n\n"
+            for subreddit in subreddits:
+                sub_numb += 1
+                embed.description += f"{sub_numb}. [{subreddit['sr_display_name_prefixed']}](https://reddit.com{subreddit['url']}) <:member:731190477927219231> **{subreddit['subscribers']:,}**\n"
+                if sub_numb >= 15:
+                    break
+            zero_subs = len([item for item in numb_subs if item == 0])
+            one_subs = len([item for item in numb_subs if item == 1])
+            hundred_subs = len([item for item in numb_subs if item >= 100])
+            thousand_subs = len([item for item in numb_subs if item >= 1000])
+            hundred_thousand_subs = len([item for item in numb_subs if item >= 100_000])
+            million = len([item for item in numb_subs if item >= 1_000_000])
+            ten_million = len([item for item in numb_subs if item >= 10_000_000])
+            # i know this ^^ is bad
+            icon_url = user['data']['icon_img'].split('?')[0]
+            embed.set_author(name=f"{user['data']['name']}", icon_url=icon_url)
+            embed.add_field(name="Stats",
+                            value=dedent(f"""
+                            Subreddits with 0 subscribers: **{zero_subs}**
+                            Subreddits with 1 subscriber: **{one_subs}**
+                            Subreddits with 100 subscribers: **{hundred_subs}**
+                            Subreddits with 1,000 subscribers: **{thousand_subs}**
+                            Subreddits with 100,000 subscribers: **{hundred_thousand_subs}**
+                            Subreddits with 1,000,000 subscribers: **{million}**
+                            Subreddits with 10,000,000 subscribers: **{ten_million}**
+                            """))
+        await ctx.send(embed=embed)
 
     @commands.command(help="Gets a post from a subreddit of your choosing.")
     async def post(self, ctx, subreddit, sort='hot'):

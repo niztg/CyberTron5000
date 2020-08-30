@@ -30,6 +30,7 @@ from discord.ext.commands import Bot, when_mentioned_or
 from discord.ext import tasks
 
 from CyberTron5000 import config, ctx
+from CyberTron5000.utils.http import CyberHTTP
 
 print(
     r"""
@@ -52,6 +53,7 @@ print(
 class CyberTron5000(Bot):
     def __init__(self):
         super().__init__(**self.config_attrs)
+        self._http = CyberHTTP()
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()

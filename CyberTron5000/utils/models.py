@@ -15,16 +15,10 @@ class InfractionUser:
         with open('json_files/infractions.json') as f:
             data = json.load(f)
         if not (resp := data.get(str(self._guild))):
-            data[str(self._guild)] = {str(self._user): []}
-            with open('json_files/infractions.json', 'w') as f:
-                json.dump(data, f, indent=4)
             return []
         try:
             return resp[str(self._user)]
         except KeyError:
-            resp[str(self._user)] = []
-            with open('json_files/infractions.json', 'w') as f:
-                json.dump(resp, f, indent=4)
             return []
 
     def all_infractions(self):
@@ -36,15 +30,21 @@ class InfractionUser:
 
     def add_infraction(self, reason="No reason provided."):
         """Adds an infraction to them"""
-        self._data.append({"reason": reason, "infraction_number": len(self._data) + 1, "is_null": False, "created": str(dt.utcnow())})
-
-    def finalize(self):
-        """Finalizes any changes made to their profile."""
+        infraction = {"reason": reason, "infraction_number": len(self._data)+1, "is_null": False, "created": str(dt.utcnow())}
+        self._data.append(infraction)
         with open('json_files/infractions.json') as f:
             data = json.load(f)
-        data[str(self._guild)] = {str(self._user): self._data}
-        with open('json_files/infractions.json', 'w') as f:
-            json.dump(data, f, indent=4)
+        if not data.get(str(self._guild)):
+            data[str(self._guild)] = {}
+        try:
+            data[str(self._guild)][str(self._user)].append(infraction)
+        except KeyError:
+            data[str(self._guild)][str(self._user)] = [infraction]
+
+        with open('json_files/infractions.json', 'w') as fp:
+            json.dump(data, fp, indent=4)
+        return Infraction(infraction)
+
 
     @property
     def valid_infractions(self):
@@ -67,7 +67,7 @@ class Infraction:
     def __init__(self, data):
         self._data = data
         self.reason = data.get('reason')
-        self.infraction_number = data.get('infraction_number')
+        self.infraction_number = data.get('infraction_number') # idk why
         self.is_null = data.get('is_null')
 
     def __int__(self):
@@ -79,18 +79,36 @@ class Infraction:
     def __repr__(self):
         return f"<Infraction={self.infraction_number} reason={self.reason} null={self.is_null} created={self.created}>"
 
-    def edit_infraction(self, reason):
-        self._data['reason'] = reason
-        with open('json_files/infractions.json', 'w') as f:
-            json.dump(self._data, f, indent=4)
+    def edit(self, reason):
+        try:
+            with open('json_files/infractions.json') as f:
+                data = json.load(f)
+            index = data[str(self._guild)][str(self._user)].index(self._data)
+            self._data['reason'] = reason
+            data[str(self._guild)][str(self._user)][index] = self._data
+            with open('json_files/infractions.json', 'w') as f:
+                json.dump(data, f, indent=4)
+            self.reason = reason
+        except:
+            raise AttributeError()
 
     def nullify(self):
-        self._data['is_null'] = True
-        with open('json_files/infractions.json', 'w') as f:
-            json.dump(self._data, f, indent=4)
+        try:
+            with open('json_files/infractions.json') as f:
+                data = json.load(f)
+            index = data[str(self._guild)][str(self._user)].index(self._data)
+            self._data['is_null'] = not self.is_null
+            data[str(self._guild)][str(self._user)][index] = self._data
+            with open('json_files/infractions.json', 'w') as f:
+                json.dump(data, f, indent=4)
+            self.is_null = not self.is_null
+        except:
+            raise AttributeError('This error doesn\'t exist!')
 
     @classmethod
     def by_infraction_no(cls, guild_id, user_id, infraction_number):
+        cls._guild = guild_id
+        cls._user = user_id
         with open('json_files/infractions.json') as f:
             data = json.load(f)
         try:
@@ -111,16 +129,13 @@ class Infraction:
 def set_infraction_punishments(guild_id, **options):
     if any(item not in ['mute', 'kick', 'ban'] for item in options.keys()):
         raise AttributeError('You have passed in invalid punishments! Valid punishments include mute, kick, ban.')
-    punishments_dict = {}
     for key, value in options.items():
         if not isinstance(value, int):
-            raise AttributeError("All of your values must be integers!")
-        punishments_dict['key'] = value
+            raise ValueError("All of your values must be integers!")
     with open('json_files/infractions.json', 'r') as f:
         data = json.load(f)
-    try:
-        data[str(guild_id)]['punishments'] = punishments_dict
-    except KeyError:
-        data[str(guild_id)] = {"punishments": punishments_dict}
+    if not data.get(str(guild_id)):
+        data[str(guild_id)] = {}
+    data[str(guild_id)]['punishments'] = dict(options)
     with open('json_files/infractions.json', 'w') as f:
         json.dump(data, f, indent=4)

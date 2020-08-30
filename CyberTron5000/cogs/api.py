@@ -46,7 +46,7 @@ class Api(commands.Cog):
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
         self.clever = async_cleverbot.Cleverbot(bot.config.cleverbot)
         self.clever.set_context(async_cleverbot.DictContext(self.bot))
-        self.http = CyberHTTP()
+        self.http = bot._http
 
     @commands.command(aliases=['ily'], help="compliment your friends :heart:")
     async def compliment(self, ctx, *, user=None):

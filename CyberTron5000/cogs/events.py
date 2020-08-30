@@ -91,6 +91,7 @@ class Events(commands.Cog):
         embed.title = f"Error on `{ctx.command}`"
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"
         embed.description += f"```py\n{self.format_error(ctx, error, not known_value)}\n```"
+        embed.description = embed.description[:2048]
         await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!", embed=embed)
         await self.bot.logging_channel[0].send(embed=embed)
 

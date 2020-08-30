@@ -4,6 +4,7 @@ from asyncio import TimeoutError
 from datetime import datetime as dt
 from io import BytesIO
 import json
+import dictionary
 from time import time
 
 import aiohttp
@@ -513,6 +514,17 @@ class Fun(commands.Cog):
         async with ctx.typing():
             file = await self.sr_image(await self.sr.get_gif('wink'), 'gif')
         await ctx.send(f"{EMOTIONS['wink']} **{ctx.author.display_name}** winked!", file=file)
+
+    @commands.command()
+    async def dictionary(self, ctx, *, word):
+        """Fetch a random word's definition"""
+        # thanks to deviljamjar for this idea
+        # find the original here: https://github.com/DevilJamJar/DevilBot/blob/master/cogs/utility.py/#L48-#L65
+        _dict = dictionary.Dictionary()
+        try:
+            ret = await self.bot.loop.run_in_executor(None)
+        except Exception as error:
+            raise error
 
 
 def setup(bot):
