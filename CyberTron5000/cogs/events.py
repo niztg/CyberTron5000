@@ -122,7 +122,7 @@ class Events(commands.Cog):
         voice_channels = guild.voice_channels
         categories = guild.categories
         emojis = guild.emojis
-        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", guild.id, "c$")
+        await self.bot.db.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", guild.id, "c$")
         try:
             self.bot.prefixes[guild.id] = ["c$"]
         except BaseException:
@@ -148,7 +148,7 @@ class Events(commands.Cog):
         voice_channels = guild.voice_channels
         categories = guild.categories
         emojis = guild.emojis
-        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE guild_id = $1", guild.id)
+        await self.bot.db.execute("DELETE FROM prefixes WHERE guild_id = $1", guild.id)
         try:
             self.bot.prefixes.pop(guild.id)
         except BaseException:

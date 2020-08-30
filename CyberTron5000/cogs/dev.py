@@ -244,16 +244,16 @@ class Developer(commands.Cog):
     @dev.command(aliases=['nu', 'update'])
     async def news_update(self, ctx, *, message):
         """Update the current news."""
-        number = await self.bot.pg_con.fetch("SELECT number FROM news")
+        number = await self.bot.db.fetch("SELECT number FROM news")
         number = number[0][0] or 0
         number += 1
-        await self.bot.pg_con.execute("UPDATE news SET message = $1, number = $2", message, number)
+        await self.bot.db.execute("UPDATE news SET message = $1, number = $2", message, number)
         await ctx.send(f"News updated to: ```{message}```")
 
     @dev.command()
     async def sql(self, ctx, *, statement):
         statement = cyberformat.codeblock(statement, lang='sql')
-        res = await self.bot.pg_con.fetch(statement)
+        res = await self.bot.db.fetch(statement)
         await ctx.send(res)
 
     @dev.command()

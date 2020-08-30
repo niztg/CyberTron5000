@@ -336,9 +336,9 @@ class Fun(commands.Cog):
 
     async def get_all_todo(self, id: int = None):
         if not id:
-            return await self.bot.pg_con.fetch("SELECT * FROM todo")
+            return await self.bot.db.fetch("SELECT * FROM todo")
         else:
-            return await self.bot.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", id)
+            return await self.bot.db.fetch("SELECT * FROM todo WHERE user_id = $1", id)
 
     @commands.group(invoke_without_command=True)
     async def todo(self, ctx):
@@ -364,7 +364,7 @@ class Fun(commands.Cog):
         if len(todo) > 50:
             return await ctx.send("Your todo is too long. Please be more consice.")
         id = random.randint(1, 99999)
-        await self.bot.pg_con.execute(
+        await self.bot.db.execute(
             "INSERT INTO todo (todo, id, time, message_url, user_id) VALUES ($1, $2, $3, $4, $5)", todo, id, time(),
             str(ctx.message.jump_url), ctx.author.id)
         await ctx.send(f"{ctx.tick()} Inserted `{todo}` into your todo list! (ID: `{id}`)")
@@ -380,7 +380,7 @@ class Fun(commands.Cog):
         message = []
         for i in id:
             message.append(f"• {todos[ids.index(i)]}")
-            await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
+            await self.bot.db.execute("DELETE FROM todo WHERE user_id = $1 AND id = $2", ctx.author.id, i)
         await ctx.send(
             f"{ctx.tick()} Deleted **{len(id)}** items from your todo list:\n" + "\n".join(message))
 
@@ -393,14 +393,14 @@ class Fun(commands.Cog):
     @todo.command()
     async def clear(self, ctx):
         """Clears all of your todos"""
-        num = len((await self.bot.pg_con.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)))
-        await self.bot.pg_con.execute("DELETE FROM todo WHERE user_id = $1", ctx.author.id)
+        num = len((await self.bot.db.fetch("SELECT * FROM todo WHERE user_id = $1", ctx.author.id)))
+        await self.bot.db.execute("DELETE FROM todo WHERE user_id = $1", ctx.author.id)
         await ctx.send(f"{ctx.tick()} Deleted **{num}** items from your todo list!")
 
     @todo.command(aliases=['show'])
     async def info(self, ctx, id: int):
         """Shows you info on a todo"""
-        results = await self.bot.pg_con.fetch("SELECT * FROM todo WHERE id = $1", id)
+        results = await self.bot.db.fetch("SELECT * FROM todo WHERE id = $1", id)
         if not results:
             raise commands.BadArgument(f'{id} is not a valid todo!')
         results = results[0]
@@ -416,12 +416,12 @@ class Fun(commands.Cog):
     @todo.command(aliases=['add_desc', 'ad'])
     async def describe(self, ctx, id: int, *, description):
         """Add a description for your todo"""
-        results = await self.bot.pg_con.fetch("SELECT * FROM todo WHERE id = $1", id)
+        results = await self.bot.db.fetch("SELECT * FROM todo WHERE id = $1", id)
         if not results:
             raise commands.BadArgument(f'{id} is not a valid todo!')
         if len(description) > 250:
             return await ctx.send("That description is too long!")
-        await self.bot.pg_con.execute("UPDATE todo SET description = $1 WHERE id = $2", description, id)
+        await self.bot.db.execute("UPDATE todo SET description = $1 WHERE id = $2", description, id)
         await ctx.send(
             f"{ctx.tick()} Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
 

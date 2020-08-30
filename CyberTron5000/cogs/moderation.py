@@ -173,8 +173,12 @@ class Moderation(commands.Cog):
         try:
             actions = []
             async for x in ctx.guild.audit_logs(limit=limit):
+                if not x.target:
+                    target = ''
+                else:
+                    target = x.target
                 actions.append(
-                    f"{x.user.name} {lists.audit_actions[x.action]} {x.target} ({humanize.naturaltime(__import__('datetime').datetime.utcnow() - x.created_at)})")
+                    f"{x.user.name} {lists.audit_actions[x.action]} {str(target)} ({humanize.naturaltime(__import__('datetime').datetime.utcnow() - x.created_at)})")
             source = paginator.IndexedListSource(embed=discord.Embed(colour=self.bot.colour).set_author(
                 name=f"Last Audit Log Actions for {ctx.guild}",
                 icon_url="https://cdn.discordapp.com/emojis/446847139977625620.png?v=1"), data=actions)
@@ -245,8 +249,8 @@ class Moderation(commands.Cog):
             return await ctx.send(f"`{prefix}` is already a prefix for this guild!")
         if len(prefixes) > 15:
             return await ctx.send("This guild already has 15 prefixes! Please remove some before continuing.")
-        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
-                                      prefix)
+        await self.bot.db.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
+                                  prefix)
         try:
             self.bot.prefixes[ctx.guild.id].append(prefix)
         except KeyError:
@@ -262,7 +266,7 @@ class Moderation(commands.Cog):
             return await ctx.send(f"`{prefix}` is already a prefix for this guild!")
         if len(prefixes) > 15:
             return await ctx.send("This guild already has 15 prefixes! Please remove some before continuing.")
-        await self.bot.pg_con.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
+        await self.bot.db.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
                                       f"{prefix} ")
         try:
             self.bot.prefixes[ctx.guild.id].append(f"{prefix} ")
@@ -277,8 +281,8 @@ class Moderation(commands.Cog):
         prefixes = self.bot.prefixes.get(ctx.guild.id)
         if prefix not in prefixes:
             return await ctx.send(f"`{prefix}` is not a prefix in {ctx.guild}!")
-        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", prefix,
-                                      ctx.guild.id)
+        await self.bot.db.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", prefix,
+                                  ctx.guild.id)
         try:
             self.bot.prefixes[ctx.guild.id].remove(prefix)
         except KeyError:
@@ -292,8 +296,8 @@ class Moderation(commands.Cog):
         prefixes = self.bot.prefixes.get(ctx.guild.id)
         if f"{prefix} " not in prefixes:
             return await ctx.send(f"`{prefix} ` is not a prefix in {ctx.guild}!")
-        await self.bot.pg_con.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", f"{prefix} ",
-                                      ctx.guild.id)
+        await self.bot.db.execute("DELETE FROM prefixes WHERE prefix = $1 AND guild_id = $2", f"{prefix} ",
+                                  ctx.guild.id)
         try:
             self.bot.prefixes[ctx.guild.id].remove(f"{prefix} ")
         except KeyError:

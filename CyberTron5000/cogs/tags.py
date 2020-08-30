@@ -50,12 +50,12 @@ class Tags(commands.Cog):
         except ValueError as v:
             return await ctx.send(v)
         self._tag_dict[ctx.guild.id][tag]['uses'] += 1
-        current_uses = await self.bot.pg_con.fetch("SELECT uses FROM tags WHERE name = $1 AND guild_id = $2", tag,
-                                                   ctx.guild.id)
+        current_uses = await self.bot.db.fetch("SELECT uses FROM tags WHERE name = $1 AND guild_id = $2", tag,
+                                               ctx.guild.id)
         uses = current_uses[0][0] or 0
         uses += 1
-        await self.bot.pg_con.execute("UPDATE tags SET uses = $1 WHERE name = $2 AND guild_id = $3", uses, tag,
-                                      ctx.guild.id)
+        await self.bot.db.execute("UPDATE tags SET uses = $1 WHERE name = $2 AND guild_id = $3", uses, tag,
+                                  ctx.guild.id)
 
     @tag.command(aliases=['create'])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -70,7 +70,7 @@ class Tags(commands.Cog):
             return await ctx.send("This tag already exists for this guild!")
         id = randint(1, 99_999)
         self._tag_dict[ctx.guild.id][tag] = {'content': content, 'uses': 0, 'author': ctx.author.id, 'id': id}
-        await self.bot.pg_con.execute(
+        await self.bot.db.execute(
             "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
             ctx.guild.id, tag, content, 0, id)
         await ctx.send(f"{ctx.tick()} Success! `{tag}` is now a tag in **{ctx.guild.name}**")
@@ -86,8 +86,8 @@ class Tags(commands.Cog):
         if self._tag_dict[ctx.guild.id][tag]['author'] != ctx.author.id:
             raise commands.BadArgument('You do not own this tag!')
         self._tag_dict[ctx.guild.id][tag]['content'] = new_content
-        await self.bot.pg_con.execute("UPDATE tags SET content = $1 WHERE name = $2 AND guild_id = $3", new_content,
-                                      tag, ctx.guild.id)
+        await self.bot.db.execute("UPDATE tags SET content = $1 WHERE name = $2 AND guild_id = $3", new_content,
+                                  tag, ctx.guild.id)
         await ctx.send(f"{ctx.tick()} Success! Tag `{tag}` has been edited!")
 
     @commands.command(aliases=['all_tags', 'at'])
@@ -149,7 +149,7 @@ class Tags(commands.Cog):
         id = randint(1, 99_999)
         self._tag_dict[ctx.guild.id][message1.content] = {'content': message2.content, 'uses': 0,
                                                           'author': ctx.author.id, 'id': id}
-        await self.bot.pg_con.execute(
+        await self.bot.db.execute(
             "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
             ctx.guild.id, message1.content, message2.content, 0, id)
         await ctx.send(f"{ctx.tick()} Success! Tag `{message1.content}` created!")
@@ -162,7 +162,7 @@ class Tags(commands.Cog):
         except Exception as error:
             return await ctx.send(error)
         if ctx.author.permissions_in(ctx.channel).kick_members or ctx.author.id == self._tag_dict[ctx.guild.id][tag]['author']:
-            await self.bot.pg_con.execute("DELETE FROM tags WHERE name = $1 AND guild_id = $2", tag, ctx.guild.id)
+            await self.bot.db.execute("DELETE FROM tags WHERE name = $1 AND guild_id = $2", tag, ctx.guild.id)
             self._tag_dict[ctx.guild.id].pop(tag)
             await ctx.send(f"{ctx.tick()} Success! Tag `{tag}` deleted!")
         else:

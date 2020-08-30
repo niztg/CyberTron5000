@@ -59,7 +59,7 @@ class CyberTron5000(Bot):
         self.config = config.config()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if filename.endswith('.py')]
-        self.pg_con = self.loop.run_until_complete(self.create_db_pool())
+        self.db = self.loop.run_until_complete(self.create_db_pool())
         self.load_extension(name='jishaku')
         for task in (self.startup, self._init_tags):
             self.loop.create_task(task())
@@ -73,12 +73,16 @@ class CyberTron5000(Bot):
 
     @property
     def owner(self) -> discord.User:
-        return self.get_user(350349365937700864)
+        return self.get_user(350349365937700864) # me
 
     @property
     def logging_channel(self) -> List[discord.TextChannel]:
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
+    # :: Key
+    # 1 - errors
+    # 2 - guilds
+    # 3 - suggestions
 
     @property
     def uptime(self) -> dict:
@@ -131,7 +135,7 @@ class CyberTron5000(Bot):
             except Exception as error:
                 print(f"Could not load {file}: {error}")
         print(f"COGS HAVE BEEN LOADED")
-        prefix_data = await self.pg_con.fetch("SELECT guild_id, array_agg(prefix) FROM prefixes GROUP BY guild_id")
+        prefix_data = await self.db.fetch("SELECT guild_id, array_agg(prefix) FROM prefixes GROUP BY guild_id")
         for entry in prefix_data:
             self.prefixes[entry['guild_id']] = entry['array_agg']
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
@@ -145,11 +149,11 @@ class CyberTron5000(Bot):
         SQL = """
         SELECT guild_id FROM tags
         """
-        tags = await self.pg_con.fetch(SQL)
+        tags = await self.db.fetch(SQL)
         for query in tags:
             self._tag_dict[query['guild_id']] = {}
-            tags2 = await self.pg_con.fetch("""SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1""",
-                                            query['guild_id'])
+            tags2 = await self.db.fetch("""SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1""",
+                                        query['guild_id'])
             for query2 in tags2:
                 self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
                                                                      'uses': query2['uses'] or 0,

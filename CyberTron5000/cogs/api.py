@@ -259,13 +259,14 @@ class Api(commands.Cog):
         await paginator.CatchAllMenu(source=source).start(ctx)
 
     @commands.command()
-    async def rtfs(self, ctx, *, query: converter.RTFSObject = None):
-        """Shows results from the discord.py sourcecode"""
+    async def rtfs(self, ctx, *, query: converter.RTFSObject):
+        """Shows results from. the discord.py sourcecode"""
         async with self.http as h:
             try:
                 res = await h.get(f"https://rtfs.eviee.me/dpy?search={query}")
-            except Exception as error:
-                print(error)
+            except APIError:
+                print('aaaa')
+                raise commands.BadArgument()
         await h.close()
         if not res:
             return await ctx.send("No results.")

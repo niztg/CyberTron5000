@@ -5,7 +5,7 @@ import aiohttp
 import discord
 import humanize
 from discord.ext import commands
-from textwrap import dedent
+from tabulate import tabulate
 
 from CyberTron5000.utils import paginator, http
 from CyberTron5000.utils.lists import REDDIT_EMOJIS
@@ -103,9 +103,7 @@ class Reddit(commands.Cog):
                 embed.set_author(name=s['author'])
                 embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
                 embed.set_image(url=s['url'])
-                return await ctx.send(embed=embed) if not s['over_18'] or s[
-                    'over_18'] and ctx.channel.is_nsfw() else await ctx.send(
-                    f"<:warning:727013811571261540> **{ctx.author.name}**, NSFW Channel required!")
+        return await ctx.send(embed=embed) if not s['over_18'] or s['over_18'] and ctx.channel.is_nsfw() else await ctx.send(f"<:warning:727013811571261540> **{ctx.author.name}**, NSFW Channel required!")
 
     @commands.command(aliases=['iu'], help="Shows you the banner or icon of a subreddit (on old Reddit).")
     async def icon(self, ctx, subreddit, choice="icon"):
@@ -195,26 +193,24 @@ class Reddit(commands.Cog):
                 embed.description += f"{sub_numb}. [{subreddit['sr_display_name_prefixed']}](https://reddit.com{subreddit['url']}) <:member:731190477927219231> **{subreddit['subscribers']:,}**\n"
                 if sub_numb >= 15:
                     break
-            zero_subs = len([item for item in numb_subs if item == 0])
-            one_subs = len([item for item in numb_subs if item == 1])
-            hundred_subs = len([item for item in numb_subs if item >= 100])
-            thousand_subs = len([item for item in numb_subs if item >= 1000])
-            hundred_thousand_subs = len([item for item in numb_subs if item >= 100_000])
-            million = len([item for item in numb_subs if item >= 1_000_000])
-            ten_million = len([item for item in numb_subs if item >= 10_000_000])
+            subreddit_stats = {
+                '0': len([item for item in numb_subs if item == 0]),
+                '1': len([item for item in numb_subs if item == 1]),
+                '100': len([item for item in numb_subs if item >= 100]),
+                '1,000': len([item for item in numb_subs if item >= 1000]),
+                '100,000': len([item for item in numb_subs if item >= 100_000]),
+                '1,000,000': len([item for item in numb_subs if item >= 1_000_000]),
+                '10,000,000': len([item for item in numb_subs if item >= 10_000_000])
+            }
             # i know this ^^ is bad
+            headers = ["Subscribers", "Number of Subreddits"]
+            table = []
+            for key, value in subreddit_stats.items():
+                table.append([key.strip(), str(value).strip()])
+            table = tabulate(table, headers, tablefmt="fancy_grid")
             icon_url = user['data']['icon_img'].split('?')[0]
             embed.set_author(name=f"{user['data']['name']}", icon_url=icon_url)
-            embed.add_field(name="Stats",
-                            value=dedent(f"""
-                            Subreddits with 0 subscribers: **{zero_subs}**
-                            Subreddits with 1 subscriber: **{one_subs}**
-                            Subreddits with 100 subscribers: **{hundred_subs}**
-                            Subreddits with 1,000 subscribers: **{thousand_subs}**
-                            Subreddits with 100,000 subscribers: **{hundred_thousand_subs}**
-                            Subreddits with 1,000,000 subscribers: **{million}**
-                            Subreddits with 10,000,000 subscribers: **{ten_million}**
-                            """))
+            embed.add_field(name="Stats", value=f"```\n{table}\n```")
         await ctx.send(embed=embed)
 
     @commands.command(help="Gets a post from a subreddit of your choosing.")

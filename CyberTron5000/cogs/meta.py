@@ -173,7 +173,7 @@ class Meta(commands.Cog):
             uptime.append(f'**{value}** {key}')
         uptime = ', '.join(uptime)
         lines = lines_of_code()
-        news = await self.bot.pg_con.fetch("SELECT message, number FROM news")
+        news = await self.bot.db.fetch("SELECT message, number FROM news")
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=f"About {self.version}", icon_url=self.bot.user.avatar_url)
         embed.description = f"→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"
@@ -206,7 +206,7 @@ class Meta(commands.Cog):
             json.dump(res, f, indent=4)
         ms = await ctx.send(
             f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{ctx.tick()} | **Yes**\n{ctx.tick(False)} | **No**\n(You have 15 seconds)")
-        await self.bot.pg_con.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
+        await self.bot.db.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
         try:
             async with async_timeout.timeout(15):
                 for emoji in (ctx.tick(True), ctx.tick(False)):
@@ -261,7 +261,7 @@ class Meta(commands.Cog):
     @suggest.command()
     @commands.is_owner()
     async def resolve(self, ctx, id: str, *, reason):
-        data = await self.bot.pg_con.fetch("SELECT msg_id FROM suggestions WHERE suggest_id = $1", id)
+        data = await self.bot.db.fetch("SELECT msg_id FROM suggestions WHERE suggest_id = $1", id)
         if not data:
             return await ctx.send("Not a valid suggestion.")
         msg = await ctx.fetch_message(data[0][0])
@@ -276,7 +276,7 @@ class Meta(commands.Cog):
         res.pop(str(id))
         with open("json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
-        await self.bot.pg_con.execute("DELETE FROM suggestions WHERE suggest_id = $1", id)
+        await self.bot.db.execute("DELETE FROM suggestions WHERE suggest_id = $1", id)
 
     @suggest.command(invoke_without_command=True)
     async def error(self, ctx, *, error):
@@ -397,7 +397,7 @@ class Meta(commands.Cog):
     async def news(self, ctx):
         """View the current news."""
         embed = discord.Embed(colour=self.bot.colour)
-        news = await self.bot.pg_con.fetch("SELECT message, number FROM news")
+        news = await self.bot.db.fetch("SELECT message, number FROM news")
         if not news:
             embed.description = "There is no news currently. Come back soon."
         else:
