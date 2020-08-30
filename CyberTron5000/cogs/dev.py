@@ -239,7 +239,7 @@ class Developer(commands.Cog):
     async def restart(self, ctx):
         await ctx.message.add_reaction(emoji=ctx.tick())
         await self.bot.logout()
-        subprocess.call([sys.executable, "main.py"])
+        subprocess.call([sys.executable, "ct5k.py"])
     
     @dev.command(aliases=['nu', 'update'])
     async def news_update(self, ctx, *, message):
