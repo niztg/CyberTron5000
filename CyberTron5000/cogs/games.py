@@ -138,7 +138,6 @@ class Games(commands.Cog):
             f"**Generation**\n{pokemon['generation']}"
         ]
         num_hints = 0
-        print(hints)
         try:
             for attempt in range(3):
                 await msg.edit(content=content.format(attempt+1))
