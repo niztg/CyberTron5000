@@ -97,25 +97,25 @@ class Api(commands.Cog):
             async with self.http as http:
                 data = await http.get(f"https://some-random-api.ml/pokedex?pokemon={pokemon.lower()}")
             await http.close()
-            embed = discord.Embed(title=f"{data[0]['name'].title()} • #{data[0]['id']}", colour=self.bot.colour)
-            embed.set_author(name=f'The {" ".join(data[0]["species"])}')
-            embed.set_thumbnail(url=data[0]['sprites']['normal'])
+            embed = discord.Embed(title=f"{data['name'].title()} • #{data['id']}", colour=self.bot.colour)
+            embed.set_author(name=f'The {" ".join(data["species"])}')
+            embed.set_thumbnail(url=data['sprites']['normal'])
             evo_line = []
-            for e in data[0]['family']['evolutionLine']:
+            for e in data['family']['evolutionLine']:
                 if str(e).lower() == pokemon.lower():
                     evo_line.append(f"**{e}**")
                 else:
                     evo_line.append(e)
             n = '\n'
-            embed.description = f" ".join([TYPES[item.lower()] for item in data[0]['type']])
-            embed.description += f'\n<:pokeball:715599637079130202> {data[0]["description"]}\n**{data[0]["height"]}**\n**{data[0]["weight"]}**'
+            embed.description = f" ".join([TYPES[item.lower()] for item in data['type']])
+            embed.description += f'\n<:pokeball:715599637079130202> {data["description"]}\n**{data["height"]}**\n**{data["weight"]}**'
             embed.add_field(name='Evolution Line',
                             value=f'{" → ".join(evo_line)}' or "**{0}**".format(str(pokemon).capitalize()),
                             inline=False)
-            embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data[0]['abilities']]) + '**',
+            embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data['abilities']]) + '**',
                             inline=False)
             embed.add_field(name='Base Stats',
-                            value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data[0]['stats'].items()])}",
+                            value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data['stats'].items()])}",
                             inline=False)
             await ctx.send(embed=embed)
         except (IndexError, APIError):

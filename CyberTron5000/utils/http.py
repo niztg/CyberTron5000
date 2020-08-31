@@ -2,11 +2,15 @@ from aiohttp import ClientSession
 
 
 class APIError(Exception):
-    def __init__(self, message="An issue has occured with the API!"):
+    def __init__(self, exc: Exception=None, message="An issue has occured with the API!"):
         self.message = message
+        self.exc = exc
 
     def __str__(self):
-        return self.message
+        if not self.exc:
+            return self.message
+        else:
+            raise self.exc
 
 
 class CyberHTTP:
@@ -25,7 +29,7 @@ class CyberHTTP:
                     raise APIError()
                 data = await r.json()
         except Exception as error:
-            raise APIError(f"{error.__class__.__name__}: {error}")
+            raise APIError(error)
         return data
 
     async def close(self):

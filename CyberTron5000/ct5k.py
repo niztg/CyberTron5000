@@ -58,7 +58,7 @@ class CyberTron5000(Bot):
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('cogs') if filename.endswith('.py')]
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('CyberTron5000/cogs') if filename.endswith('.py')]
         self.db = self.loop.run_until_complete(self.create_db_pool())
         self.load_extension(name='jishaku')
         for task in (self.startup, self._init_tags):

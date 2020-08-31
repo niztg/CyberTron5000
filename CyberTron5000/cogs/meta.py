@@ -59,6 +59,8 @@ def lines_of_code():
         "files": fc
     }
 
+lines = lines_of_code()
+
 
 class Meta(commands.Cog):
     """Meta Bot commands"""
@@ -132,7 +134,7 @@ class Meta(commands.Cog):
             location = os.path.relpath(file)
             total, fl = __import__('inspect').getsourcelines(cmd.callback)
             ll = fl + (len(total) - 1)
-            url = f"https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/{location}#L{fl}-L{ll}"
+            url = f"https://github.com/niztg/CyberTron5000/blob/master/{location}#L{fl}-L{ll}"
             if not cmd.aliases:
                 char = '\u200b'
             else:
@@ -150,7 +152,7 @@ class Meta(commands.Cog):
 
     @commands.command(help="Shows total lines of code used to make the bot.")
     async def lines(self, ctx):
-        await ctx.send(f"**{self.bot.user.name}** was made with **{lines_of_code().get('lines'):,}** lines of code!")
+        await ctx.send(f"**{self.bot.user.name}** was made with **{lines.get('lines'):,}** lines of code!")
 
     async def get_commits(self, limit: int = 3, names: bool = True, author: bool = True):
         async with aiohttp.ClientSession() as cs:
@@ -173,7 +175,6 @@ class Meta(commands.Cog):
         for key, value in self.bot.uptime.items():
             uptime.append(f'**{value}** {key}')
         uptime = ', '.join(uptime)
-        lines = lines_of_code()
         news = await self.bot.db.fetch("SELECT message, number FROM news")
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=f"About {self.version}", icon_url=self.bot.user.avatar_url)
@@ -288,12 +289,11 @@ class Meta(commands.Cog):
     @commands.command(aliases=['stats'])
     async def statistics(self, ctx):
         """Shows you statistics."""
-        stats = lines_of_code()
         embed = discord.Embed(colour=ctx.bot.colour)
-        embed.set_author(name=f"Stats for {ctx.me.name}", icon_url=ctx.me.avatar_url)
-        embed.description = f"**{stats.get('lines'):,}** lines of code | **{stats.get('files')}** files"
+        embed.set_author(name=f"lines for {ctx.me.name}", icon_url=ctx.me.avatar_url)
+        embed.description = f"**{lines.get('lines'):,}** lines of code | **{lines.get('files')}** files"
         embed.add_field(name="Statistics",
-                        value=f"<:class:735360032434290830> Classes: **{stats.get('classes'):,}**\n<:function:735517201561288775> Functions: **{stats.get('functions'):,}**\n<:coroutine:735520608183648337> Coroutines: **{stats.get('coroutine'):,}**\n💬 Comments: **{stats.get('comments'):,}**")
+                        value=f"<:class:735360032434290830> Classes: **{lines.get('classes'):,}**\n<:function:735517201561288775> Functions: **{lines.get('functions'):,}**\n<:coroutine:735520608183648337> Coroutines: **{lines.get('coroutine'):,}**\n💬 Comments: **{lines.get('comments'):,}**")
         embed.add_field(name="\u200b",
                         value=f'<:member:731190477927219231> Users: **{len(self.bot.users):,}**\n<:Discord:735530547992068146> Servers: **{len(self.bot.guilds)}**\n<:text_channel:703726554018086912> Channels: **{len([*self.bot.get_all_channels()]):,}**\n<:emoji:734231060069613638> Emojis: **{len(self.bot.emojis):,}**')
         await ctx.send(embed=embed)
@@ -314,17 +314,7 @@ class Meta(commands.Cog):
     @commands.command()
     async def invite(self, ctx):
         """Invite me to your server!"""
-        embed = discord.Embed(colour=self.bot.colour)
-        embed.add_field(name="Invite the Bot!",
-                        value=f"[`Permissions: 104189632`]({self.bot.logging['invite']}) <:star:737736250718421032>\n[`Permissions: 8 (Admin)`](https://discord.com/api/oauth2/authorize?client_id=697678160577429584&permissions=8&scope=bot)\n[`Permissions: 0`](https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=0)\n",
-                        inline=False)
-        embed.add_field(name="Other",
-                        value=f"[`Chose Your Own`](https://discord.com/api/oauth2/authorize?client_id=697678160577429584&permissions=2147483639&scope=bot)",
-                        inline=False)
-        embed.set_thumbnail(url=ctx.me.avatar_url)
-        await ctx.send(
-            content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632",
-            embed=embed)
+        await ctx.send(content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632")
 
     @commands.command()
     async def support(self, ctx):

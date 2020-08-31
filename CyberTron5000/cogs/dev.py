@@ -276,13 +276,19 @@ class Developer(commands.Cog):
         await ctx.send(random.randint(no, no2))
 
     @dev.command()
-    async def snipe_cache(self, ctx):
+    async def snipe_cache(self, ctx, channel: discord.TextChannel = None):
         l = list()
-        with open('json_files/snipes.json') as f:
+        with open('CyberTron5000/json_files/snipes.json') as f:
             data = json.load(f)
-        for x in data.values():
-            l += x
-        await ctx.send(f"I have cached **{len(l)}** deleted messages across **{len(data.keys())}** channels!")
+        if not channel:
+            for x in data.values():
+                l += x
+            await ctx.send(f"I have cached **{len(l)}** deleted message(s) across **{len(data.keys())}** channels!")
+        else:
+            try:
+                await ctx.send(f"I have cached **{len(data[str(channel.id)])}** deleted message(s) in {channel}")
+            except KeyError:
+                await ctx.send(f"I have cached **0** deleted message(s) in {channel}")
 
 
 def setup(bot):

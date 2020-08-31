@@ -26,7 +26,7 @@ class Events(commands.Cog):
 
     @staticmethod
     def snipes():
-        with open('json_files/snipes.json', 'r') as f:
+        with open('CyberTron5000/json_files/snipes.json', 'r') as f:
             data = json.load(f)
         return data
 
@@ -40,7 +40,7 @@ class Events(commands.Cog):
             data[channel_id].append(msg_data)
         except KeyError:
             data[channel_id] = [msg_data]
-        with open('json_files/snipes.json', 'w') as f:
+        with open('CyberTron5000/json_files/snipes.json', 'w') as f:
             json.dump(data, f, indent=4)
         return
 

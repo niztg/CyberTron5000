@@ -432,7 +432,7 @@ class Fun(commands.Cog):
         """Shows the most recently deleted messages in a given channel"""
         # i know i shouldnt be using json for this
         channel = flags.get('channel') or ctx.channel
-        with open('json_files/snipes.json', 'r') as f:
+        with open('CyberTron5000/json_files/snipes.json', 'r') as f:
             snipes = json.load(f)
         try:
             channel_snipes = snipes[str(channel.id)]
