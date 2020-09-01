@@ -7,8 +7,9 @@ import humanize
 from discord.ext import commands
 from tabulate import tabulate
 
-from CyberTron5000.utils import paginator, http
+from CyberTron5000.utils import paginator
 from CyberTron5000.utils.lists import REDDIT_EMOJIS
+from CyberTron5000.utils.http import APIError
 
 
 class Reddit(commands.Cog):
@@ -18,92 +19,88 @@ class Reddit(commands.Cog):
         self.bot = bot
         self.up = "<:upvote:718895913342337036>"
         self.share = "<:share:730823872265584680>"
-        self.http = self.bot._http
+        self.http = bot._http
 
     # noinspection PyBroadException
 
-    async def cakeday(self, u: str) -> bool:
-        async with aiohttp.ClientSession().get(f'https://www.reddit.com/user/{u}/about/.json') as re:
-            k = await re.json()
-        created = datetime.datetime.utcfromtimestamp(k['data']['created_utc'])
+    async def cakeday(self, data: dict) -> bool:
+        created = datetime.datetime.utcfromtimestamp(data['data']['created_utc'])
         today = datetime.datetime.utcnow()
         return (created.month, created.day) == (today.month, today.day)
 
+    async def get_redditor_data(self, user, option):
+        assert option in ("moderated_subreddits", "about", "trophies")
+        async with self.http as h:
+            try:
+                data = await h.get(f"https://www.reddit.com/user/{user}/{option}/.json")
+            except APIError:
+                raise APIError(message=f"Redditor **{user}** not found!")
+        await h.close()
+        return data
+
+    async def get_post_data(self, subreddit, sort):
+        async with self.http as h:
+            try:
+                data = await h.get(f"https://www.reddit.com/r/{subreddit}/{sort}.json", params={'limit': 100})
+            except APIError:
+                raise APIError()
+        posts = list()
+        for item in data['data']['children']:
+            posts.append(item['data'])
+        await h.close()
+        return [post for post in posts if not post['stickied']]
+
     @commands.command(help="Shows your Reddit Stats.", aliases=['rs', 'karma', 'redditor'])
-    async def redditstats(self, ctx, user):
-        trophies = []
-        td = {
-            True: "<:on:732805104620797965>",
-            False: "<:off:732805190582927410>"
-        }
+    async def redditstats(self, ctx, redditor):
+        troph_list, final = [], []
         async with ctx.typing():
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://www.reddit.com/user/{user}/trophies/.json") as r:
-                    res = await r.json()
-                async with cs.get(f"https://www.reddit.com/user/{user}/about/.json") as re:
-                    k = await re.json()
-                await cs.close()
-                if r.status != 200 or re.status != 200:
-                    if r.status or re.status == 400:
-                        custom_message = " Redditor not found. "
-                    else:
-                        custom_message = "\u200b"
-                    return await ctx.send(
-                        f"Whoops, something went wrong.{custom_message}Error Codes: {r.status}, {re.status}")
-            for item in res['data']['trophies']:
+            try:
+                user, trophies = await self.get_redditor_data(redditor, 'about'), await self.get_redditor_data(redditor, 'trophies')
+            except APIError as error:
+                raise commands.BadArgument(str(error))
+            for item in trophies['data']['trophies']:
                 try:
-                    trophies.append(REDDIT_EMOJIS[item['data']['name']])
+                    troph_list.append(REDDIT_EMOJIS[item['data']['name']])
                 except KeyError:
                     print(f"{item['data']['name']} not in trophies list!")
-            final = []
-            for i in trophies:
+            for i in troph_list:
                 if i not in final:
                     final.append(i)
             cake = " <:cakeday:736660679938932876>" if await self.cakeday(user) else ''
-            icon = k['data']['icon_img']
+            icon = user['data']['icon_img']
             icon = icon.split("?")[0]
-            banner = k['data']['subreddit']['banner_img']
+            banner = user['data']['subreddit']['banner_img']
             banner = banner.split("?")[0]
             embed = discord.Embed(color=self.bot.colour)
             embed.set_thumbnail(url=icon)
-            embed.url = f"https://reddit.com/user/{user}"
-            embed.set_author(name=f"{k['data']['subreddit']['title']}",
-                             url=f"https://reddit.com/user/{user}") if f"{k['data']['subreddit']['title']}" else None
-            embed.title = k['data']['name'] + cake
-            embed.description = k['data']['subreddit']['public_description'] + '\n'
-            embed.description += f"<:karma:704158558547214426> **{k['data']['link_karma'] + k['data']['comment_karma']:,}** | 🔗 **{k['data']['link_karma']:,}** 💬 **{k['data']['comment_karma']:,}**"
+            embed.url = f"https://reddit.com/user/{redditor}"
+            embed.set_author(name=f"{user['data']['subreddit']['title']}", url=f"https://reddit.com/user/{redditor}") if f"{user['data']['subreddit']['title']}" else None
+            embed.title = user['data']['name'] + cake
+            embed.description = user['data']['subreddit']['public_description'] + '\n'
+            embed.description += f"<:karma:704158558547214426> **{user['data']['link_karma'] + user['data']['comment_karma']:,}** | 🔗 **{user['data']['link_karma']:,}** 💬 **{user['data']['comment_karma']:,}**"
             embed.description += f"\n<:asset:734531316741046283> [Icon URL]({icon})"
             if banner:
-                embed.description += f" | [Banner URL]({banner})"
+                embed.description += f" [Banner URL]({banner})"
             embed.description += "\n" + ' '.join(final)
-            dt = datetime.datetime.utcfromtimestamp(k['data']['created_utc'])
+            dt = datetime.datetime.utcfromtimestamp(user['data']['created_utc'])
             created = humanize.naturaltime(datetime.datetime.utcnow() - dt)
-            embed.add_field(name="Account Settings",
-                            value=f'{td[k["data"]["verified"]]} **Verified**\n{td[k["data"]["is_mod"]]} **Is Mod**\n{td[k["data"]["hide_from_robots"]]} **Hide From Robots**\n{td[k["data"]["has_subscribed"]]} **Has Subscribed**')
+            embed.add_field(name="Account Settings", value=f'{ctx.on_off(user["data"]["verified"])} **Verified**\n{ctx.on_off(user["data"]["is_mod"])} **Is Mod**\n{ctx.on_off(user["data"]["hide_from_robots"])} **Hide From Robots**\n{ctx.on_off(user["data"]["has_subscribed"])} **Has Subscribed**')
             embed.set_footer(text=f'Account created {created}')
-            await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['m'], help="Shows you a meme from some of reddit's dankest places (and r/memes)")
     async def meme(self, ctx):
-        subreddit = random.choice(
-            ['memes', 'dankmemes', 'okbuddyretard', 'memeeconomy', 'dankexchange', 'pewdiepiesubmissions',
-             'wholesomememes'])
-        posts = []
+        subreddit = random.choice(['memes', 'meme', 'dankmemes', 'okbuddyretard', 'memeeconomy', 'dankexchange', 'pewdiepiesubmissions', 'wholesomememes'])
         async with ctx.typing():
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
-                    res = await r.json()
-                await cs.close()
-                for i in res['data']['children']:
-                    posts.append(i['data'])
-                s = random.choice([p for p in posts if not p['is_self'] and not p['stickied']])
-                embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
-                                      url=f"https://reddit.com/{s['permalink']}",
-                                      description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
-                embed.set_author(name=s['author'])
-                embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
-                embed.set_image(url=s['url'])
-        return await ctx.send(embed=embed) if not s['over_18'] or s['over_18'] and ctx.channel.is_nsfw() else await ctx.send(f"<:warning:727013811571261540> **{ctx.author.name}**, NSFW Channel required!")
+            s = random.choice(await self.get_post_data(subreddit, 'hot'))
+            embed = discord.Embed(title=str(s['title']), colour=self.bot.colour, url=f"https://reddit.com/{s['permalink']}", description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
+            embed.timestamp = datetime.datetime.utcfromtimestamp(s['created'])
+            embed.set_author(name=s['author'])
+            embed.set_footer(text=f"r/{s['subreddit']} • {s['upvote_ratio'] * 100:,}% upvote ratio")
+            embed.set_image(url=s['url'])
+        if s['over_18'] and not ctx.channel.is_nsfw():
+            raise commands.NSFWChannelRequired(ctx.channel)
+        return await ctx.send(embed=embed)
 
     @commands.command(aliases=['iu'], help="Shows you the banner or icon of a subreddit (on old Reddit).")
     async def icon(self, ctx, subreddit, choice="icon"):
@@ -172,14 +169,11 @@ class Reddit(commands.Cog):
     @commands.command(aliases=['ms'])
     async def modstats(self, ctx, user):
         """Shows you the moderated subreddits of a specific user."""
-        async with self.http as h, ctx.typing():
+        async with ctx.typing():
             try:
-                subreddit, user = await h.get(
-                    f"https://www.reddit.com/user/{user}/moderated_subreddits/.json"), await h.get(
-                    f"https://www.reddit.com/user/{user}/about/.json")
-            except http.APIError:
+                subreddit, user = await self.get_redditor_data(user, 'moderated_subreddits'), await self.get_redditor_data(user, 'about')
+            except APIError:
                 raise commands.BadArgument(f'user **{user}** not found!')
-            await h.close()
             embed = discord.Embed(colour=self.bot.colour)
             sub_numb = 0
             data = subreddit.get('data')
@@ -219,8 +213,7 @@ class Reddit(commands.Cog):
         sorts = ['new', 'hot', 'top', 'rising', 'controversial']
         u = '\u200b'
         if sort not in sorts:
-            return await ctx.send(
-                f"<:warning:727013811571261540> **{ctx.author.name}**, that isn't a valid sort! Valid sorts include {', '.join(sorts)}.")
+            raise commands.BadArgument(f"that isn't a valid sort! Valid sorts include {', '.join(sorts)}.")
         async with ctx.typing():
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://www.reddit.com/r/{subreddit}/{sort}.json") as r:
@@ -303,11 +296,13 @@ class Reddit(commands.Cog):
                         break
                     else:
                         continue
-        p = paginator.CatchAllMenu(paginator.EmbedSource(embeds))
-        p.add_info_fields({self.up: "How many upvotes the post has", "💬": "How many comments the post has",
-                           self.share: "How many shares/cross-posts the post has",
-                           ":medal:": "How many awards the post has"})
-        await p.start(ctx)
+        menu = paginator.CatchAllMenu(paginator.EmbedSource(embeds))
+        menu.add_info_fields({self.up: "How many upvotes the post has", "💬": "How many comments the post has", self.share: "How many shares/cross-posts the post has", ":medal:": "How many awards the post has"})
+        await menu.start(ctx)
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            return
 
 
 def setup(bot):

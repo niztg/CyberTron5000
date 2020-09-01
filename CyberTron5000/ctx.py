@@ -11,3 +11,9 @@ class CyberContext(commands.Context):
             False: self.bot.get_emoji(732660210132451369)
         }.get(val)
 
+    def on_off(self, val: bool = True):
+        return {
+            True: self.bot.get_emoji(732805104620797965),
+            False: self.bot.get_emoji(732805190582927410)
+        }.get(val)
+

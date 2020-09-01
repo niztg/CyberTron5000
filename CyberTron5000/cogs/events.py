@@ -87,12 +87,13 @@ class Events(commands.Cog):
         if known_value:
             await ctx.message.add_reaction(self.x_r)
             return await ctx.send(self.format_error(ctx, error))
+        print(self.format_error(ctx, error, not known_value))
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = f"Error on `{ctx.command}`"
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"
         embed.description += f"```py\n{self.format_error(ctx, error, not known_value)}\n```"
         embed.description = embed.description[:2048]
-        await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!", embed=embed)
+        await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!", embed=embed.add_field(name="Join the Support Server!", value=f"{self.bot.logging['support']}"))
         await self.bot.logging_channel[0].send(embed=embed)
 
     @commands.Cog.listener(name="on_message")

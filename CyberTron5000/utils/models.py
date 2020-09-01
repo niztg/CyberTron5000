@@ -12,7 +12,7 @@ class InfractionUser:
 
     def collect_data(self):
         """The base data for this user"""
-        with open('json_files/infractions.json') as f:
+        with open('CyberTron5000/json_files/infractions.json') as f:
             data = json.load(f)
         if not (resp := data.get(str(self._guild))):
             return []
@@ -32,7 +32,7 @@ class InfractionUser:
         """Adds an infraction to them"""
         infraction = {"reason": reason, "infraction_number": len(self._data)+1, "is_null": False, "created": str(dt.utcnow())}
         self._data.append(infraction)
-        with open('json_files/infractions.json') as f:
+        with open('CyberTron5000/json_files/infractions.json') as f:
             data = json.load(f)
         if not data.get(str(self._guild)):
             data[str(self._guild)] = {}
@@ -41,7 +41,7 @@ class InfractionUser:
         except KeyError:
             data[str(self._guild)][str(self._user)] = [infraction]
 
-        with open('json_files/infractions.json', 'w') as fp:
+        with open('CyberTron5000/json_files/infractions.json', 'w') as fp:
             json.dump(data, fp, indent=4)
         return Infraction(infraction)
 
@@ -81,12 +81,12 @@ class Infraction:
 
     def edit(self, reason):
         try:
-            with open('json_files/infractions.json') as f:
+            with open('CyberTron5000/json_files/infractions.json') as f:
                 data = json.load(f)
             index = data[str(self._guild)][str(self._user)].index(self._data)
             self._data['reason'] = reason
             data[str(self._guild)][str(self._user)][index] = self._data
-            with open('json_files/infractions.json', 'w') as f:
+            with open('CyberTron5000/json_files/infractions.json', 'w') as f:
                 json.dump(data, f, indent=4)
             self.reason = reason
         except:
@@ -94,12 +94,12 @@ class Infraction:
 
     def nullify(self):
         try:
-            with open('json_files/infractions.json') as f:
+            with open('CyberTron5000/json_files/infractions.json') as f:
                 data = json.load(f)
             index = data[str(self._guild)][str(self._user)].index(self._data)
             self._data['is_null'] = not self.is_null
             data[str(self._guild)][str(self._user)][index] = self._data
-            with open('json_files/infractions.json', 'w') as f:
+            with open('CyberTron5000/json_files/infractions.json', 'w') as f:
                 json.dump(data, f, indent=4)
             self.is_null = not self.is_null
         except:
@@ -109,7 +109,7 @@ class Infraction:
     def by_infraction_no(cls, guild_id, user_id, infraction_number):
         cls._guild = guild_id
         cls._user = user_id
-        with open('json_files/infractions.json') as f:
+        with open('CyberTron5000/json_files/infractions.json') as f:
             data = json.load(f)
         try:
             data = data[str(guild_id)][str(user_id)]
@@ -132,10 +132,10 @@ def set_infraction_punishments(guild_id, **options):
     for key, value in options.items():
         if not isinstance(value, int):
             raise ValueError("All of your values must be integers!")
-    with open('json_files/infractions.json', 'r') as f:
+    with open('CyberTron5000/json_files/infractions.json', 'r') as f:
         data = json.load(f)
     if not data.get(str(guild_id)):
         data[str(guild_id)] = {}
     data[str(guild_id)]['punishments'] = dict(options)
-    with open('json_files/infractions.json', 'w') as f:
+    with open('CyberTron5000/json_files/infractions.json', 'w') as f:
         json.dump(data, f, indent=4)

@@ -353,7 +353,7 @@ class Fun(commands.Cog):
             else:
                 desc_em = ""
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since}) {desc_em}")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items (`❔` indicates that the todo has a description)")
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items (`❔` indicates that the todo has a description)",  per_page=5)
         menu = paginator.CatchAllMenu(source=source)
         menu.add_info_fields({"❔": "Indicates that the todo has a description"})
         await menu.start(ctx)
