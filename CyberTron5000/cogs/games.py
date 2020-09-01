@@ -9,7 +9,6 @@ from unidecode import unidecode
 from CyberTron5000.utils import (
     cyberformat,
     lists,
-    http
 )
 
 
@@ -18,7 +17,6 @@ class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.http: http.CyberHTTP = bot._http
         self.headers = {'token': bot.config.dagpi_token}
 
     # rock paper scissors, shoot
@@ -110,14 +108,12 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
-        async with self.http as h, ctx.typing():
-            try:
-                who = await h.get('https://dagpi.tk/api/wtp', headers=self.headers)
-                __name = unidecode(str(who['pokemon']['name'])).lower()
-                pokemon = await h.get(f"https://some-random-api.ml/pokedex?pokemon={__name}")
-                await h.close()
-            except http.APIError as error:
-                raise error
+        async with self.bot.session as cs, ctx.typing():
+            async with cs.get('https://dagpi.tk/api/wtp', headers=self.headers) as r:
+                who = await r.json()
+            __name = unidecode(str(who['pokemon']['name'])).lower()
+            async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
+                pokemon = await r2.json()
             initial_embed = discord.Embed(colour=self.bot.colour)
             initial_embed.title = "Who's that Pokemon?"
             initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."

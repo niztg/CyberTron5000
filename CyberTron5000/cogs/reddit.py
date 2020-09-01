@@ -19,7 +19,6 @@ class Reddit(commands.Cog):
         self.bot = bot
         self.up = "<:upvote:718895913342337036>"
         self.share = "<:share:730823872265584680>"
-        self.http = bot._http
 
     # noinspection PyBroadException
 
@@ -30,24 +29,16 @@ class Reddit(commands.Cog):
 
     async def get_redditor_data(self, user, option):
         assert option in ("moderated_subreddits", "about", "trophies")
-        async with self.http as h:
-            try:
-                data = await h.get(f"https://www.reddit.com/user/{user}/{option}/.json")
-            except APIError:
-                raise APIError(message=f"Redditor **{user}** not found!")
-        await h.close()
+        async with self.bot.session.get(f"https://www.reddit.com/user/{user}/{option}/.json") as r:
+            data = await r.json()
         return data
 
     async def get_post_data(self, subreddit, sort):
-        async with self.http as h:
-            try:
-                data = await h.get(f"https://www.reddit.com/r/{subreddit}/{sort}.json", params={'limit': 100})
-            except APIError:
-                raise APIError()
+        async with self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/{sort}.json", params={'limit': 100}) as r:
+            data = await r.json()
         posts = list()
         for item in data['data']['children']:
             posts.append(item['data'])
-        await h.close()
         return [post for post in posts if not post['stickied']]
 
     @commands.command(help="Shows your Reddit Stats.", aliases=['rs', 'karma', 'redditor'])

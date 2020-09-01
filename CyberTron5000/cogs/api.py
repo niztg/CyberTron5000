@@ -12,7 +12,6 @@ from CyberTron5000.utils import (
     cyberformat,
     converter
 )
-from CyberTron5000.utils.http import *
 from CyberTron5000.utils.lists import (
     STAT_NAMES,
     TYPES
@@ -46,17 +45,12 @@ class Api(commands.Cog):
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
         self.clever = async_cleverbot.Cleverbot(bot.config.cleverbot)
         self.clever.set_context(async_cleverbot.DictContext(self.bot))
-        self.http = bot._http
 
     @commands.command(aliases=['ily'], help="compliment your friends :heart:")
     async def compliment(self, ctx, *, user=None):
         user = user or ctx.author.mention
-        async with self.http as http:
-            try:
-                data = await http.get('https://complimentr.com/api')
-            except APIError:
-                raise commands.BadArgument()
-        await http.close()
+        async with self.bot.session.get('https://complimentr.com/api') as r:
+            data = await r.json()
         return await ctx.send(f":heart: **{user}, {data['compliment']}**")
 
     @flags.add_flag("--unit", type=str, default='c')
@@ -68,10 +62,8 @@ class Api(commands.Cog):
         If you want kelvin, add `-unit k` at the end. (Celsius is the default)
         """
         try:
-            async with self.http as http:
-                data = await http.get(
-                    f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}")
-            await http.close()
+            async with self.bot.session.get(f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}") as r:
+                data = await r.json()
             if not str(unit := flags.get('unit')).startswith(('c', 'k', 'f')):
                 return await ctx.send(
                     f"**{unit}** is an invalid unit! Please make sure your unit starts with either **c**, **k** or **f**")
@@ -87,48 +79,44 @@ class Api(commands.Cog):
             embed.description += f"☀️ Sunrise: **{sunrise}** UTC • Sunset: **{sunset}** UTC"
             embed.set_thumbnail(url="https://i.dlpng.com/static/png/6552264_preview.png")
             await ctx.send(embed=embed)
-        except Exception as error:
-            if isinstance(error, (IndexError, APIError)):
-                raise commands.BadArgument(f"city not found!")
+        except IndexError:
+            raise commands.BadArgument('city not found!')
 
     @commands.command(help="Shows you info about a Pokémon", aliases=['pokemon', 'poke', 'pokémon', 'pokédex'])
     async def pokedex(self, ctx, pokemon):
-        try:
-            async with self.http as http:
-                data = await http.get(f"https://some-random-api.ml/pokedex?pokemon={pokemon.lower()}")
-            await http.close()
-            embed = discord.Embed(title=f"{data['name'].title()} • #{data['id']}", colour=self.bot.colour)
-            embed.set_author(name=f'The {" ".join(data["species"])}')
-            embed.set_thumbnail(url=data['sprites']['normal'])
-            evo_line = []
-            for e in data['family']['evolutionLine']:
-                if str(e).lower() == pokemon.lower():
-                    evo_line.append(f"**{e}**")
-                else:
-                    evo_line.append(e)
-            n = '\n'
-            embed.description = f" ".join([TYPES[item.lower()] for item in data['type']])
-            embed.description += f'\n<:pokeball:715599637079130202> {data["description"]}\n**{data["height"]}**\n**{data["weight"]}**'
-            embed.add_field(name='Evolution Line',
-                            value=f'{" → ".join(evo_line)}' or "**{0}**".format(str(pokemon).capitalize()),
-                            inline=False)
-            embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data['abilities']]) + '**',
-                            inline=False)
-            embed.add_field(name='Base Stats',
-                            value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data['stats'].items()])}",
-                            inline=False)
-            await ctx.send(embed=embed)
-        except (IndexError, APIError):
-            raise commands.BadArgument('Pokémon not found!')
+        async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={pokemon.lower()}") as r:
+            data = await r.json()
+        if r.status != 200:
+            raise commands.BadArgument(f'Pokémon **{pokemon}** not found!')
+        embed = discord.Embed(title=f"{data['name'].title()} • #{data['id']}", colour=self.bot.colour)
+        embed.set_author(name=f'The {" ".join(data["species"])}')
+        embed.set_thumbnail(url=data['sprites']['normal'])
+        evo_line = []
+        for e in data['family']['evolutionLine']:
+            if str(e).lower() == pokemon.lower():
+                evo_line.append(f"**{e}**")
+            else:
+                evo_line.append(e)
+        n = '\n'
+        embed.description = f" ".join([TYPES[item.lower()] for item in data['type']])
+        embed.description += f'\n<:pokeball:715599637079130202> {data["description"]}\n**{data["height"]}**\n**{data["weight"]}**'
+        embed.add_field(name='Evolution Line',
+                        value=f'{" → ".join(evo_line)}' or "**{0}**".format(str(pokemon).capitalize()),
+                        inline=False)
+        embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data['abilities']]) + '**',
+                        inline=False)
+        embed.add_field(name='Base Stats',
+                        value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data['stats'].items()])}",
+                        inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(help="Urban Dictionary", aliases=['urban', 'define', 'def'])
     @commands.is_nsfw()
     async def urbandict(self, ctx, *, terms):
         embeds = []
         try:
-            async with self.http as http:
-                data = await http.get(f"http://api.urbandictionary.com/v0/define", params={'term': terms})
-            await http.close()
+            async with self.bot.session.get(f"http://api.urbandictionary.com/v0/define", params={'term': terms}) as r:
+                data = await r.json()
             items = data['list']
             for item in items:
                 embed = discord.Embed(color=self.bot.colour)
@@ -142,11 +130,9 @@ class Api(commands.Cog):
                 embeds.append(embed)
             source = paginator.EmbedSource(embeds)
             menu = paginator.CatchAllMenu(source=source)
-            menu.add_info_fields({"<:author:734991429843157042>": "The author of the post",
-                                  ":thumbsup:": "How many thumbs up the post has",
-                                  ":thumbsdown:": "How many thumbs down the post has"})
+            menu.add_info_fields({"<:author:734991429843157042>": "The author of the post", ":thumbsup:": "How many thumbs up the post has", ":thumbsdown:": "How many thumbs down the post has"})
             await menu.start(ctx)
-        except (APIError, IndexError):
+        except IndexError:
             raise commands.BadArgument(f"term not found on urban dictionary.")
 
     @commands.command(aliases=['wiki'])
@@ -166,22 +152,16 @@ class Api(commands.Cog):
     @commands.command()
     async def fact(self, ctx):
         """Random fact"""
-        async with self.http as http:
-            try:
-                data = await http.get(f"https://useless-facts.sameerkumar.website/api")
-            except APIError:
-                raise commands.BadArgument()
-        await http.close()
-        await ctx.send(embed=discord.Embed(title=data['data'], colour=self.bot.colour))
+        async with self.bot.session.get(f"https://useless-facts.sameerkumar.website/api") as r:
+            data = await r.json()
+        await ctx.send(data['data'])
 
     @commands.command()
     async def pypi(self, ctx, *, package):
         """Shows info on a PyPi package"""
-        try:
-            async with self.http as http:
-                res = await http.get(f"https://pypi.org/pypi/{package}/json")
-            await http.close()
-        except:
+        async with self.bot.session.get(f"https://pypi.org/pypi/{package}/json") as r:
+            res = await r.json()
+        if r.status != 200:
             raise commands.BadArgument(f'package **{package}** not found!')
         embed = discord.Embed(colour=self.bot.colour)
         char = '\u200b' if not res['info']['author_email'] else f' • {res["info"]["author_email"]}'
@@ -261,13 +241,8 @@ class Api(commands.Cog):
     @commands.command()
     async def rtfs(self, ctx, *, query: converter.RTFSObject):
         """Shows results from. the discord.py sourcecode"""
-        async with self.http as h:
-            try:
-                res = await h.get(f"https://rtfs.eviee.me/dpy?search={query}")
-            except APIError:
-                print('aaaa')
-                raise commands.BadArgument()
-        await h.close()
+        async with self.bot.session.get(f"https://rtfs.eviee.me/dpy?search={query}") as r:
+            res = await r.json()
         if not res:
             return await ctx.send("No results.")
         embed = discord.Embed(color=self.bot.colour)
@@ -279,13 +254,8 @@ class Api(commands.Cog):
     @commands.is_nsfw()
     async def giphy(self, ctx, *, query):
         """Get a random gif based on your query"""
-        async with self.http as h:
-            try:
-                res = await h.get(
-                    'http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10')
-            except Exception as error:
-                raise commands.BadArgument(error)
-        await h.close()
+        async with self.bot.session.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10') as r:
+            res = await r.json()
         data = res.get('data')
         embeds = []
         for item in data:

@@ -26,11 +26,11 @@ from typing import List
 
 import asyncpg
 import discord
+import aiohttp
 from discord.ext import tasks
 from discord.ext.commands import Bot, when_mentioned_or
 
 from CyberTron5000 import config, ctx
-from CyberTron5000.utils.http import CyberHTTP
 
 print(
     r"""
@@ -53,23 +53,23 @@ print(
 class CyberTron5000(Bot):
     def __init__(self):
         super().__init__(**self.config_attrs)
-        self._http = CyberHTTP()
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('CyberTron5000/cogs') if filename.endswith('.py')]
         self.db = self.loop.run_until_complete(self.create_db_pool())
+        self.loop.run_until_complete(self.set_http())
         self.load_extension(name='jishaku')
         for task in (self.startup, self._init_tags):
             self.loop.create_task(task())
-        self.logging = dict(
-            invite='https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
-            support='https://discord.com/invite/2fxKxJH', github='https://github.com/niztg/CyberTron5000',
-            website='https://cybertron-5k.netlify.app', reddit='https://reddit.com/r/CyberTron5000',
-            servers={"CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
-                     "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
-                     "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"})
+        self.logging = {
+            'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
+            'support': 'https://discord.com/invite/2fxKxJH', 'github': 'https://github.com/niztg/CyberTron5000',
+            'website': 'https://cybertron-5k.netlify.app', 'reddit': 'https://reddit.com/r/CyberTron5000',
+            'servers': {"CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
+                        "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
+                        "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"}}
 
     @property
     def owner(self) -> discord.User:
@@ -101,6 +101,9 @@ class CyberTron5000(Bot):
             'case_insensitive': True,
             'status': discord.Status.online
         }
+
+    async def set_http(self):
+        self.session = aiohttp.ClientSession()
 
     async def create_db_pool(self):
         return await asyncpg.create_pool(user=self.config.pg_data["user"], password=self.config.pg_data["password"],
