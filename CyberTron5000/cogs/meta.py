@@ -102,7 +102,7 @@ class Meta(commands.Cog):
         await self.bot.db.fetch("SELECT * FROM news")
         db_end = time.perf_counter()
         db_dur = round((db_end-db_start)*1000, 3)
-        message += f"\n{check_health(duration)} {self.softwares[3]} Database Latency `{db_dur}` ms"
+        message += f"\n{check_health(db_dur, (5, 15))} {self.softwares[3]} Database Latency `{db_dur}` ms"
         # thanks to dutchy for db latency idea
         await msg.edit(content=message)
 
