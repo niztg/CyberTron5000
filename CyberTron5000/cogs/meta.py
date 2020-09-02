@@ -367,7 +367,6 @@ class Meta(commands.Cog):
                     return await ctx.send(f"Repository not found.")
                 res1 = await r1.json()
                 res2 = await r2.json()
-                await cs.close()
         embed.set_author(name=f'{res1.get("full_name")}', icon_url=res2.get("avatar_url"), url=res1.get("svn_url"))
         embed.description = res1.get("description") or '' + "\n"
         stars = res1.get("stargazers_count")

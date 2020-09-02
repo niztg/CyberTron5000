@@ -247,7 +247,7 @@ class Developer(commands.Cog):
         number = number[0][0] or 0
         number += 1
         await self.bot.db.execute("UPDATE news SET message = $1, number = $2", message, number)
-        await ctx.send(f"News updated to: ```{message}```")
+        await ctx.send(embed=discord.Embed(colour=self.bot.colour, description=f"**News Updated To:**\n{message}"))
 
     @dev.command()
     async def sql(self, ctx, *, statement):

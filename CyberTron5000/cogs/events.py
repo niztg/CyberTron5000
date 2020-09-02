@@ -4,6 +4,7 @@ from traceback import format_exception
 
 import async_cleverbot
 import discord
+import random
 import humanize
 from discord.ext import (
     commands,
@@ -164,7 +165,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):
-        if (message.channel.id == 730486269468999741) or (message.channel.id == 730570845013147708):
+        if message.channel.id in (730486269468999741, 730570845013147708, 750404241566335088):
             if message.author.bot:
                 return
             async with message.channel.typing():
@@ -185,6 +186,23 @@ class Events(commands.Cog):
         if (message.channel.id == 735694049700347954) or (message.channel.id == 735690974340317216):
             for i in ['🇲', '🇴', '🇳', '🇰', '🇪']:
                 await message.add_reaction(i)
+        if message.guild.id == 748616619449647244 and not message.author.bot:
+            for word in ("hello", "good morning", "helo", "good night"):
+                if word in message.content.lower():
+                    await message.channel.send(word)
+            for start in ("i'm", "im", "i am", "am"):
+                if start in (msg := message.content.lower()) and not message.author.bot:
+                    if "aimg" in msg:
+                        return
+                    if random.randint(1, 5) == 3:
+                        texts = msg.split(start, 1)
+                        final = " ".join([i for i in texts[1:] if i is not None])
+                        await message.channel.send(f"Hi {final.strip()}, I'm dad!")
+                if (word := f" {self.bot.config.forbidden_word_flushed} ") in (msg := message.content.lower()) and not message.author.bot:
+                    if random.randint(1, 5) == 3:
+                        if len((people := msg.split(word, 1))) == 2:
+                            await message.channel.send(f'Guy named "{people[0].strip()}": :smirk:\nGirl named "{people[1].strip()}": :flushed:')
+
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):

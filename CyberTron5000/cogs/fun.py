@@ -7,9 +7,9 @@ from io import BytesIO
 from time import time
 
 import aiohttp
-import dictionary
 import discord
 from discord.ext import commands, flags
+from PyDictionary import PyDictionary as dictionary
 from humanize import naturaltime as nt
 from jikanpy import AioJikan
 from sr_api import Client
@@ -31,6 +31,7 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.sr = Client()
+        self._dictionary = dictionary()
 
     @commands.command()
     async def horror(self, ctx, limit: int = 5):
@@ -353,7 +354,8 @@ class Fun(commands.Cog):
             else:
                 desc_em = ""
             items.append(f"[{each['todo']}]({each['message_url']}) (ID: {each['id']} | Created {since}) {desc_em}")
-        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour), title="Items (`❔` indicates that the todo has a description)",  per_page=5)
+        source = paginator.IndexedListSource(data=items, embed=discord.Embed(colour=self.bot.colour),
+                                             title="Items (`❔` indicates that the todo has a description)", per_page=5)
         menu = paginator.CatchAllMenu(source=source)
         menu.add_info_fields({"❔": "Indicates that the todo has a description"})
         await menu.start(ctx)
@@ -477,6 +479,13 @@ class Fun(commands.Cog):
         image = BytesIO(await image.read())
         return discord.File(image, filename=f"somerandom.{ext}")
 
+    async def get_attachement(self, image_url: str, ext='png') -> discord.File:
+        """Gives you a valid image attachment of any url"""
+        async with self.bot.session.get(image_url) as r:
+            data = await r.read()
+        image = BytesIO(data)
+        return discord.File(image, filename=f'image.{ext}')
+
     @commands.command(aliases=['aimg'])
     async def animalimg(self, ctx, *, animal=None):
         """Shows an image of an animal of your choice."""
@@ -486,45 +495,115 @@ class Fun(commands.Cog):
         try:
             async with ctx.typing():
                 animal = str(animal).lower().replace(' ', '_')
+                image = await self.sr.get_image(animal)
+                file = await self.get_attachement(image.url)
                 await ctx.send(f"{ANIMALS.get(animal, '')} **Random {animal.replace('_', ' ').title()} Image:**",
-                               file=await self.sr_image(await self.sr.get_image(animal)))
+                               file=file)
         except Exception as error:
             return await ctx.send(error)
 
     @commands.command()
     async def hug(self, ctx, member: discord.Member):
         async with ctx.typing():
-            file = await self.sr_image(await self.sr.get_gif('hug'), 'gif')
+            image = await self.sr.get_gif('hug')
+            file = await self.get_attachement(image.url, 'gif')
         await ctx.send(f"{EMOTIONS['hug']} **{ctx.author.display_name}** hugged **{member.display_name}**!", file=file)
 
     @commands.command()
     async def pat(self, ctx, member: discord.Member):
         async with ctx.typing():
-            file = await self.sr_image(await self.sr.get_gif('pat'), 'gif')
+            image = await self.sr.get_gif('pat')
+            file = await self.get_attachement(image.url, 'gif')
         await ctx.send(f"{EMOTIONS['pat']} **{ctx.author.display_name}** patted **{member.display_name}**!", file=file)
 
     @commands.command()
     async def facepalm(self, ctx):
         async with ctx.typing():
-            file = await self.sr_image(await self.sr.get_gif('face-palm'), 'gif')
+            image = await self.sr.get_gif('face-palm')
+            file = await self.get_attachement(image.url, 'gif')
         await ctx.send(f"{EMOTIONS['face-palm']} **{ctx.author.display_name}** facepalmed!", file=file)
 
     @commands.command()
     async def wink(self, ctx):
         async with ctx.typing():
-            file = await self.sr_image(await self.sr.get_gif('wink'), 'gif')
+            image = await self.sr.get_gif('wink')
+            file = await self.get_attachement(image.url, 'gif')
         await ctx.send(f"{EMOTIONS['wink']} **{ctx.author.display_name}** winked!", file=file)
 
     @commands.command()
-    async def dictionary(self, ctx, *, word):
-        """Fetch a random word's definition"""
+    async def dog(self, ctx):
+        """Shows you an image of a dog."""
+        async with self.bot.session.get('https://dog.ceo/api/breeds/image/random') as r, ctx.typing():
+            data = await r.json()
+        file = await self.get_attachement(data['message'])
+        await ctx.send(f"{ANIMALS.get('dog')} **Random Dog Image**", file=file)
+
+    def format_meanings(self, ret: dict) -> str:
+        message = ''
+        for index, value in ret.items():
+            message += f"\n**{index}**\n"
+            for num, _def in enumerate(value, 1):
+                message += f"[{num}] {_def}\n"
+        return message
+
+    @commands.group(aliases=['dictionary'], invoke_without_command=True)
+    async def word(self, ctx, *, word):
+        """Fetch a word's definition"""
         # thanks to deviljamjar for this idea
         # find the original here: https://github.com/DevilJamJar/DevilBot/blob/master/cogs/utility.py/#L48-#L65
-        _dict = dictionary.Dictionary()
-        try:
-            ret = await self.bot.loop.run_in_executor(None)
-        except Exception as error:
-            raise error
+        async with ctx.typing():
+            try:
+                ret = await self.bot.loop.run_in_executor(None, self._dictionary.meaning, word)
+            except Exception as error:
+                raise error
+            embed = discord.Embed(colour=self.bot.colour, title=word.lower())
+            embed.description = self.format_meanings(ret)
+        await ctx.send(embed=embed)
+
+    @word.command(aliases=['syn'])
+    async def synonyms(self, ctx, *, word):
+        """Shows you the synonyms of a word."""
+        async with ctx.typing():
+            try:
+                ret = await self.bot.loop.run_in_executor(None, self._dictionary.synonym, word)
+            except Exception as error:
+                raise error
+            embed = discord.Embed(colour=self.bot.colour, title=word.lower())
+            embed.description = ', '.join(ret)
+        await ctx.send(embed=embed)
+
+    @word.command(aliases=['ant'])
+    async def antonyms(self, ctx, *, word):
+        """Shows you the antonyms of a word."""
+        async with ctx.typing():
+            try:
+                ret = await self.bot.loop.run_in_executor(None, self._dictionary.antonym, word)
+            except Exception as error:
+                raise error
+            embed = discord.Embed(colour=self.bot.colour, title=word.lower())
+            embed.description = ', '.join(ret)
+        await ctx.send(embed=embed)
+
+    @word.command()
+    async def many(self, ctx, *words):
+        """Get information on many words"""
+        command = self.bot.get_command('words')
+        await ctx.invoke(command, *words)
+
+    @commands.command()
+    async def words(self, ctx, *words):
+        """Get information on many words"""
+        async with ctx.typing():
+            _dict = dictionary(*words)
+            try:
+                ret = await self.bot.loop.run_in_executor(None, _dict.getMeanings)
+            except Exception as error:
+                raise error
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.title = "Words"
+            for word in words:
+                embed.add_field(name=word, value=self.format_meanings(ret.get(word)), inline=False)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

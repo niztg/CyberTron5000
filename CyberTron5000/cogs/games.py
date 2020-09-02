@@ -108,17 +108,16 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
-        async with self.bot.session as cs, ctx.typing():
-            async with cs.get('https://dagpi.tk/api/wtp', headers=self.headers) as r:
-                who = await r.json()
+        async with self.bot.session.get('https://dagpi.tk/api/wtp', headers=self.headers) as r, ctx.typing():
+            who = await r.json()
             __name = unidecode(str(who['pokemon']['name'])).lower()
-            async with cs.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
+            async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
                 pokemon = await r2.json()
             initial_embed = discord.Embed(colour=self.bot.colour)
             initial_embed.title = "Who's that Pokemon?"
             initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."
             initial_embed.set_image(url=who.get('question_image'))
-            answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {pokemon['name'].title()}!")
+            answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {who['pokemon']['name']}!")
             answer_embed.set_image(url=who.get('answer_image'))
         if __name.replace('.', '') == "mrmime":
             await ctx.invoke(ctx.command)

@@ -15,5 +15,5 @@ validator_collection
 aiotrivia~=2.0.1
 git+https://github.com/niztg/aiotrivia
 Unidecode~=1.1.1
-dictionary~=1.0
 tabulate~=0.8.7
+PyDictionary~=2.0.1
