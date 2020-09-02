@@ -97,7 +97,7 @@ class CyberTron5000(Bot):
         return {
             'command_prefix': self.get_prefix,
             'pm_help': None,
-            'allowed_mentions': discord.AllowedMentions(users=False, roles=False, everyone=False),
+            'allowed_mentions': discoprd.AllowedMentions(users=False, roles=False, everyone=False),
             'case_insensitive': True,
             'status': discord.Status.online
         }

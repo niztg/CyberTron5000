@@ -92,11 +92,18 @@ class Meta(commands.Cog):
 
         websocket = round(self.bot.latency * 1000, 3)
         start = time.perf_counter()
-        message = f"{check_health(websocket)} <:wumpus:742965982640865311> Websocket Latency `{websocket}`"
+        message = f"{check_health(websocket)} <:wumpus:742965982640865311> Websocket Latency `{websocket}` ms"
         msg = await ctx.send(message)
         end = time.perf_counter()
         duration = round((end - start) * 1000, 3)
-        message += f"\n{check_health(duration, (200, 500))} <:clock:738186842343735387> Response Time `{duration}`"
+        message += f"\n{check_health(duration, (200, 500))} <:clock:738186842343735387> Response Time `{duration}` ms"
+        await msg.edit(content=message)
+        db_start = time.perf_counter()
+        await self.bot.db.fetch("SELECT * FROM news")
+        db_end = time.perf_counter()
+        db_dur = round((db_end-db_start)*1000, 3)
+        message += f"\n{check_health(duration)} {self.softwares[3]} Database Latency `{db_dur}` ms"
+        # thanks to dutchy for db latency idea
         await msg.edit(content=message)
 
     @commands.command(aliases=["sourcecode", "src"], help="Shows source code for a given command")
