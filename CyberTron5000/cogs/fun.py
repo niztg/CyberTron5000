@@ -6,7 +6,6 @@ from datetime import datetime as dt
 from io import BytesIO
 from time import time
 
-import aiohttp
 import discord
 from discord.ext import commands, flags
 from PyDictionary import PyDictionary as dictionary
@@ -37,9 +36,8 @@ class Fun(commands.Cog):
     async def horror(self, ctx, limit: int = 5):
         """spoopy"""
         posts = []
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://www.reddit.com/r/twosentencehorror/hot.json") as r:
-                res = await r.json()
+        async with self.bot.session.get(f"https://www.reddit.com/r/twosentencehorror/hot.json") as r:
+            res = await r.json()
             for i in res['data']['children']:
                 posts.append(i['data'])
             counter = 0
@@ -295,18 +293,14 @@ class Fun(commands.Cog):
     @commands.command(aliases=['bin'])
     async def binary(self, ctx, *, message):
         """Convert text to binary."""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://some-random-api.ml/binary?text={message}") as r:
-                res = await r.json()
-            await ctx.send(f'{res["binary"]}')
+        binary = await self.sr.encode_binary(message)
+        await ctx.send(f"```py\n{binary}```")
 
     @commands.command(aliases=['fb', 'from-bin'])
-    async def from_binary(self, ctx, *, message):
-        """Convert text from binary"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://some-random-api.ml/binary?decode={message}") as r:
-                res = await r.json()
-            await ctx.send(f'{res["text"]}')
+    async def from_binary(self, ctx, *, binary):
+        """Convert text from binary."""
+        binary = await self.sr.decode_binary(binary)
+        await ctx.send(binary)
 
     @commands.command()
     async def owner(self, ctx):
@@ -557,6 +551,8 @@ class Fun(commands.Cog):
             except Exception as error:
                 raise error
             embed = discord.Embed(colour=self.bot.colour, title=word.lower())
+            if not ret:
+                raise commands.BadArgument("this word was not found in the dictionary!")
             embed.description = self.format_meanings(ret)
         await ctx.send(embed=embed)
 
@@ -601,9 +597,18 @@ class Fun(commands.Cog):
                 raise error
             embed = discord.Embed(colour=self.bot.colour)
             embed.title = "Words"
+            not_found = list()
             for word in words:
-                embed.add_field(name=word, value=self.format_meanings(ret.get(word)), inline=False)
-        await ctx.send(embed=embed)
+                if not (meanings := ret.get(word)):
+                    not_found.append(word)
+                    continue
+                embed.add_field(name=word.lower(), value=self.format_meanings(meanings))
+        if not_found:
+            embed.set_footer(text=', '.join(not_found) + " were not found.")
+        try:
+            await ctx.send(embed=embed)
+        except discord.HTTPException:
+            return await ctx.send("You passed in too many words!")
 
 
 def setup(bot):

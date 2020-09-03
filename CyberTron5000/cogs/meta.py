@@ -162,9 +162,8 @@ class Meta(commands.Cog):
         await ctx.send(f"**{self.bot.user.name}** was made with **{lines.get('lines'):,}** lines of code!")
 
     async def get_commits(self, limit: int = 3, names: bool = True, author: bool = True):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://api.github.com/repos/niztg/CyberTron5000/commits") as r:
-                res = await r.json()
+        async with self.bot.session.get("https://api.github.com/repos/niztg/CyberTron5000/commits") as r:
+            res = await r.json()
             commits = []
             for item in res:
                 msg = f"[`{item['sha'][0:7]}`](https://github.com/niztg/CyberTron5000/commit/{item['sha']})"

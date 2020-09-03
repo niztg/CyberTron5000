@@ -52,33 +52,55 @@ print(
 
 class CyberTron5000(Bot):
     def __init__(self):
-        super().__init__(**self.config_attrs)
+        """Regular init"""
+        super().__init__(
+            command_prefix=self.get_prefix,
+            pm_help=None,
+            allowed_mentions=discord.AllowedMentions(
+                users=False,
+                roles=False,
+                everyone=False
+            ),
+            case_insensitive=True,
+            status=discord.Status.online)
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('CyberTron5000/cogs') if filename.endswith('.py')]
-        self.db = self.loop.run_until_complete(self.create_db_pool())
-        self.loop.run_until_complete(self.set_http())
         self.load_extension(name='jishaku')
-        for task in (self.startup, self._init_tags):
-            self.loop.create_task(task())
+        self.loop.create_task(self.__aioinit__())
         self.logging = {
             'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
-            'support': 'https://discord.com/invite/2fxKxJH', 'github': 'https://github.com/niztg/CyberTron5000',
-            'website': 'https://cybertron-5k.netlify.app', 'reddit': 'https://reddit.com/r/CyberTron5000',
-            'servers': {"CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
-                        "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
-                        "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"}}
+            'support': 'https://discord.com/invite/2fxKxJH',
+            'github': 'https://github.com/niztg/CyberTron5000',
+            'website': 'https://cybertron-5k.netlify.app',
+            'reddit': 'https://reddit.com/r/CyberTron5000',
+            'servers': {
+                "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
+                "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
+                "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
+            }
+        }
+
+    async def __aioinit__(self):
+        """Async init"""
+        self.db = await asyncpg.create_pool(
+            user=self.config.pg_data["user"],
+            password=self.config.pg_data["password"],
+            database=self.config.pg_data["db"])
+        self.session = aiohttp.ClientSession()
+        await self.startup()
 
     @property
     def owner(self) -> discord.User:
-        return self.get_user(350349365937700864) # me
+        return self.get_user(350349365937700864)  # me
 
     @property
     def logging_channel(self) -> List[discord.TextChannel]:
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
+
     # :: Key
     # 1 - errors
     # 2 - guilds
@@ -91,23 +113,6 @@ class CyberTron5000(Bot):
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         return {'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds}
-
-    @property
-    def config_attrs(self) -> dict:
-        return {
-            'command_prefix': self.get_prefix,
-            'pm_help': None,
-            'allowed_mentions': discoprd.AllowedMentions(users=False, roles=False, everyone=False),
-            'case_insensitive': True,
-            'status': discord.Status.online
-        }
-
-    async def set_http(self):
-        self.session = aiohttp.ClientSession()
-
-    async def create_db_pool(self):
-        return await asyncpg.create_pool(user=self.config.pg_data["user"], password=self.config.pg_data["password"],
-                                         database=self.config.pg_data["db"])
 
     async def get_prefix(self, message):
         if not message.guild:
@@ -144,25 +149,25 @@ class CyberTron5000(Bot):
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                              name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
         print("PREFIXES AND PRESENCE SETUP")
-        print("READY!")
-        print("──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
-
-    async def _init_tags(self):
-        await self.wait_until_ready()
         SQL = """
         SELECT guild_id FROM tags
         """
         tags = await self.db.fetch(SQL)
         for query in tags:
             self._tag_dict[query['guild_id']] = {}
-            tags2 = await self.db.fetch("""SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1""",
-                                        query['guild_id'])
+            SQL2 = """
+            SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1;
+            """
+            tags2 = await self.db.fetch(SQL2, query['guild_id'])
             for query2 in tags2:
                 self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
                                                                      'uses': query2['uses'] or 0,
                                                                      'author': query2['user_id'], 'id': query2['id']}
         print("TAGS HAVE BEEN INITIALIZED")
-        print(self._tag_dict)
+        print("READY!")
+        print(
+            "──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+
 
 # 4,993
 # that's how many lines we were on when that was written

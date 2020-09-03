@@ -110,7 +110,6 @@ class Developer(commands.Cog):
                     'get': discord.utils.get,
                     'ctx': ctx,
                     'asyncio': asyncio,
-                    'session': aiohttp.ClientSession(),
                     '__import__': __import__,
                     'author': ctx.author,
                     'guild': ctx.guild,
