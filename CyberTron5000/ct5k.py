@@ -126,14 +126,6 @@ class CyberTron5000(Bot):
     async def get_context(self, message, *, cls=None):
         return await super().get_context(message, cls=cls or ctx.CyberContext)
 
-    def run(self, *args, **kwargs):
-        super().run(self.config.bot_token)
-
-    @tasks.loop(minutes=3)
-    async def loop(self):
-        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                             name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
-
     async def startup(self):
         await self.wait_until_ready()
         print(f"{self.user.name.upper()} IS ONLINE")
@@ -179,4 +171,4 @@ class CyberTron5000(Bot):
 # 5,000!
 
 
-CyberTron5000().run()
+CyberTron5000().run(config.config().bot_token)

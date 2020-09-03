@@ -8,7 +8,8 @@ import random
 import humanize
 from discord.ext import (
     commands,
-    flags
+    flags,
+    tasks
 )
 
 from CyberTron5000.utils.cyberformat import (
@@ -34,7 +35,8 @@ class Events(commands.Cog):
     def append_snipe(self, message: discord.Message):
         data = self.snipes()
         channel_id = str(message.channel.id)
-        msg_data = {"author": str(message.author.id), "content": message.content, "created_at": str(message.created_at), "id": str(message.id)}
+        msg_data = {"author": str(message.author.id), "content": message.content, "created_at": str(message.created_at),
+                    "id": str(message.id)}
         if message.embeds:
             msg_data['embed'] = True
         try:
@@ -94,7 +96,8 @@ class Events(commands.Cog):
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"
         embed.description += f"```py\n{self.format_error(ctx, error, not known_value)}\n```"
         embed.description = embed.description[:2048]
-        await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!", embed=embed.add_field(name="Join the Support Server!", value=f"{self.bot.logging['support']}"))
+        await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!",
+                       embed=embed.add_field(name="Join the Support Server!", value=f"{self.bot.logging['support']}"))
         await self.bot.logging_channel[0].send(embed=embed)
 
     @commands.Cog.listener(name="on_message")
@@ -186,6 +189,9 @@ class Events(commands.Cog):
         if (message.channel.id == 735694049700347954) or (message.channel.id == 735690974340317216):
             for i in ['🇲', '🇴', '🇳', '🇰', '🇪']:
                 await message.add_reaction(i)
+
+    @commands.Cog.listener(name='on_message')
+    async def potpotpotato(self, message):
         if message.guild.id == 748616619449647244 and not message.author.bot:
             for word in ("hello", "good morning", "helo", "good night"):
                 if word in message.content.lower():
@@ -198,11 +204,19 @@ class Events(commands.Cog):
                         texts = msg.split(start, 1)
                         final = " ".join([i for i in texts[1:] if i is not None])
                         await message.channel.send(f"Hi {final.strip()}, I'm dad!")
-                if (word := f" {self.bot.config.forbidden_word_flushed} ") in (msg := message.content.lower()) and not message.author.bot:
+                if (word := f" {self.bot.config.forbidden_word_flushed} ") in (
+                        msg := message.content.lower()) and not message.author.bot:
                     if random.randint(1, 5) == 3:
                         if len((people := msg.split(word, 1))) == 2:
-                            await message.channel.send(f'Guy named "{people[0].strip()}": :smirk:\nGirl named "{people[1].strip()}": :flushed:')
+                            await message.channel.send(
+                                f'Guy named "{people[0].strip()}": :smirk:\nGirl named "{people[1].strip()}": :flushed:')
 
+    @tasks.loop(minutes=3)
+    async def loop(self):
+        await self.bot.change_presence(
+            activity=discord.Activity(type=discord.ActivityType.watching,
+            name=f"{len(self.bot.users):,} users in {len(self.bot.guilds):,} guilds")
+        )
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
