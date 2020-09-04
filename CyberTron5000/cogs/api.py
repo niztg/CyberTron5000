@@ -64,7 +64,8 @@ class Api(commands.Cog):
         try:
             async with self.bot.session.get(f"http://api.openweathermap.org/data/2.5/weather?appid={self.bot.config.weather}&q={city}") as r:
                 data = await r.json()
-            if not str(unit := flags.get('unit')).startswith(('c', 'k', 'f')):
+            unit = flags.get('unit')
+            if not str(unit).startswith(('c', 'k', 'f')):
                 return await ctx.send(
                     f"**{unit}** is an invalid unit! Please make sure your unit starts with either **c**, **k** or **f**")
             embed = discord.Embed(colour=self.bot.colour)

@@ -395,7 +395,8 @@ class Profile(commands.Cog):
     async def spotify(self, ctx, *, member: discord.Member = None):
         """Shows a member's spotify status"""
         member = member or ctx.author
-        if not (spotify := discord.utils.get(member.activities, type=discord.ActivityType.listening)):
+        spotify = discord.utils.get(member.activities, type=discord.ActivityType.listening)
+        if not spotify:
             return await ctx.send(f"{member} is not listening to Spotify!")
         embed = discord.Embed(colour=spotify.colour)
         le_bar = cyberformat.bar(stat=(dt.utcnow() - spotify.start).seconds, max=spotify.duration.seconds, filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>', show_stat=True)

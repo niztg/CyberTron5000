@@ -15,7 +15,8 @@ class InfractionUser:
         """The base data for this user"""
         with open('CyberTron5000/json_files/infractions.json') as f:
             data = json.load(f)
-        if not (resp := data.get(str(self._guild))):
+        resp = data.get(str(self._guild))
+        if not resp:
             return []
         try:
             return resp[str(self._user)]

@@ -39,7 +39,8 @@ class Moderation(commands.Cog):
         """Purges a given amount of messages."""
         amount += 1
         await ctx.message.delete()
-        if user := flags.get('user'):
+        user = flags.get('user')
+        if user:
             await ctx.channel.purge(limit=amount, check=lambda msg: msg.author == user)
             return await ctx.send(f'{ctx.tick()} **{amount - 1}** messages by {user} have been purged', delete_after=3)
         await ctx.channel.purge(limit=amount)
@@ -106,7 +107,8 @@ class Moderation(commands.Cog):
     @commands.cooldown(1, 60, commands.BucketType.guild)
     async def vote(self, ctx, *, message):
         """Vote on something."""
-        if not 3 <= (len(options := message.split("|"))) < 21:
+        options = message.split("|")
+        if not 3 <= (len(options)) < 21:
             return await ctx.send(
                 f"You must have a minimum of **2** options and a maximum of **20**! Remember to split your question and options with a `|`, e.g. `what is your favourite food?|pizza|cake|fries`")
         question = options[0]
