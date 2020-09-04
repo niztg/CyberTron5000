@@ -108,7 +108,7 @@ class Tags(commands.Cog):
     @tag.command()
     async def list(self, ctx, member: discord.Member = None):
         """Shows you all the tags of you or another member"""
-        command = self.bot.get_command('tags')
+        command = self.bot.get_command('tags', member)
         await ctx.invoke(command)
 
     @commands.command()
