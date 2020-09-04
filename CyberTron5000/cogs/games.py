@@ -117,6 +117,7 @@ class Games(commands.Cog):
             initial_embed.title = "Who's that Pokemon?"
             initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."
             initial_embed.set_image(url=who.get('question_image'))
+            initial_embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
             answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {who['pokemon']['name']}!")
             answer_embed.set_image(url=who.get('answer_image'))
         if __name.replace('.', '') == "mrmime":
