@@ -67,8 +67,8 @@ class CyberTron5000(Bot):
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('CyberTron5000/cogs') if filename.endswith('.py')]
-        self.load_extension(name='jishaku')
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if filename.endswith('.py')]
+   #     self.load_extension(name='jishaku')
         self.loop.create_task(self.__aioinit__())
         self.embed = models.CyberEmbed
         self.colour_chooser = models.CyberColours
