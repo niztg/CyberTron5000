@@ -192,22 +192,24 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name='on_message')
     async def potpotpotato(self, message):
+        msg = message.content.lower()
         if message.guild.id == 748616619449647244 and not message.author.bot:
             for word in ("hello", "good morning", "helo", "good night"):
-                if word in message.content.lower():
+                if word in msg:
                     await message.channel.send(word)
             for start in ("i'm", "im", "i am", "am"):
-                if start in (msg := message.content.lower()) and not message.author.bot:
+                if start in msg and not message.author.bot:
                     if "aimg" in msg:
                         return
                     if random.randint(1, 5) == 3:
                         texts = msg.split(start, 1)
                         final = " ".join([i for i in texts[1:] if i is not None])
                         await message.channel.send(f"Hi {final.strip()}, I'm dad!")
-                if (word := f" {self.bot.config.forbidden_word_flushed} ") in (
-                        msg := message.content.lower()) and not message.author.bot:
+                word = f" {self.bot.config.forbidden_word_flushed} "
+                if word in msg and not message.author.bot:
                     if random.randint(1, 5) == 3:
-                        if len((people := msg.split(word, 1))) == 2:
+                        people = msg.split(word, 1)
+                        if len(people) == 2:
                             await message.channel.send(
                                 f'Guy named "{people[0].strip()}": :smirk:\nGirl named "{people[1].strip()}": :flushed:')
 
@@ -224,7 +226,8 @@ class Events(commands.Cog):
         # if the bot gets hard resetted, the votes would be deleted
         # F
         votes = self.bot.global_votes
-        if not (vote_message := votes.get(payload.message_id)):
+        vote_message = votes.get(payload.message_id)
+        if not vote_message:
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]
@@ -257,7 +260,8 @@ class Events(commands.Cog):
         # if the bot gets hard resetted, the votes would be deleted
         # F
         votes = self.bot.global_votes
-        if not (vote_message := votes.get(payload.message_id)):
+        vote_message = votes.get(payload.message_id)
+        if not vote_message:
             return
         data = vote_message['data']
         emojis = [x['emoji'] for x in data]

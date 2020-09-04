@@ -599,7 +599,8 @@ class Fun(commands.Cog):
             embed.title = "Words"
             not_found = list()
             for word in words:
-                if not (meanings := ret.get(word)):
+                meanings = ret.get(word)
+                if not meanings:
                     not_found.append(word)
                     continue
                 embed.add_field(name=word.lower(), value=self.format_meanings(meanings))

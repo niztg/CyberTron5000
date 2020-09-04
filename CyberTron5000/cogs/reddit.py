@@ -121,7 +121,8 @@ class Reddit(commands.Cog):
             user = mods[index]
             embed = discord.Embed(colour=self.bot.colour)
             name = f"{user['name']}"
-            if flair := user['author_flair_text']:
+            flair = user['author_flair_text']
+            if flair:
                 name += f" | {flair}"
             added = datetime.datetime.utcfromtimestamp(user['date'])
             embed.set_author(name=name, icon_url="https://cdn.discordapp.com/emojis/446524953341460491.png?v=1")

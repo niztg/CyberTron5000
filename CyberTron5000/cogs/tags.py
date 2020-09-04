@@ -25,14 +25,16 @@ class Tags(commands.Cog):
         ftags = list()
         for command in self.bot.get_command('tag').commands:
             ftags.append(command.name)
-            if not (c := self.bot.get_command(f'{command}')):
+            c = self.bot.get_command(f'{command}')
+            if not c:
                 continue
             for alias in c.aliases:
                 ftags.append(alias)
         return ftags
 
     def fetch_tag(self, ctx, tag):
-        if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
+        guild_tags = self._tag_dict.get(ctx.guild.id)
+        if not guild_tags:
             raise ValueError(f'This guild does not have any tags!')
         try:
             return guild_tags[tag]['content']
@@ -93,8 +95,9 @@ class Tags(commands.Cog):
     @commands.command(aliases=['all_tags', 'at'])
     async def guild_tags(self, ctx):
         """Shows you all the tags in the guild"""
-        if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
-            return await ctx.send("This guild doesn't have any tags!")
+        guild_tags = self._tag_dict.get(ctx.guild.id)
+        if not guild_tags:
+            raise commands.BadArgument(f'This guild does not have any tags!')
         tags = sorted(guild_tags.items(), key=lambda x: x[1]['uses'], reverse=True)
         data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags]
         embed = discord.Embed(colour=self.bot.colour)
@@ -112,8 +115,9 @@ class Tags(commands.Cog):
     async def tags(self, ctx, member: discord.Member = None):
         """Shows you all the tags of you or another member"""
         member = member or ctx.author
-        if not (guild_tags := self._tag_dict.get(ctx.guild.id)):
-            return await ctx.send("This guild doesn't have any tags!")
+        guild_tags = self._tag_dict.get(ctx.guild.id)
+        if not guild_tags:
+            raise commands.BadArgument(f'This guild does not have any tags!')
         tags = guild_tags.items()
         tags = sorted(tags, key=lambda x: x[1]['uses'], reverse=True)
         data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1]['author'] == member.id] # only add to list comp if belongs to author instead of removing from dict items in above lines
