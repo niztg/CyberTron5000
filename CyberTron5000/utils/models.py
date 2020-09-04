@@ -1,5 +1,6 @@
 import json
 from datetime import datetime as dt
+from discord import Embed, Colour
 
 
 class InfractionUser:
@@ -30,7 +31,8 @@ class InfractionUser:
 
     def add_infraction(self, reason="No reason provided."):
         """Adds an infraction to them"""
-        infraction = {"reason": reason, "infraction_number": len(self._data)+1, "is_null": False, "created": str(dt.utcnow())}
+        infraction = {"reason": reason, "infraction_number": len(self._data) + 1, "is_null": False,
+                      "created": str(dt.utcnow())}
         self._data.append(infraction)
         with open('CyberTron5000/json_files/infractions.json') as f:
             data = json.load(f)
@@ -44,7 +46,6 @@ class InfractionUser:
         with open('CyberTron5000/json_files/infractions.json', 'w') as fp:
             json.dump(data, fp, indent=4)
         return Infraction(infraction)
-
 
     @property
     def valid_infractions(self):
@@ -67,7 +68,7 @@ class Infraction:
     def __init__(self, data):
         self._data = data
         self.reason = data.get('reason')
-        self.infraction_number = data.get('infraction_number') # idk why
+        self.infraction_number = data.get('infraction_number')  # idk why
         self.is_null = data.get('is_null')
 
     def __int__(self):
@@ -139,3 +140,15 @@ def set_infraction_punishments(guild_id, **options):
     data[str(guild_id)]['punishments'] = dict(options)
     with open('CyberTron5000/json_files/infractions.json', 'w') as f:
         json.dump(data, f, indent=4)
+
+
+class CyberColours(Colour):
+    @classmethod
+    def main(cls):
+        return cls(0x00dcff)
+
+
+class CyberEmbed(Embed):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.colour = kwargs.get('colour') or kwargs.get('color') or CyberColours.main()

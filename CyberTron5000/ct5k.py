@@ -30,6 +30,7 @@ import aiohttp
 from discord.ext.commands import Bot, when_mentioned_or
 
 from CyberTron5000 import config, ctx
+from CyberTron5000.utils import models
 
 print(
     r"""
@@ -69,6 +70,8 @@ class CyberTron5000(Bot):
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('CyberTron5000/cogs') if filename.endswith('.py')]
         self.load_extension(name='jishaku')
         self.loop.create_task(self.__aioinit__())
+        self.embed = models.CyberEmbed
+        self.colour_chooser = models.CyberColours
         self.logging = {
             'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
             'support': 'https://discord.com/invite/2fxKxJH',
@@ -156,8 +159,7 @@ class CyberTron5000(Bot):
                                                                      'author': query2['user_id'], 'id': query2['id']}
         print("TAGS HAVE BEEN INITIALIZED")
         print("READY!")
-        print(
-            "──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+        print("───────────────────────────────────────────────────────────────────────────────────────────────────────")
 
 
 # 4,993
@@ -171,3 +173,4 @@ class CyberTron5000(Bot):
 
 
 CyberTron5000().run(config.config().bot_token)
+
