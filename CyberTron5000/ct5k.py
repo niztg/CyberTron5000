@@ -87,10 +87,7 @@ class CyberTron5000(Bot):
 
     async def __aioinit__(self):
         """Async init"""
-        self.db = await asyncpg.create_pool(
-            user=self.config.pg_data["user"],
-            password=self.config.pg_data["password"],
-            database=self.config.pg_data["db"])
+        self.db = await asyncpg.create_pool(**self.config.pg_data)
         self.session = aiohttp.ClientSession()
         await self.startup()
 
