@@ -27,7 +27,6 @@ from typing import List
 import asyncpg
 import discord
 import aiohttp
-from discord.ext import tasks
 from discord.ext.commands import Bot, when_mentioned_or
 
 from CyberTron5000 import config, ctx
