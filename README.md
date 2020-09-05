@@ -5,15 +5,15 @@
  
  ### Notable Categories:
 - <h4>Moderation</h4>
-*These commands require the bot to have the requisite permissions, i.e. ban members for ban, view audit log for audit, etc.*
-CyberTron5000 fufills the need for better moderation with various easy to use features!
-`c$kick` - Kick a member from the guild
-`c$ban`, `c$unban` - Ban/Unban. (ban commands include functionality on non-guild members)
-`c$mute`, `c$unmute` - Mute a member.
-`c$vote` - Vote on a poll with multiple options, editing on every vote with percentages
-`c$vote quick` - Vote on a poll with an upvote/downvote menu
-`c$user-nick` - Change a user's nickname.
-`c$audit`- View the guild's recent audit logs in a convenient paginated menu.
+*These commands require the bot to have the requisite permissions, i.e. ban members for ban, view audit log for audit, etc.*<br>
+CyberTron5000 fufills the need for better moderation with various easy to use features!<br>
+- `c$kick` - Kick a member from the guild
+- `c$ban`, `c$unban` - Ban/Unban. (ban commands include functionality on non-guild members)
+- `c$mute`, `c$unmute` - Mute a member.
+- `c$vote` - Vote on a poll with multiple options, editing on every vote with percentages
+- `c$vote quick` - Vote on a poll with an upvote/downvote menu
+- `c$user-nick` - Change a user's nickname.
+- `c$audit`- View the guild's recent audit logs in a convenient paginated menu.
 
 And More!
   
