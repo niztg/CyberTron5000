@@ -1,4 +1,8 @@
 # CyberTron5000
+```java
+LICENSE: MIT (See LICENSE)
+Copyright (c) 2020 niztg
+```
 
 <p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in over 100 commands and 15 categories, you'll never be bored!</p>
 <strong>Default Prefix: c$</strong><br>
@@ -75,7 +79,4 @@ Do `c$help [category]` for more help about any of these<br>
     <li>Join the Support Server! → https://discord.com/invite/2fxKxJH</li>
     <li>Check out the website! → https://cybertron-5k.netlify.app</li>
   </ul>
-
-### <em>License</em>
-CyberTron5000 is under the MIT License. (See: LICENSE)
 
