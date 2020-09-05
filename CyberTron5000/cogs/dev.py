@@ -202,8 +202,8 @@ class Developer(commands.Cog):
             for file in self.bot.ext:
                 try:
                     self.bot.reload_extension(file)
-                except:
-                    continue
+                except Exception as error:
+                    raise error
             embed = discord.Embed(
                 description="\n".join([f"{reload} `cogs.{f[19:]}`" for f in self.bot.ext]),
                 colour=self.bot.colour)
@@ -217,7 +217,10 @@ class Developer(commands.Cog):
                     return await ctx.send(f"**{i}** is not a valid cog!")
 
             for f in extension:
-                self.bot.reload_extension(f'CyberTron5000.cogs.{f}')
+                try:
+                    self.bot.reload_extension(f'CyberTron5000.cogs.{f}')
+                except Exception as error:
+                    raise error
             a = []
             for x in cogs:
                 if x in extension:
@@ -279,7 +282,7 @@ class Developer(commands.Cog):
     @dev.command()
     async def snipe_cache(self, ctx, channel: discord.TextChannel = None):
         l = list()
-        with open('CyberTron5000/json_files/snipes.json') as f:
+        with open('./json_files/snipes.json') as f:
             data = json.load(f)
         if not channel:
             for x in data.values():

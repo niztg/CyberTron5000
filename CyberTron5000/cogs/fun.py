@@ -428,7 +428,7 @@ class Fun(commands.Cog):
         """Shows the most recently deleted messages in a given channel"""
         # i know i shouldnt be using json for this
         channel = flags.get('channel') or ctx.channel
-        with open('CyberTron5000/json_files/snipes.json', 'r') as f:
+        with open('./json_files/snipes.json', 'r') as f:
             snipes = json.load(f)
         try:
             channel_snipes = snipes[str(channel.id)]
@@ -601,6 +601,9 @@ class Fun(commands.Cog):
         except discord.HTTPException:
             return await ctx.send("You passed in too many words!")
 
+    @commands.command()
+    async def funpy(self, ctx):
+        await ctx.send('everyone ~~!!!!~~ hates funpy')
 
 def setup(bot):
     bot.add_cog(Fun(bot))
