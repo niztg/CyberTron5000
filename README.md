@@ -1,7 +1,8 @@
 # CyberTron5000
 
 <p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in over 100 commands and 15 categories, you'll never be bored!</p>
-<strong>Default Prefix: c$</strong>
+<strong>Default Prefix: c$</strong><br>
+<strong>Help for all of these commands/categories can be found through c$help [command/category] </strong>
  
  ### Notable Categories:
 - <h4>Moderation</h4>
@@ -16,6 +17,10 @@ CyberTron5000 fufills the need for better moderation with various easy to use fe
 - `c$audit`- View the guild's recent audit logs in a convenient paginated menu.
 
 And More!
+
+- <h4>Fun</h4>
+CyberTron5000 contains various fun commands to spice up your life!
+- `c$animalfact`, `c$animalimg` - Show a fact/image on an animal.
   
 ### <em>Relevant URL's</em>
 <ul>
