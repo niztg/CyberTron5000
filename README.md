@@ -1,7 +1,7 @@
 # CyberTron5000
 
 <p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in over 100 commands and 15 categories, you'll never be bored!</p>
-**Default Prefix: c$** (each guild can have up to 15 prefixes, with `c$` being the default.)
+<strong>Default Prefix: c$</strong>
  
  ### Notable Categories:
 - <h4>Moderation</h4>
