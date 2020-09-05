@@ -1,17 +1,21 @@
 # CyberTron5000
 
-<p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in almost 100 commands, spread across 10 categories and growing, you'll never be bored!</p>
+<p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in over 100 commands and 15 categories, you'll never be bored!</p>
+**Default Prefix: c$** (each guild can have up to 15 prefixes, with `c$` being the default.)
  
- ### <em>Notable Categories</em>
-<ul>
-  <li>Fun (reply, askouija, coinflip, iq, fight, who, emoji, greentext and more!)</li>
-  <li>Moderation (ban, kick, user-nick, vote and more!)</li>
-  <li>Games (rockpaperscissors, kissmarrykill)</li>
-  <li>Reddit (post, meme, redditstats, modstats, askreddit, showerthought, wiki, moderator, and more!)</li>
-  <li>Profile (userinfo, guildinfo, avatar, permissions, guild stats, guild mods and more!)</li>
-  <li>Internet (compliment, trivia, dog, cat, translate, weather, pokédex and more!)</li>
-</ul>
-These are only some of CyberTron's commands! 
+ ### Notable Categories:
+- <h4>Moderation</h4>
+*These commands require the bot to have the requisite permissions, i.e. ban members for ban, view audit log for audit, etc.*
+CyberTron5000 fufills the need for better moderation with various easy to use features!
+`c$kick` - Kick a member from the guild
+`c$ban`, `c$unban` - Ban/Unban. (ban commands include functionality on non-guild members)
+`c$mute`, `c$unmute` - Mute a member.
+`c$vote` - Vote on a poll with multiple options, editing on every vote with percentages
+`c$vote quick` - Vote on a poll with an upvote/downvote menu
+`c$user-nick` - Change a user's nickname.
+`c$audit`- View the guild's recent audit logs in a convenient paginated menu.
+
+And More!
   
 ### <em>Relevant URL's</em>
 <ul>
