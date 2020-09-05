@@ -3,7 +3,12 @@
 LICENSE: MIT (See LICENSE)
 Copyright (c) 2020 niztg
 ```
+**Invite the Bot:**
+- [`Permissions for all commands including moderation`](https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=2080899263)
+- [`Requisite Permissions`](https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=523328)
+- [`None`](https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=0)<br>
 
+[`Support Server`](https://discord.com/invite/2fxKxJH) | [`Website`](https://cybertron-5k.netlify.app) | [`Subreddit`](https://reddit.com/r/CyberTron5000)
 <p>CyberTron5000 is a general purpose discord bot, and the best one! With various original and revolutionary features in over 100 commands and 15 categories, you'll never be bored!</p>
 <strong>Default Prefix: c$</strong><br>
 <strong>Help for all of these commands/categories can be found through c$help [command/category] </strong>
@@ -61,22 +66,16 @@ Manipulate various images including profile pictures, emojis and urls!
 
 ### All Categories
 Do `c$help [category]` for more help about any of these<br>
-- Meta - Meta Bot commands (12 commands)
-- Profile - Commands interacting with a user or guild's profile. (8 commands)
-- Api - Interact with various API's (12 commands)
-- Images - None (11 commands)
-- Fun - Fun commands (27 commands)
-- Reddit - Commands interacting with the Reddit API. (9 commands)
-- Tags - Tags are a way of storing data for later retrieval (3 commands)
-- Moderation - Commands for Moderation (13 commands)
-- Help - Help Commands (3 commands)
-- Games - Games! (5 commands)
+- Meta - Meta Bot commands
+- Profile - Commands interacting with a user or guild's profile.
+- Api - Interact with various API's 
+- Images - Image Manipulation Commands
+- Fun - Fun commands
+- Reddit - Commands interacting with the Reddit API.
+- Tags - Tags are a way of storing data for later retrieval 
+- Moderation - Commands for Moderation 
+- Help - Help Commands 
+- Games - Games! 
 
-
-### <em>Relevant URL's</em>
-<ul>
-  <li>Invite the Bot! → https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632</li>
-    <li>Join the Support Server! → https://discord.com/invite/2fxKxJH</li>
-    <li>Check out the website! → https://cybertron-5k.netlify.app</li>
-  </ul>
-
+have fun!<br>
+~ niztg/nizcomix
