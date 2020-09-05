@@ -64,7 +64,7 @@ class CyberTron5000(Bot):
             case_insensitive=True,
             status=discord.Status.online)
         self.colour = 0x00dcff
-        self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
+    #    self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if filename.endswith('.py')]
@@ -114,13 +114,13 @@ class CyberTron5000(Bot):
         return {'days': days, 'hours': hours, 'minutes': minutes, 'seconds': seconds}
 
     async def get_prefix(self, message):
-        if not message.guild:
-            return 'c$'
-        DEFAULT_PREFIX = ["c$"]
-        prefixes = self.prefixes.get(message.guild.id, DEFAULT_PREFIX)
-        if message.author.id == self.owner.id:
-            return when_mentioned_or(*prefixes, 'dev ')(self, message)
-        return when_mentioned_or(*prefixes)(self, message)
+        #if not message.guild:
+        #    return 'c$'
+        #DEFAULT_PREFIX = ["c$"]
+        #prefixes = self.prefixes.get(message.guild.id, DEFAULT_PREFIX)
+        #if message.aauthor.id == self.owner.id:
+        #    return when_mentioned_or(*prefixes, 'dev ')(self, message)
+        return when_mentioned_or('c$')(self, message)
 
     async def get_context(self, message, *, cls=None):
         return await super().get_context(message, cls=cls or ctx.CyberContext)
@@ -134,29 +134,29 @@ class CyberTron5000(Bot):
             except Exception as error:
                 print(f"Could not load {file}: {error}")
         print(f"COGS HAVE BEEN LOADED")
-        prefix_data = await self.db.fetch("SELECT guild_id, array_agg(prefix) FROM prefixes GROUP BY guild_id")
-        for entry in prefix_data:
-            self.prefixes[entry['guild_id']] = entry['array_agg']
-        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                             name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
-        print("PREFIXES AND PRESENCE SETUP")
-        SQL = """
-        SELECT guild_id FROM tags
-        """
-        tags = await self.db.fetch(SQL)
-        for query in tags:
-            self._tag_dict[query['guild_id']] = {}
-            SQL2 = """
-            SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1;
-            """
-            tags2 = await self.db.fetch(SQL2, query['guild_id'])
-            for query2 in tags2:
-                self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
-                                                                     'uses': query2['uses'] or 0,
-                                                                     'author': query2['user_id'], 'id': query2['id']}
-        print("TAGS HAVE BEEN INITIALIZED")
-        print("READY!")
-        print("───────────────────────────────────────────────────────────────────────────────────────────────────────")
+        #prefix_data = await self.db.fetch("SELECT guild_id, array_agg(prefix) FROM prefixes GROUP BY guild_id")
+        #for entry in prefix_data:
+        #    self.prefixes[entry['guild_id']] = entry['array_agg']
+        #await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+        #                                                     name=f"{len(self.users):,} users in {len(self.guilds):,} guilds"))
+        #print("PREFIXES AND PRESENCE SETUP")
+        #SQL = """
+        #SELECT guild_id FROM tags
+        #"""
+        #tags = await self.db.fetch(SQL)
+        #for query in tags:
+        #    self._tag_dict[query['guild_id']] = {}
+        #    SQL2 = """
+        #    SELECT name, content, uses, user_id, id FROM tags WHERE guild_id = $1;
+        #    """
+        #    tags2 = await self.db.fetch(SQL2, query['guild_id'])
+        #    for query2 in tags2:
+        #        self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
+        #                                                             'uses': query2['uses'] or 0,
+        #                                                             'author': query2['user_id'], 'id': query2['id']}
+        #print("TAGS HAVE BEEN INITIALIZED")
+        #print("READY!")
+        #print("───────────────────────────────────────────────────────────────────────────────────────────────────────")
 
 
 # 4,993
