@@ -141,7 +141,7 @@ class Meta(commands.Cog):
             location = os.path.relpath(file)
             total, fl = __import__('inspect').getsourcelines(cmd.callback)
             ll = fl + (len(total) - 1)
-            url = f"https://github.com/niztg/CyberTron5000/blob/master/{location}#L{fl}-L{ll}"
+            url = f"https://github.com/niztg/CyberTron5000/blob/master/CyberTron5000/{location}#L{fl}-L{ll}"
             if not cmd.aliases:
                 char = '\u200b'
             else:
@@ -208,10 +208,10 @@ class Meta(commands.Cog):
         mes = await self.bot.logging_channel[2].send(embed=embed)
         for r in ['⬆️', '⬇️']:
             await mes.add_reaction(r)
-        with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+        with open("./json_files/suggestions.json", "r") as f:
             res = json.load(f)
         res[str(sugid)] = []
-        with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+        with open("./json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
         ms = await ctx.send(
             f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{ctx.tick()} | **Yes**\n{ctx.tick(False)} | **No**\n(You have 15 seconds)")
@@ -222,10 +222,10 @@ class Meta(commands.Cog):
                     await ms.add_reaction(emoji)
                 r, u = await self.bot.wait_for('reaction_add', timeout=15, check=lambda r, u: u.bot is False)
                 if r.emoji.name == "tickgreen":
-                    with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+                    with open("./json_files/suggestions.json", "r") as f:
                         res = json.load(f)
                     res[str(sugid)].append(ctx.author.id)
-                    with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+                    with open("./json_files/suggestions.json", "w") as f:
                         json.dump(res, f, indent=4)
                     await ctx.send("Followed suggestion!")
                 else:
@@ -241,10 +241,10 @@ class Meta(commands.Cog):
     async def follow(self, ctx, id: str):
         """Follow a suggestion"""
         try:
-            with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+            with open("./json_files/suggestions.json", "r") as f:
                 res = json.load(f)
             res[str(id)].append(ctx.author.id)
-            with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+            with open("./json_files/suggestions.json", "w") as f:
                 json.dump(res, f, indent=4)
             await ctx.send(f"You have successfully followed suggestion `{id}`")
         except KeyError:
@@ -254,14 +254,14 @@ class Meta(commands.Cog):
     async def unfollow(self, ctx, id: str):
         """Unfollow a suggestion"""
         try:
-            with open("CyberTron5000/json_files/suggestions.json", "r") as f:
+            with open("./json_files/suggestions.json", "r") as f:
                 res = json.load(f)
             try:
                 index = res[str(id)].index(ctx.author.id)
             except (ValueError, KeyError):
                 return await ctx.send("That suggestion was not found, or you aren't following it!")
             res[str(id)].pop(index)
-            with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+            with open("./json_files/suggestions.json", "w") as f:
                 json.dump(res, f, indent=4)
             await ctx.send(f"You have successfully unfollowed suggestion `{id}`")
         except KeyError:
@@ -277,13 +277,13 @@ class Meta(commands.Cog):
         embed = msg.embeds[0]
         embed.add_field(name=f"Reply from {ctx.author}", value=reason)
         await msg.edit(embed=embed)
-        with open('CyberTron5000/json_files/suggestions.json', 'r') as f:
+        with open('./json_files/suggestions.json', 'r') as f:
             res = json.load(f)
         for i in res[str(id)]:
             a = self.bot.get_user(i) or await self.bot.fetch_user(i)
             await a.send(content=f"Suggestion **{id}** has been resolved!", embed=embed)
         res.pop(str(id))
-        with open("CyberTron5000/json_files/suggestions.json", "w") as f:
+        with open("./json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
         await self.bot.db.execute("DELETE FROM suggestions WHERE suggest_id = $1", id)
 

@@ -157,7 +157,7 @@ class Moderation(commands.Cog):
 
 
     @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_nicknames=True)
     async def user_nick(self, ctx, member: discord.Member, *, name=None):
         nick = name or member.name
         if not self.hierarchy(member):

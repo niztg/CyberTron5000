@@ -279,7 +279,7 @@ class Developer(commands.Cog):
     @dev.command()
     async def snipe_cache(self, ctx, channel: discord.TextChannel = None):
         l = list()
-        with open('CyberTron5000/json_files/snipes.json') as f:
+        with open('./json_files/snipes.json') as f:
             data = json.load(f)
         if not channel:
             for x in data.values():

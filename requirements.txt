@@ -16,4 +16,6 @@ aiotrivia~=2.0.1
 git+https://github.com/niztg/aiotrivia
 Unidecode~=1.1.1
 tabulate~=0.8.7
+jishaku
+sr_api
 PyDictionary~=2.0.1

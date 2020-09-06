@@ -428,7 +428,7 @@ class Fun(commands.Cog):
         """Shows the most recently deleted messages in a given channel"""
         # i know i shouldnt be using json for this
         channel = flags.get('channel') or ctx.channel
-        with open('CyberTron5000/json_files/snipes.json', 'r') as f:
+        with open('./json_files/snipes.json', 'r') as f:
             snipes = json.load(f)
         try:
             channel_snipes = snipes[str(channel.id)]
@@ -479,6 +479,12 @@ class Fun(commands.Cog):
             data = await r.read()
         image = BytesIO(data)
         return discord.File(image, filename=f'image.{ext}')
+
+    @commands.command()
+    async def inspiration(self, ctx):
+        """Get inspired"""
+        file = await self.get_attachement((await self.bot.session.get('https://inspirobot.me/api?generate=true')).text())
+        await ctx.send(file=file)
 
     @commands.command(aliases=['aimg'])
     async def animalimg(self, ctx, *, animal=None):
@@ -610,6 +616,10 @@ class Fun(commands.Cog):
             await ctx.send(embed=embed)
         except discord.HTTPException:
             return await ctx.send("You passed in too many words!")
+
+    @commands.command()
+    async def funpy(self, ctx):
+        await ctx.send('i hate u mom')
 
 
 def setup(bot):
