@@ -473,8 +473,10 @@ class Fun(commands.Cog):
     @commands.command()
     async def inspiration(self, ctx):
         """Get inspired"""
-        file = await self.get_attachement((await self.bot.session.get('https://inspirobot.me/api?generate=true')).text())
-        await ctx.send(file=file)
+        async with self.bot.session.get('https://inspirobot.me/api?generate=true') as r:
+            data = await r.text()
+        file = await self.get_attachement(data)
+        await ctx.send(content=f"**Inspiration**", file=file)
 
     @commands.command(aliases=['aimg'])
     async def animalimg(self, ctx, *, animal=None):
@@ -609,12 +611,8 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def funpy(self, ctx):
-<<<<<<< HEAD
         await ctx.send('i hate u mom')
 
-=======
-        await ctx.send('everyone ~~!!!!~~ hates funpy')
->>>>>>> 72d890cb8c6457a027fc38a32107126d81482dcd
 
 def setup(bot):
     bot.add_cog(Fun(bot))
