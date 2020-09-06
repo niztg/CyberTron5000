@@ -470,6 +470,8 @@ class Fun(commands.Cog):
         image = BytesIO(data)
         return discord.File(image, filename=f'image.{ext}')
 
+
+
     @commands.command(aliases=['aimg'])
     async def animalimg(self, ctx, *, animal=None):
         """Shows an image of an animal of your choice."""
@@ -603,7 +605,8 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def funpy(self, ctx):
-        await ctx.send('everyone ~~!!!!~~ hates funpy')
+        await ctx.send('everyone ~a~~ hates funpy')
+
 
 def setup(bot):
     bot.add_cog(Fun(bot))
