@@ -463,16 +463,6 @@ class Fun(commands.Cog):
         except Exception as error:
             return await ctx.send(error)
 
-    async def sr_image(self, image, ext='png') -> discord.File:
-        """
-        Returns a discord.File of a sr_api image
-        :param image:
-        :param ext:
-        :return:
-        """
-        image = BytesIO(await image.read())
-        return discord.File(image, filename=f"somerandom.{ext}")
-
     async def get_attachement(self, image_url: str, ext='png') -> discord.File:
         """Gives you a valid image attachment of any url"""
         async with self.bot.session.get(image_url) as r:
@@ -619,8 +609,12 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def funpy(self, ctx):
+<<<<<<< HEAD
         await ctx.send('i hate u mom')
 
+=======
+        await ctx.send('everyone ~~!!!!~~ hates funpy')
+>>>>>>> 72d890cb8c6457a027fc38a32107126d81482dcd
 
 def setup(bot):
     bot.add_cog(Fun(bot))

@@ -59,6 +59,7 @@ def lines_of_code():
         "files": fc
     }
 
+
 lines = lines_of_code()
 
 
@@ -76,7 +77,8 @@ class Meta(commands.Cog):
         uptime = []
         for key, value in self.bot.uptime.items():
             uptime.append(f'**{value}** {key}')
-        await ctx.send(embed=discord.Embed(description='\n'.join(uptime), colour=self.bot.colour).set_author(name=f"I have been up for {str(humanize.naturaltime(datetime.datetime.utcnow() - self.bot.start_time)).split('ago')[0]}"))
+        await ctx.send(embed=discord.Embed(description='\n'.join(uptime), colour=self.bot.colour).set_author(
+            name=f"I have been up for {str(humanize.naturaltime(datetime.datetime.utcnow() - self.bot.start_time)).split('ago')[0]}"))
 
     @commands.command()
     async def ping(self, ctx):
@@ -101,7 +103,7 @@ class Meta(commands.Cog):
         db_start = time.perf_counter()
         await self.bot.db.fetch("SELECT * FROM news")
         db_end = time.perf_counter()
-        db_dur = round((db_end-db_start)*1000, 3)
+        db_dur = round((db_end - db_start) * 1000, 3)
         message += f"\n{check_health(db_dur, (5, 15))} {self.softwares[3]} Database Latency `{db_dur}` ms"
         # thanks to dutchy for db latency idea
         await msg.edit(content=message)
@@ -190,7 +192,8 @@ class Meta(commands.Cog):
             embed.description += f"→ Used Memory | {cyberformat.bar(stat=psutil.virtual_memory()[2], max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}\n→ CPU | {cyberformat.bar(stat=psutil.cpu_percent(), max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}"
             embed.description += f"\n→ Uptime | {uptime}"
             embed.description += f"\n**{lines.get('lines'):,}** lines of code | **{lines.get('files'):,}** files\n{self.softwares[0]} {discord.__version__}\n{self.softwares[1]} {platform.python_version()}"
-            embed.add_field(name=f"<:news:730866149109137520> News Update #{news[0][1]}", value=news[0][0], inline=False)
+            embed.add_field(name=f"<:news:730866149109137520> News Update #{news[0][1]}", value=news[0][0],
+                            inline=False)
             embed.set_footer(
                 text=f"Developed by {str(ctx.bot.owner)} | Bot created {humanize.naturaltime(datetime.datetime.utcnow() - self.bot.user.created_at)}",
                 icon_url=ctx.bot.owner.avatar_url)
@@ -321,7 +324,8 @@ class Meta(commands.Cog):
     @commands.command()
     async def invite(self, ctx):
         """Invite me to your server!"""
-        await ctx.send(content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632")
+        await ctx.send(
+            content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632")
 
     @commands.command()
     async def support(self, ctx):
