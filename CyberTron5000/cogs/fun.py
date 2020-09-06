@@ -470,6 +470,13 @@ class Fun(commands.Cog):
         image = BytesIO(data)
         return discord.File(image, filename=f'image.{ext}')
 
+    @commands.command()
+    async def inspiration(self, ctx):
+        """Get inspired"""
+        async with self.bot.session.get('https://inspirobot.me/api?generate=true') as r:
+            data = await r.text()
+        file = await self.get_attachement(data)
+        await ctx.send(content=f"**Inspiration**", file=file)
 
     @commands.command(aliases=['aimg'])
     async def animalimg(self, ctx, *, animal=None):
@@ -601,10 +608,6 @@ class Fun(commands.Cog):
             await ctx.send(embed=embed)
         except discord.HTTPException:
             return await ctx.send("You passed in too many words!")
-
-    @commands.command()
-    async def funpy(self, ctx):
-        await ctx.send('everyone ~a~~ hates funpy')
 
 def setup(bot):
     bot.add_cog(Fun(bot))
