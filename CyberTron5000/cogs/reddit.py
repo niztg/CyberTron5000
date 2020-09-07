@@ -72,7 +72,12 @@ class Reddit(commands.Cog):
                 embed.description += "\n" + ' '.join(final)
                 dt = datetime.datetime.utcfromtimestamp(user['data']['created_utc'])
                 created = humanize.naturaltime(datetime.datetime.utcnow() - dt)
-                embed.add_field(name="Account Settings", value=f'{ctx.on_off(user["data"]["verified"])} **Verified**\n{ctx.on_off(user["data"]["is_mod"])} **Is Mod**\n{ctx.on_off(user["data"]["hide_from_robots"])} **Hide From Robots**\n{ctx.on_off(user["data"]["has_subscribed"])} **Has Subscribed**')
+                embed.add_field(name="Account Settings",
+                                value=(f'{ctx.on_off(user["data"]["verified"])} **Verified**\n'
+                                       f'{ctx.on_off(user["data"]["is_mod"])} **Is Mod**\n'
+                                       f'{ctx.on_off(user["data"]["hide_from_robots"])} **Hide From Robots**\n'
+                                       f'{ctx.on_off(user["data"]["has_subscribed"])} **Has Subscribed**')
+                                )
                 embed.set_footer(text=f'Account created {created}')
             await ctx.send(embed=embed)
         except KeyError:
@@ -83,7 +88,10 @@ class Reddit(commands.Cog):
         subreddit = random.choice(['memes', 'meme', 'dankmemes', 'okbuddyretard', 'memeeconomy', 'dankexchange', 'pewdiepiesubmissions', 'wholesomememes'])
         async with ctx.typing():
             s = random.choice(await self.get_post_data(subreddit, 'hot'))
-            embed = discord.Embed(title=str(s['title']), colour=self.bot.colour, url=f"https://reddit.com/{s['permalink']}", description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
+            embed = discord.Embed(title=str(s['title']),
+                                  colour=self.bot.colour,
+                                  url=f"https://reddit.com/{s['permalink']}",
+                                  description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
             embed.timestamp = datetime.datetime.utcfromtimestamp(s['created'])
             embed.set_author(name=s['author'])
             embed.set_footer(text=f"r/{s['subreddit']} • {s['upvote_ratio'] * 100:,}% upvote ratio")
@@ -134,7 +142,10 @@ class Reddit(commands.Cog):
     async def thonk(self, ctx):
         async with ctx.typing():
             s = random.choice(await self.get_post_data('showerthoughts', 'top'))
-            embed = discord.Embed(title=str(s['title']), colour=self.bot.colour, url=f"https://reddit.com/{s['permalink']}", description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
+            embed = discord.Embed(title=str(s['title']),
+                                  colour=self.bot.colour,
+                                  url=f"https://reddit.com/{s['permalink']}",
+                                  description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
             embed.timestamp = datetime.datetime.utcfromtimestamp(s['created'])
             embed.set_author(name=s['author'])
             embed.set_footer(text=f"r/{s['subreddit']} • {s['upvote_ratio'] * 100:,}% upvote ratio")

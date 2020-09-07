@@ -77,7 +77,11 @@ class CyberTronHelpCommand(commands.HelpCommand):
         msg = await self.context.send(embed=embed)
         embed_dict = {
             ":info:731324830724390974": discord.Embed(colour=self.context.bot.colour,
-                                                      description="<argument> - This means the argument is **required.**\n[argument] - This means the argument is **optional.**\n[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**\nNow that you know the basics, it should be noted that...\n**You do not type in the brackets!**"),
+                                                      description=("<argument> - This means the argument is **required.**\n"
+                                                                    "[argument] - This means the argument is **optional.**\n"
+                                                                    "[A|B] - This means that it can be either **A or B.**\n[argument...] - This means you can have **multiple arguments.**"
+                                                                    "Now that you know the basics, it should be noted that...\n"
+                                                                    "**You do not type in the brackets!**")),
             ":redo:741793178704937000": embed
         }
         valid_reactions = [*embed_dict.keys()] + [':stop_button:731316755485425744']

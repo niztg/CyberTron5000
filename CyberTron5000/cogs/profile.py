@@ -90,7 +90,14 @@ class Profile(commands.Cog):
             embed.set_field_at(index=0, name='Formats',
                                value=f"[WEBP]({avamember.avatar_url_as(format='webp')}) | [PNG]({avamember.avatar_url_as(format='png')}) | [JPG]({avamember.avatar_url_as(format='jpg')}) | [GIF]({avamember.avatar_url})")
         embed.add_field(name="Sizes",
-                        value=f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | [256]({avamember.avatar_url_as(static_format="png", size=256)}) | [512]({avamember.avatar_url_as(static_format="png", size=512)}) | [1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | [2048]({avamember.avatar_url_as(static_format="png", size=2048)})')
+                        value=(
+                               f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | '
+                               f'[256]({avamember.avatar_url_as(static_format="png", size=256)}) | '
+                               f'[512]({avamember.avatar_url_as(static_format="png", size=512)}) | '
+                               f'[1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | '
+                               f'[2048]({avamember.avatar_url_as(static_format="png", size=2048)})'
+                              )
+                        )
         embed.set_author(name=f"{avamember}")
         return await ctx.send(embed=embed)
     
@@ -435,7 +442,12 @@ class Profile(commands.Cog):
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = f"{url} {channel.name} | {channel.id}"
         last_message = await channel.fetch_message(channel.last_message_id)
-        embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+        pins = await channel.pins()
+        embed.description = (
+                             f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} "
+                             f"<:member:731190477927219231> **{len(channel.members):,}** "
+                             f"{f'<:pin:735989723591344208> **{len(pings)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+                            )
         embed.set_footer(
             text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)

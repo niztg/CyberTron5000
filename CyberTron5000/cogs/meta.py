@@ -216,8 +216,11 @@ class Meta(commands.Cog):
         res[str(sugid)] = []
         with open("./json_files/suggestions.json", "w") as f:
             json.dump(res, f, indent=4)
-        ms = await ctx.send(
-            f"Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\nIf you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n{ctx.tick()} | **Yes**\n{ctx.tick(False)} | **No**\n(You have 15 seconds)")
+        ms = await ctx.send(("Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\n"
+                             f"If you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n"
+                             f"{ctx.tick()} | **Yes**\n"
+                             "{ctx.tick(False)} | **No**\n"
+                             "(You have 15 seconds)"))
         await self.bot.db.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
         try:
             async with async_timeout.timeout(15):
@@ -303,7 +306,14 @@ class Meta(commands.Cog):
         embed.set_author(name=f"lines for {ctx.me.name}", icon_url=ctx.me.avatar_url)
         embed.description = f"**{lines.get('lines'):,}** lines of code | **{lines.get('files')}** files"
         embed.add_field(name="Statistics",
-                        value=f"<:class:735360032434290830> Classes: **{lines.get('classes'):,}**\n<:function:735517201561288775> Functions: **{lines.get('functions'):,}**\n<:coroutine:735520608183648337> Coroutines: **{lines.get('coroutine'):,}**\n💬 Comments: **{lines.get('comments'):,}**")
+                        value=(
+                               f"<:class:735360032434290830> Classes: **{lines.get('classes'):,}**\n"
+                               f"<:function:735517201561288775> Functions: **{lines.get('functions'):,}**\n"
+                               f"<:coroutine:735520608183648337> Coroutines: **{lines.get('coroutine'):,}**\n"
+                               f"💬 Comments: **{lines.get('comments'):,}**"
+                               )
+                        )
+
         embed.add_field(name="\u200b",
                         value=f'<:member:731190477927219231> Users: **{len(self.bot.users):,}**\n<:Discord:735530547992068146> Servers: **{len(self.bot.guilds)}**\n<:text_channel:703726554018086912> Channels: **{len([*self.bot.get_all_channels()]):,}**\n<:emoji:734231060069613638> Emojis: **{len(self.bot.emojis):,}**')
         await ctx.send(embed=embed)
