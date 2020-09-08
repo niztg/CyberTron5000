@@ -28,55 +28,58 @@ class GuildStats:
     """
     Guild Stats
     """
-    
+
     def __init__(self, ctx):
         self.context = ctx
-    
+
     @property
     def num_bot(self):
         return len([m for m in self.context.guild.members if m.bot])
-    
+
     @property
     def status_counter(self):
         return collections.Counter([m.status for m in self.context.guild.members])
-    
+
     def guild_graph(self):
         status_counts = self.status_counter
         labels = f'Online ({status_counts[discord.Status.online]:,})', f'Do Not Disturb ({status_counts[discord.Status.dnd]:,})', f'Idle ({status_counts[discord.Status.idle]:,})', f'Offline ({status_counts[discord.Status.offline]:,})'
-        sizes = [status_counts[discord.Status.online], status_counts[discord.Status.dnd], status_counts[discord.Status.idle], status_counts[discord.Status.offline]]
+        sizes = [status_counts[discord.Status.online], status_counts[discord.Status.dnd],
+                 status_counts[discord.Status.idle], status_counts[discord.Status.offline]]
         colors = ['#42B581', '#E34544', '#FAA619', '#747F8D']
         explode = (0.0, 0, 0, 0)
-        
+
         patches, texts = plt.pie(sizes, colors=colors, shadow=False, startangle=90)
         plt.legend(patches, labels, loc="best")
         plt.pie(sizes, explode=explode, colors=colors,
                 autopct='%1.1f%%', shadow=False, startangle=140)
-        
+
         plt.axis('equal')
         plt.title(f"Total guild members: {len(self.context.guild.members):,}",
                   bbox={'facecolor': '0.8', 'pad': 5})
         fig = plt.savefig("guild.png", transparent=True)
         plt.close(fig=fig)
         return discord.File("guild.png", filename="guild.png")
-    
+
     async def check_nitro(self, m: Union[discord.Member, int]):
         if isinstance(m, int):
             m = self.context.bot.get_user(m) or await self.context.bot.fetch_user(m)
         if m.is_avatar_animated() or m in self.context.guild.premium_subscribers:
             return True
         if not isinstance(m, discord.User):
-            for a in m.activities:
-                if a.type == discord.ActivityType.custom and a.emoji and a.emoji.is_custom_emoji():
-                        return True
+            if m.activity:
+                for a in m.activities:
+                    if a.type == discord.ActivityType.custom:
+                        if a.emoji and a.emoji.is_custom_emoji():
+                            return True
         return False
 
 
 class Profile(commands.Cog):
     """Commands interacting with a user or guild's profile."""
-    
+
     def __init__(self, bot):
         self.bot = bot
-        
+
     @commands.command(aliases=["av"], help="Gets the avatar of a user.")
     async def avatar(self, ctx, *, avamember: Union[discord.Member, int] = None):
         if isinstance(avamember, int):
@@ -90,25 +93,18 @@ class Profile(commands.Cog):
             embed.set_field_at(index=0, name='Formats',
                                value=f"[WEBP]({avamember.avatar_url_as(format='webp')}) | [PNG]({avamember.avatar_url_as(format='png')}) | [JPG]({avamember.avatar_url_as(format='jpg')}) | [GIF]({avamember.avatar_url})")
         embed.add_field(name="Sizes",
-                        value=(
-                               f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | '
-                               f'[256]({avamember.avatar_url_as(static_format="png", size=256)}) | '
-                               f'[512]({avamember.avatar_url_as(static_format="png", size=512)}) | '
-                               f'[1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | '
-                               f'[2048]({avamember.avatar_url_as(static_format="png", size=2048)})'
-                              )
-                        )
+                        value=f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | [256]({avamember.avatar_url_as(static_format="png", size=256)}) | [512]({avamember.avatar_url_as(static_format="png", size=512)}) | [1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | [2048]({avamember.avatar_url_as(static_format="png", size=2048)})')
         embed.set_author(name=f"{avamember}")
         return await ctx.send(embed=embed)
-    
+
     @commands.group(aliases=['si', 'serverinfo', 'gi', 'guild', 'server'], help="Gets the guild's info.",
                     invoke_without_command=True)
     async def guildinfo(self, ctx):
         try:
-            gs = GuildStats(ctx)
-            g = gs.status_counter
+            g = GuildStats(ctx).status_counter
+            n = '\n'
             guild = ctx.guild
-            people = [f"<:member:731190477927219231>**{guild.member_count:,}**",
+            people = [f"<:member:731190477927219231>**{len(ctx.guild.members):,}**",
                       f"{sl[discord.Status.online]}**{g[discord.Status.online]:,}**",
                       f"{sl[discord.Status.idle]}**{g[discord.Status.idle]:,}**",
                       f"{sl[discord.Status.dnd]}**{g[discord.Status.dnd]:,}**",
@@ -120,27 +116,16 @@ class Profile(commands.Cog):
             categories = guild.categories
             region = REGIONS[f"{str(guild.region)}"]
             banner_url = f" [Banner URL]({ctx.guild.banner_url_as(format='png')})" if ctx.guild.banner_url else "\u200b"
-            description_text = (
-                                f'**{guild.id}**\n'
-                                f'<:owner:730864906429136907> **{guild.owner}**\n'
-                                f'🗺 **{region}**\n'
-                                f'<:emoji:734231060069613638> **{len(guild.emojis)}** <:roles:734232012730138744> **{len(guild.roles)}**\n'
-                                f'<:category:716057680548200468> **{len(categories)}** <:text_channel:703726554018086912>**{len(text_channels)}** <:voice_channel:703726554068418560>**{len(voice_channels)}**\n'
-                                f'<:asset:734531316741046283> [Icon URL]({guild.icon_url_as(static_format='png')}){banner_url}\n'
-                                f'{"\n".join(people)}\n'
-                                f'<:bot:703728026512392312> **{gs.num_bot}**\n'
-                                f'<:boost:726151031322443787> **Tier: {guild.premium_tier}**\n'
-                                f'{guild.premium_subscription_count} {cyberformat.bar(stat=guild.premium_subscription_count, max=30, filled="<:loading_filled:730823516059992204>", empty="<:loading_empty:730823515862859897>", show_stat=True)} {30}'
-                               )
-            embed = discord.Embed(colour=self.bot.colour,description=description_text)
-
+            embed = discord.Embed(colour=self.bot.colour,
+                                  description=f"**{guild.id}**\n<:owner:730864906429136907> **{guild.owner}**\n🗺 **{region}**\n<:emoji:734231060069613638> **{len(ctx.guild.emojis)}** <:roles:734232012730138744> **{len(ctx.guild.roles)}**\n<:category:716057680548200468> **{len(categories)}** <:text_channel:703726554018086912>**{len(text_channels)}** <:voice_channel:703726554068418560>**{len(voice_channels)}**\n<:asset:734531316741046283> [Icon URL]({ctx.guild.icon_url_as(static_format='png')}){banner_url}"
+                                              f"\n{f'{n}'.join(people)}\n<:bot:703728026512392312> **{GuildStats(ctx).num_bot}**\n<:boost:726151031322443787> **Tier: {guild.premium_tier}**\n{guild.premium_subscription_count} {cyberformat.bar(stat=guild.premium_subscription_count, max=30, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>', show_stat=True)} {30}")
             embed.set_author(name=f"{guild}", icon_url=guild.icon_url)
             embed.set_footer(
-                text=f"Guild created {nt(dt.utcnow() - guild.created_at)}")
+                text=f"Guild created {nt(dt.utcnow() - ctx.guild.created_at)}")
             await ctx.send(embed=embed)
         except Exception as er:
             await ctx.send(er)
-    
+
     @guildinfo.command(aliases=['mods'], invoke_without_command=True)
     async def staff(self, ctx):
         """Shows you the mods of a guild"""
@@ -157,7 +142,7 @@ class Profile(commands.Cog):
                                             f"\n\n**MOD BOTS** (Total {len(mod_bots)})\n {f'{n}'.join([f'🛡 {bot.mention} - {bot.top_role.mention}' for bot in mod_bots[:10]])}",
                                 colour=self.bot.colour).set_author(name=f"Staff Team for {ctx.guild}",
                                                                    icon_url=ctx.guild.icon_url))
-    
+
     @guildinfo.command(invoke_without_command=True, aliases=['graph'])
     async def chart(self, ctx):
         """Shows a chart of the guild's activity"""
@@ -169,7 +154,7 @@ class Profile(commands.Cog):
         embed = discord.Embed(colour=self.bot.colour, name=f"Status Chart for{ctx.guild}", icon_url=ctx.guild.icon_url)
         embed.set_image(url="attachment://guild.png")
         await ctx.send(embed=embed, file=image)
-    
+
     @guildinfo.command(aliases=['chan'])
     @checks.bruh()
     async def channels(self, ctx):
@@ -199,7 +184,7 @@ class Profile(commands.Cog):
                 else:
                     pass
             embed.add_field(name=f"<:menu:739570837081817160> {c}", value='\u200b' + "\n".join(x), inline=False)
-        
+
         y = ctx.guild.text_channels + ctx.guild.voice_channels
         chl = []
         for o in y:
@@ -221,10 +206,10 @@ class Profile(commands.Cog):
                     else:
                         channel = "<:voice_channel:703726554068418560>"
                     chl.append(f"{channel} {o.name}")
-        
+
         embed.description = "\n".join(chl)
         await ctx.send(embed=embed)
-    
+
     @guildinfo.command(aliases=['def-chan'])
     async def default_channels(self, ctx):
         """Shows you the channels of a guild that everyone can see."""
@@ -277,10 +262,10 @@ class Profile(commands.Cog):
                     else:
                         channel = "<:voice_channel:703726554068418560>"
                     chl.append(f"{channel} {o.name}")
-        
+
         embed.description = "\n".join(chl)
         await ctx.send(embed=embed)
-    
+
     @commands.command(help="Gets a user's info.")
     async def betteruserinfo(self, ctx, *, member: discord.Member = None):
         member = member or ctx.author
@@ -297,7 +282,7 @@ class Profile(commands.Cog):
         embed.add_field(name='is a bot?', value=f'{member.bot}')
         embed.add_field(name='bad', value='ges {member.bdages}')
         await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['mi', 'member', 'ui', 'user', 'userinfo'])
     async def memberinfo(self, ctx, *, member: Union[discord.Member, int] = None):
         """
@@ -367,7 +352,8 @@ class Profile(commands.Cog):
                     else:
                         emoji = ''
                         if activity.emoji:
-                            emoji = '<:emoji:734231060069613638>' if activity.emoji.is_custom_emoji() and not ctx.bot.get_emoji(activity.emoji.id) else activity.emoji
+                            emoji = '<:emoji:734231060069613638>' if activity.emoji.is_custom_emoji() and not ctx.bot.get_emoji(
+                                activity.emoji.id) else activity.emoji
                         char = "\u200b" if activity.type == discord.ActivityType.custom else " "
                         if str(activity.name) == "None":
                             ac = "\u200b"
@@ -377,19 +363,21 @@ class Profile(commands.Cog):
                     activities.append(activity)
                 embed.add_field(name='Activities', value='\n'.join(activities))
         return await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['perms'], help="Gets a user's permissions in the current channel.")
     async def permissions(self, ctx, *, member: discord.Member = None):
         member = member or ctx.author
         all_perms = list()
-        embed = discord.Embed(colour=self.bot.colour).set_author(name=f"{member}'s permissions in {ctx.channel}", icon_url=member.avatar_url)
+        embed = discord.Embed(colour=self.bot.colour).set_author(name=f"{member}'s permissions in {ctx.channel}",
+                                                                 icon_url=member.avatar_url)
         all = dict(member.permissions_in(ctx.channel)).items()
         for key, value in all:
             all_perms.append((f"{ctx.tick(value)} **{key.title().replace('_', ' ')}**", value))
         perms = sorted(all_perms, key=lambda x: x[1], reverse=True)
-        source = paginator.IndexedListSource(data=[perm[0] for perm in perms], show_index=False, title="Permissions", per_page=16, embed=embed)
+        source = paginator.IndexedListSource(data=[perm[0] for perm in perms], show_index=False, title="Permissions",
+                                             per_page=16, embed=embed)
         await paginator.CatchAllMenu(source=source).start(ctx)
-    
+
     @commands.command(aliases=['ri'])
     async def roleinfo(self, ctx, *, role: discord.Role):
         """Gives you roleinfo"""
@@ -406,7 +394,7 @@ class Profile(commands.Cog):
         embed.description += f"\n:paintbrush: **{role.colour}**\n<:member:731190477927219231> **{len(role.members)}**\n<:ping:733142612839628830> {role.mention}"
         embed.set_footer(text=f'Role created {nt(dt.utcnow() - role.created_at)}')
         await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['spot'])
     async def spotify(self, ctx, *, member: discord.Member = None):
         """Shows a member's spotify status"""
@@ -415,7 +403,9 @@ class Profile(commands.Cog):
         if not spotify:
             return await ctx.send(f"{member} is not listening to Spotify!")
         embed = discord.Embed(colour=spotify.colour)
-        le_bar = cyberformat.bar(stat=(dt.utcnow() - spotify.start).seconds, max=spotify.duration.seconds, filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>', show_stat=True)
+        le_bar = cyberformat.bar(stat=(dt.utcnow() - spotify.start).seconds, max=spotify.duration.seconds,
+                                 filled='<:full:739980860371107899>', empty='<:empty:739980654019870720>',
+                                 show_stat=True)
         embed.set_thumbnail(url=spotify.album_cover_url)
         embed.description = f"[{spotify.title}](https://open.spotify.com/track/{spotify.track_id})\n"
         embed.description += f"by {spotify.artist}\n"
@@ -423,7 +413,7 @@ class Profile(commands.Cog):
         embed.description += f"{dt.utcfromtimestamp((dt.utcnow() - spotify.start).seconds).strftime('%-M:%S')} {le_bar} {dt.utcfromtimestamp(spotify.duration.seconds).strftime('%-M:%S')}"
         embed.set_footer(icon_url='https://cdn.discordapp.com/emojis/739983277053706302.png?v=1', text=str(member))
         await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['channel', 'chan', 'ci'])
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Shows info on a channel."""
@@ -442,16 +432,11 @@ class Profile(commands.Cog):
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = f"{url} {channel.name} | {channel.id}"
         last_message = await channel.fetch_message(channel.last_message_id)
-        pins = await channel.pins()
-        embed.description = (
-                             f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} "
-                             f"<:member:731190477927219231> **{len(channel.members):,}** "
-                             f"{f'<:pin:735989723591344208> **{len(pings)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
-                            )
+        embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
         embed.set_footer(
             text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)
-        
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.BadUnionArgument):
             return await ctx.send("That member or user was not found!")
