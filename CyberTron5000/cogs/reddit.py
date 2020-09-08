@@ -72,7 +72,12 @@ class Reddit(commands.Cog):
                 embed.description += "\n" + ' '.join(final)
                 dt = datetime.datetime.utcfromtimestamp(user['data']['created_utc'])
                 created = humanize.naturaltime(datetime.datetime.utcnow() - dt)
-                embed.add_field(name="Account Settings", value=f'{ctx.on_off(user["data"]["verified"])} **Verified**\n{ctx.on_off(user["data"]["is_mod"])} **Is Mod**\n{ctx.on_off(user["data"]["hide_from_robots"])} **Hide From Robots**\n{ctx.on_off(user["data"]["has_subscribed"])} **Has Subscribed**')
+                embed.add_field(name="Account Settings",
+                                value=(f'{ctx.on_off(user["data"]["verified"])} **Verified**\n'
+                                       f'{ctx.on_off(user["data"]["is_mod"])} **Is Mod**\n'
+                                       f'{ctx.on_off(user["data"]["hide_from_robots"])} **Hide From Robots**\n'
+                                       f'{ctx.on_off(user["data"]["has_subscribed"])} **Has Subscribed**')
+                                )
                 embed.set_footer(text=f'Account created {created}')
             await ctx.send(embed=embed)
         except KeyError:
@@ -83,7 +88,10 @@ class Reddit(commands.Cog):
         subreddit = random.choice(['memes', 'meme', 'dankmemes', 'okbuddyretard', 'memeeconomy', 'dankexchange', 'pewdiepiesubmissions', 'wholesomememes'])
         async with ctx.typing():
             s = random.choice(await self.get_post_data(subreddit, 'hot'))
-            embed = discord.Embed(title=str(s['title']), colour=self.bot.colour, url=f"https://reddit.com/{s['permalink']}", description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
+            embed = discord.Embed(title=str(s['title']),
+                                  colour=self.bot.colour,
+                                  url=f"https://reddit.com/{s['permalink']}",
+                                  description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
             embed.timestamp = datetime.datetime.utcfromtimestamp(s['created'])
             embed.set_author(name=s['author'])
             embed.set_footer(text=f"r/{s['subreddit']} • {s['upvote_ratio'] * 100:,}% upvote ratio")
@@ -134,7 +142,10 @@ class Reddit(commands.Cog):
     async def thonk(self, ctx):
         async with ctx.typing():
             s = random.choice(await self.get_post_data('showerthoughts', 'top'))
-            embed = discord.Embed(title=str(s['title']), colour=self.bot.colour, url=f"https://reddit.com/{s['permalink']}", description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
+            embed = discord.Embed(title=str(s['title']),
+                                  colour=self.bot.colour,
+                                  url=f"https://reddit.com/{s['permalink']}",
+                                  description=f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**")
             embed.timestamp = datetime.datetime.utcfromtimestamp(s['created'])
             embed.set_author(name=s['author'])
             embed.set_footer(text=f"r/{s['subreddit']} • {s['upvote_ratio'] * 100:,}% upvote ratio")
@@ -236,31 +247,29 @@ class Reddit(commands.Cog):
         """Gives you a paginated menu of any subreddit"""
         posts = []
         u = '\u200b'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
-                res = await r.json()
-            await cs.close()
-            for i in res['data']['children']:
-                posts.append(i['data'])
-            counter = 0
-            embeds = []
-            async with ctx.typing():
-                for s in random.sample(posts, len(posts)):
-                    embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
-                                          url=f"https://reddit.com/{s['permalink']}")
-                    embed.set_author(name=s['author'])
-                    embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
-                    if s['is_self']:
-                        embed.description = f"{s['selftext'].replace('**', f'{u}')}\n{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**"
-                    else:
-                        embed.set_image(url=s['url'].split("?")[0])
-                        embed.description = f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**"
-                    embeds.append(embed)
-                    counter += 1
-                    if counter == limit:
-                        break
-                    else:
-                        continue
+        async with self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
+            res = await r.json()
+        for i in res['data']['children']:
+            posts.append(i['data'])
+        counter = 0
+        embeds = []
+        async with ctx.typing():
+            for s in random.sample(posts, len(posts)):
+                embed = discord.Embed(title=str(s['title']), colour=self.bot.colour,
+                                      url=f"https://reddit.com/{s['permalink']}")
+                embed.set_author(name=s['author'])
+                embed.set_footer(text=f"{s['upvote_ratio'] * 100:,}% upvote ratio | posted to r/{s['subreddit']}")
+                if s['is_self']:
+                    embed.description = f"{s['selftext'].replace('**', f'{u}')}\n{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**"
+                else:
+                    embed.set_image(url=s['url'].split("?")[0])
+                    embed.description = f"{self.up} **{s['score']:,}** :speech_balloon: **{s['num_comments']:,}** {self.share} **{s['num_crossposts']:,}** :medal: **{s['total_awards_received']}**"
+                embeds.append(embed)
+                counter += 1
+                if counter == limit:
+                    break
+                else:
+                    continue
         menu = paginator.CatchAllMenu(paginator.EmbedSource(embeds))
         menu.add_info_fields({self.up: "How many upvotes the post has", "💬": "How many comments the post has", self.share: "How many shares/cross-posts the post has", ":medal:": "How many awards the post has"})
         await menu.start(ctx)

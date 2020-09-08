@@ -18,9 +18,9 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.headers = {'token': bot.config.dagpi_token}
+        self.trivia = aiotrivia.TriviaClient()
 
     # rock paper scissors, shoot
-
     @commands.command(aliases=['rps'], help="Rock paper scissors shoot")
     async def rockpaperscissors(self, ctx):
         rps_dict = {
@@ -58,19 +58,11 @@ class Games(commands.Cog):
 
     @commands.command(help="Kiss, marry, kill.", aliases=['kmk'])
     async def kissmarrykill(self, ctx):
-        member1 = random.choice(ctx.guild.members)
-        member2 = random.choice(ctx.guild.members)
-        member3 = random.choice(ctx.guild.members)
-        if member1 == member2:
-            member1 = random.choice(ctx.guild.members)
-        elif member3 == member2:
-            member3 = random.choice(ctx.guild.members)
-        members = [member1, member2, member3]
+        members = random.sample(ctx.guild.members, k=3)
         kmk = {'😘': 'kiss (😘)', '👫': 'marry (👫)', '🔪': 'kill(🔪)'}
         embed = discord.Embed(colour=self.bot.colour)
-        embed.add_field(name=member1.display_name, value="\u200b")
-        embed.add_field(name=member2.display_name, value="\u200b")
-        embed.add_field(name=member3.display_name, value="\u200b")
+        for m in members:
+            embed.add_field(name=m.display_name, value="\u200b")
         embed.set_author(name=ctx.message.author.display_name, icon_url=ctx.message.author.avatar_url)
 
         async def _add_reactions(_msg, _reactions):
@@ -162,10 +154,9 @@ class Games(commands.Cog):
 
     @commands.command(help="Get's you a trivia question.", aliases=['tr', 't'])
     async def trivia(self, ctx, difficulty: str = None):
-        trivia = aiotrivia.TriviaClient()
         difficulty = difficulty or random.choice(['easy', 'medium', 'hard'])
         try:
-            question = await trivia.get_random_question(difficulty)
+            question = await self.trivia.get_random_question(difficulty)
         except aiotrivia.AiotriviaException:
             return await ctx.send(f'**{difficulty}** is not a valid difficulty!')
         embed = discord.Embed(colour=ctx.bot.colour)
@@ -180,7 +171,6 @@ class Games(commands.Cog):
         emojis = [cyberformat.to_emoji(x) for x in range(len(responses))]
         index = responses.index(question.answer)
         msg = await ctx.send(embed=embed)
-        await trivia.close()
         for e in emojis:
             await msg.add_reaction(e)
 
@@ -206,6 +196,10 @@ class Games(commands.Cog):
         """
         Guess a random logo!
         """
+
+    def cog_unload(self):
+        #close trivia aiohttp session
+        self.bot.loop.create_task(self.trivia.close())
 
 
 

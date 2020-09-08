@@ -65,11 +65,9 @@ class GuildStats:
         if m.is_avatar_animated() or m in self.context.guild.premium_subscribers:
             return True
         if not isinstance(m, discord.User):
-            if m.activity:
-                for a in m.activities:
-                    if a.type == discord.ActivityType.custom:
-                        if a.emoji and a.emoji.is_custom_emoji():
-                            return True
+            for a in m.activities:
+                if a.type == discord.ActivityType.custom and a.emoji and a.emoji.is_custom_emoji():
+                        return True
         return False
 
 
@@ -92,7 +90,14 @@ class Profile(commands.Cog):
             embed.set_field_at(index=0, name='Formats',
                                value=f"[WEBP]({avamember.avatar_url_as(format='webp')}) | [PNG]({avamember.avatar_url_as(format='png')}) | [JPG]({avamember.avatar_url_as(format='jpg')}) | [GIF]({avamember.avatar_url})")
         embed.add_field(name="Sizes",
-                        value=f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | [256]({avamember.avatar_url_as(static_format="png", size=256)}) | [512]({avamember.avatar_url_as(static_format="png", size=512)}) | [1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | [2048]({avamember.avatar_url_as(static_format="png", size=2048)})')
+                        value=(
+                               f'[128]({avamember.avatar_url_as(static_format="png", size=128)}) | '
+                               f'[256]({avamember.avatar_url_as(static_format="png", size=256)}) | '
+                               f'[512]({avamember.avatar_url_as(static_format="png", size=512)}) | '
+                               f'[1024]({avamember.avatar_url_as(static_format="png", size=1024)}) | '
+                               f'[2048]({avamember.avatar_url_as(static_format="png", size=2048)})'
+                              )
+                        )
         embed.set_author(name=f"{avamember}")
         return await ctx.send(embed=embed)
     
@@ -100,10 +105,10 @@ class Profile(commands.Cog):
                     invoke_without_command=True)
     async def guildinfo(self, ctx):
         try:
-            g = GuildStats(ctx).status_counter
-            n = '\n'
+            gs = GuildStats(ctx)
+            g = gs.status_counter
             guild = ctx.guild
-            people = [f"<:member:731190477927219231>**{len(ctx.guild.members):,}**",
+            people = [f"<:member:731190477927219231>**{guild.member_count:,}**",
                       f"{sl[discord.Status.online]}**{g[discord.Status.online]:,}**",
                       f"{sl[discord.Status.idle]}**{g[discord.Status.idle]:,}**",
                       f"{sl[discord.Status.dnd]}**{g[discord.Status.dnd]:,}**",
@@ -115,12 +120,23 @@ class Profile(commands.Cog):
             categories = guild.categories
             region = REGIONS[f"{str(guild.region)}"]
             banner_url = f" [Banner URL]({ctx.guild.banner_url_as(format='png')})" if ctx.guild.banner_url else "\u200b"
-            embed = discord.Embed(colour=self.bot.colour,
-                                  description=f"**{guild.id}**\n<:owner:730864906429136907> **{guild.owner}**\n🗺 **{region}**\n<:emoji:734231060069613638> **{len(ctx.guild.emojis)}** <:roles:734232012730138744> **{len(ctx.guild.roles)}**\n<:category:716057680548200468> **{len(categories)}** <:text_channel:703726554018086912>**{len(text_channels)}** <:voice_channel:703726554068418560>**{len(voice_channels)}**\n<:asset:734531316741046283> [Icon URL]({ctx.guild.icon_url_as(static_format='png')}){banner_url}"
-                                              f"\n{f'{n}'.join(people)}\n<:bot:703728026512392312> **{GuildStats(ctx).num_bot}**\n<:boost:726151031322443787> **Tier: {guild.premium_tier}**\n{guild.premium_subscription_count} {cyberformat.bar(stat=guild.premium_subscription_count, max=30, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>', show_stat=True)} {30}")
+            description_text = (
+                                f'**{guild.id}**\n'
+                                f'<:owner:730864906429136907> **{guild.owner}**\n'
+                                f'🗺 **{region}**\n'
+                                f'<:emoji:734231060069613638> **{len(guild.emojis)}** <:roles:734232012730138744> **{len(guild.roles)}**\n'
+                                f'<:category:716057680548200468> **{len(categories)}** <:text_channel:703726554018086912>**{len(text_channels)}** <:voice_channel:703726554068418560>**{len(voice_channels)}**\n'
+                                f'<:asset:734531316741046283> [Icon URL]({guild.icon_url_as(static_format='png')}){banner_url}\n'
+                                f'{"\n".join(people)}\n'
+                                f'<:bot:703728026512392312> **{gs.num_bot}**\n'
+                                f'<:boost:726151031322443787> **Tier: {guild.premium_tier}**\n'
+                                f'{guild.premium_subscription_count} {cyberformat.bar(stat=guild.premium_subscription_count, max=30, filled="<:loading_filled:730823516059992204>", empty="<:loading_empty:730823515862859897>", show_stat=True)} {30}'
+                               )
+            embed = discord.Embed(colour=self.bot.colour,description=description_text)
+
             embed.set_author(name=f"{guild}", icon_url=guild.icon_url)
             embed.set_footer(
-                text=f"Guild created {nt(dt.utcnow() - ctx.guild.created_at)}")
+                text=f"Guild created {nt(dt.utcnow() - guild.created_at)}")
             await ctx.send(embed=embed)
         except Exception as er:
             await ctx.send(er)
@@ -426,7 +442,12 @@ class Profile(commands.Cog):
         embed = discord.Embed(colour=self.bot.colour)
         embed.title = f"{url} {channel.name} | {channel.id}"
         last_message = await channel.fetch_message(channel.last_message_id)
-        embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+        pins = await channel.pins()
+        embed.description = (
+                             f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} "
+                             f"<:member:731190477927219231> **{len(channel.members):,}** "
+                             f"{f'<:pin:735989723591344208> **{len(pings)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+                            )
         embed.set_footer(
             text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)

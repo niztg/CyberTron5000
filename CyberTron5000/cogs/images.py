@@ -34,9 +34,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/wanted', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/wanted', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -60,9 +59,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/obamameme', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/obamameme', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -86,9 +84,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/bad', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/bad', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -112,9 +109,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/hitler', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/hitler', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -138,9 +134,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url, 'text': tweet, 'name': url.display_name}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/tweet', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/tweet', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -158,9 +153,8 @@ class Images(commands.Cog):
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': str(member.avatar_url_as(static_fornat='png')), 'text': quote,
                        'name': member.display_name}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/quote', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/quote', headers=headers) as r:
+                data = await r.json()
             try:
                 image = data['url']
             except KeyError:
@@ -185,9 +179,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             headers = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/triggered', headers=headers) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/triggered', headers=headers) as r:
+                data = await r.json()
                 try:
                     image = data['url']
                 except KeyError:
@@ -213,9 +206,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             resp = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/gay', headers=resp) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/gay', headers=resp) as r:
+                data = await r.json()
                 try:
                     image = data['url']
                 except KeyError:
@@ -241,9 +233,8 @@ class Images(commands.Cog):
             url = url
         async with ctx.typing():
             resp = {'token': self.dagpi_token, 'url': url}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/paint', headers=resp) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/paint', headers=resp) as r:
+                data = await r.json()
                 try:
                     image = data['url']
                 except KeyError:
@@ -273,9 +264,8 @@ class Images(commands.Cog):
             url2 = url2
         async with ctx.typing():
             resp = {'token': self.dagpi_token, 'url2': url, 'url': url2}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/whyareyougay', headers=resp) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/whyareyougay', headers=resp) as r:
+                data = await r.json()
                 try:
                     image = data['url']
                 except KeyError:
@@ -305,9 +295,8 @@ class Images(commands.Cog):
             url2 = url2
         async with ctx.typing():
             resp = {'token': self.dagpi_token, 'url': url, 'url2': url2}
-            async with aiohttp.ClientSession() as cs:
-                async with cs.post('https://dagpi.tk/api/5g1g', headers=resp) as r:
-                    data = await r.json()
+            async with self.bot.session.post('https://dagpi.tk/api/5g1g', headers=resp) as r:
+                data = await r.json()
                 try:
                     image = data['url']
                 except KeyError:
