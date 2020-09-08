@@ -446,7 +446,7 @@ class Profile(commands.Cog):
         embed.description = (
                              f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} "
                              f"<:member:731190477927219231> **{len(channel.members):,}** "
-                             f"{f'<:pin:735989723591344208> **{len(pings)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+                             f"{f'<:pin:735989723591344208> **{len(pins)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
                             )
         embed.set_footer(
             text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
