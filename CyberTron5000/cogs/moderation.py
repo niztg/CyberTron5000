@@ -18,6 +18,11 @@ from CyberTron5000.utils.models import Infraction, InfractionUser, set_infractio
 from CyberTron5000.utils.converter import Prefix
 
 
+def ct5k():
+    def predicate(ctx):
+        return ctx.guild.id == 715743556488396872
+    return commands.check(predicate)
+
 # ≫
 
 
@@ -502,6 +507,16 @@ class Moderation(commands.Cog):
         embed.add_field(name="Info",
                         value=f"Configure these with {signature}\nView info on these with `{ctx.prefix}sgp info`")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @ct5k()
+    async def apply(self, ctx, reason: str):
+        embed = discord.Embed(colour=self.bot.colour)
+        embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+        embed.description = discord.utils.escape_markdown(reason)
+        embed.title = "New mod application!"
+        await self.bot.get_channel(753389607965556746).send(embed=embed)
+        await ctx.message.add_reaction(ctx.tick())
 
 
 def setup(bot):
