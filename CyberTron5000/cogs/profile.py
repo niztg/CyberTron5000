@@ -417,24 +417,31 @@ class Profile(commands.Cog):
     @commands.command(aliases=['channel', 'chan', 'ci'])
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Shows info on a channel."""
-        channel = channel or ctx.channel
-        td = {
-            True: "<:nsfw:730852009032286288>",
-            False: "<:text_channel:703726554018086912>",
-        }
-        if channel.overwrites_for(ctx.guild.default_role).read_messages is False:
-            url = "<:text_locked:730929388832686090>"
-        else:
-            if channel.is_news():
-                url = "<:news:730866149109137520>"
+        async with ctx.typing():
+            channel = channel or ctx.channel
+            td = {
+                True: "<:nsfw:730852009032286288>",
+                False: "<:text_channel:703726554018086912>",
+            }
+            if channel.overwrites_for(ctx.guild.default_role).read_messages is False:
+                url = "<:text_locked:730929388832686090>"
             else:
-                url = td[channel.is_nsfw()]
-        embed = discord.Embed(colour=self.bot.colour)
-        embed.title = f"{url} {channel.name} | {channel.id}"
-        last_message = await channel.fetch_message(channel.last_message_id)
-        embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
-        embed.set_footer(
-            text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
+                if channel.is_news():
+                    url = "<:news:730866149109137520>"
+                else:
+                    url = td[channel.is_nsfw()]
+            embed = discord.Embed(colour=self.bot.colour)
+            embed.title = f"{url} {channel.name} | {channel.id}"
+            last_message = await channel.fetch_message(channel.last_message_id)
+            pins = await channel.pins()
+            embed.description = (
+                                 f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} "
+                                 f"<:member:731190477927219231> **{len(channel.members):,}** "
+                                 f"{f'<:pin:735989723591344208> **{len(pins)}**' if pins else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+                                )
+            embed.description = f"{channel.topic or ''}\n{f'<:category:716057680548200468> **{channel.category}**' if channel.category else ''} <:member:731190477927219231> **{len(channel.members):,}** {f'<:pin:735989723591344208> **{len([*await channel.pins()])}**' if await channel.pins() else ''} <:msg:735993207317594215> [Last Message]({last_message.jump_url})"
+            embed.set_footer(
+                text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)
 
     async def cog_command_error(self, ctx, error):
