@@ -43,3 +43,18 @@ def bruh():
         return ctx.guild.id != 653376332507643914
 
     return commands.check(predicate)
+
+
+def mod():
+    """Checks if they're a mod"""
+    def predicate(ctx):
+        return any(
+            dict(ctx.channel.permissions_for(ctx.author)).get(perm) for perm in (
+                'kick_members',
+                'ban_members',
+                'manage_messages',
+                'manage_roles',
+                'manage_channels'
+            )
+        )
+    return commands.check(predicate)

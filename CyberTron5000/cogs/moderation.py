@@ -1,17 +1,20 @@
 import asyncio
 from math import ceil
 from typing import Union
+from datetime import datetime as dt
 
 import discord
+import json
 import humanize
 from discord.ext import commands, flags
 
 from CyberTron5000.utils import (
     paginator,
     lists,
-    cyberformat
+    cyberformat,
+    checks
 )
-from CyberTron5000.utils.checks import check_mod_or_owner
+from CyberTron5000.utils.models import Infraction, InfractionUser, set_infraction_punishments, FILENAME
 from CyberTron5000.utils.converter import Prefix
 
 
@@ -150,11 +153,11 @@ class Moderation(commands.Cog):
             colour=self.bot.colour,
             description=poll
         )
-        embed.add_field(name="Vote Now!", value="<:upvote:751314607808839803> **I agree!**\n<:downvote:751314712179900457> **I disagree!**")
+        embed.add_field(name="Vote Now!",
+                        value="<:upvote:751314607808839803> **I agree!**\n<:downvote:751314712179900457> **I disagree!**")
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         msg = await ctx.send(embed=embed)
         [await msg.add_reaction(x) for x in ("<:upvote:751314607808839803>", "<:downvote:751314712179900457>")]
-
 
     @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
     @commands.has_permissions(manage_nicknames=True)
@@ -166,7 +169,7 @@ class Moderation(commands.Cog):
         await ctx.message.add_reaction(emoji=ctx.tick())
 
     @commands.command()
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def leave(self, ctx):
         """Makes bot leave server"""
         await ctx.guild.leave()
@@ -246,7 +249,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
 
     @_prefix.command()
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def add(self, ctx, *, prefix: Prefix):
         """Add a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
@@ -263,7 +266,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'{ctx.tick()} Success! `{prefix}` is now a prefix in {ctx.guild}!')
 
     @_prefix.command(aliases=['sp-add'])
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def spaceprefix_add(self, ctx, *, prefix: Prefix):
         """Add a prefix for the guild that ends in a space."""
         prefixes = self.bot.prefixes.get(ctx.guild.id, ["c$"])
@@ -272,7 +275,7 @@ class Moderation(commands.Cog):
         if len(prefixes) > 15:
             return await ctx.send("This guild already has 15 prefixes! Please remove some before continuing.")
         await self.bot.db.execute("INSERT INTO prefixes (guild_id, prefix) VALUES ($1, $2)", ctx.guild.id,
-                                      f"{prefix} ")
+                                  f"{prefix} ")
         try:
             self.bot.prefixes[ctx.guild.id].append(f"{prefix} ")
         except KeyError:
@@ -280,7 +283,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'{ctx.tick()} Success! `{prefix} ` is now a prefix in {ctx.guild}!')
 
     @_prefix.command(aliases=['rm'])
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def remove(self, ctx, *, prefix: Prefix):
         """Remove a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id)
@@ -295,7 +298,7 @@ class Moderation(commands.Cog):
         await ctx.send(f'{ctx.tick()} `{prefix}` is no longer a prefix for {ctx.guild}')
 
     @_prefix.command(aliases=['sp-rm'])
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def spaceprefix_remove(self, ctx, *, prefix: Prefix):
         """Remove a prefix for the guild."""
         prefixes = self.bot.prefixes.get(ctx.guild.id)
@@ -340,7 +343,7 @@ class Moderation(commands.Cog):
             await ctx.send(message)
 
     @commands.command(aliases=["n", "changenickname", "nick"])
-    @check_mod_or_owner()
+    @checks.check_mod_or_owner()
     async def nickname(self, ctx, *, nickname=None):
         """Change the bot's nickname"""
         nickname = nickname or self.bot.user.name
@@ -353,6 +356,152 @@ class Moderation(commands.Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, discord.Forbidden):
             return await ctx.send("I don't have the permissions to do that!")
+
+    @commands.group(invoke_without_command=True)
+    @checks.mod()
+    async def warn(self, ctx, member: discord.Member, *, reason="No reason provided."):
+        """Warn a user"""
+        user = InfractionUser(guild_id=ctx.guild.id, user_id=member.id)
+        infraction = user.add_infraction(reason=reason)
+        embed = discord.Embed(
+            colour=self.bot.colour,
+            description=f"""
+    {ctx.tick()} {member} has received a warning.
+    > {reason}
+    **Infraction Number:** {infraction.infraction_number}
+    **Valid Infractions:** {user.num_valid_infractions}
+    {ctx.tick(infraction.is_null)} **Is Null?**
+    """,
+            timestamp=infraction.created
+        )
+        await ctx.send(embed=embed)
+        punishments = {
+            "mute": self.bot.get_command('mute'),
+            "kick": self.bot.get_command('kick'),
+            "ban": self.bot.get_command('ban')
+        }
+        p = user.determine_punishment()
+        punishment = punishments.get(p)
+        if not punishment:
+            return
+        await ctx.send(
+            f"{ctx.author.mention}, **{member.name}** has recieved their {user.num_valid_infractions} punishment. This makes them eligible for a **{p}**\n**Do you want to carry out this punishment?** [y/n]")
+        msg = await self.bot.wait_for('message', timeout=30, check=lambda x: x.author == ctx.author)
+        if msg.content.lower().startswith('y'):
+            try:
+                await ctx.invoke(punishment, member)
+            except Exception:
+                raise commands.BotMissingPermissions(
+                    "I don't have the requisite permissions to do this, or I can't moderate this user! Please give me the permissions to do this.")
+        else:
+            await ctx.send(
+                f"Ok, user not punished. If you ever want to punish them, simply do `{ctx.prefix}{p} {member}`.")
+
+    @warn.command()
+    async def list(self, ctx, member: discord.Member = None):
+        """List all of the warns of a user"""
+        command = self.bot.get_command('infractions')
+        await ctx.invoke(command, member)
+
+    @commands.command()
+    async def infractions(self, ctx, member: discord.Member = None):
+        """List all of the warns of a user"""
+        member = member or ctx.author
+        user = InfractionUser(ctx.guild.id, member.id)
+        embed = discord.Embed(
+            colour=self.bot.colour
+        )
+        for infraction in user:
+            embed.add_field(name=f"**Infraction #{infraction.infraction_number}:**",
+                            value=f"> {infraction.reason}\nIssued **{humanize.naturaltime(dt.utcnow() - infraction.created)}**\n{ctx.tick(infraction.is_null)} **Is Null?**")
+        embed.set_author(name=f"All of {member.display_name}'s warnings", icon_url=member.avatar_url)
+        embed.description = f"All Infractions: `{user.num_infractions}`\nValid Infractions: `{user.num_valid_infractions}`\n\n"
+        try:
+            await ctx.send(embed=embed)
+        except discord.HTTPException:
+            embed.remove_field(len(embed.fields) - 1)
+
+    @warn.command()
+    @checks.mod()
+    async def nullify(self, ctx, member: discord.Member, infraction_no: int):
+        """Nullify a warning so it doesn't count towards punishments"""
+        try:
+            infraction = Infraction.by_infraction_no(ctx.guild.id, member.id, infraction_no)
+            null = infraction.is_null
+            infraction.nullify()
+        except Exception as error:
+            return await ctx.send(error)
+        if null:
+            await ctx.send(
+                f"{ctx.tick(not null)} Infraction #{infraction.infraction_number} for {member}: `un-nullified`")
+        else:
+            await ctx.send(
+                f"{ctx.tick(not null)} Infraction #{infraction.infraction_number} for {member}: `nullified`")
+
+    @warn.command()
+    @checks.mod()
+    async def edit(self, ctx, member: discord.Member, number: int, *, reason):
+        """Edit the reason for a warn"""
+        try:
+            infraction = Infraction.by_infraction_no(ctx.guild.id, member.id, number)
+            infraction.edit(reason=reason)
+        except Exception as error:
+            return await ctx.send(error)
+        await ctx.send(f"{ctx.tick()} Infraction #{infraction.infraction_number} edited to:\n> {infraction.reason}")
+
+    @flags.add_flag("--mute", type=int)
+    @flags.add_flag("--kick", type=int)
+    @flags.add_flag("--ban", type=int)
+    @flags.group(invoke_without_command=True, aliases=['sgp'])
+    @commands.has_permissions(administrator=True)
+    async def set_guild_punishments(self, ctx, **flags):
+        """Set the guild punishments for a server.\n\nE.g. `sgp --mute 2 --kick 4 --ban 6`"""
+        new_dict = {key: value for key, value in flags.items() if value}
+        set_infraction_punishments(ctx.guild.id, **new_dict)
+        single, double = "'", '"'
+        await ctx.send(
+            "Infraction Punishments edited to:\n" + f"```json\n{str(new_dict).replace(single, double)}\n```")
+
+    @set_guild_punishments.command()
+    @checks.mod()
+    async def info(self, ctx):
+        """Shows you info on guild punishments"""
+        embed = discord.Embed(
+            colour=self.bot.colour,
+            title=f"Infraction Punishment Info",
+            description="\n\n".join(
+                [f"**{key}**:\n{value.format(ctx.prefix)}" for key, value in lists.INFRACTION_DESCRIPTIONS.items()])
+        )
+        await ctx.send(embed=embed)
+
+    @warn.command()
+    @commands.has_permissions(administrator=True)
+    async def clear(self, ctx, member: discord.Member):
+        """Clear all of a user's infractions"""
+        user = InfractionUser(guild_id=ctx.guild.id, user_id=member.id)
+        user.clear_punishments()
+        await ctx.message.add_reaction(ctx.tick())
+
+    @commands.command(aliases=['vgp'])
+    @checks.mod()
+    async def view_guild_punishments(self, ctx):
+        """View the guild's punishment levels"""
+        data = json.load(open(FILENAME))
+        signature = f"`{ctx.prefix}sgp --mute [punishments for mute] --kick [punishments for kick] --ban [punishments for ban]`"
+        error = commands.BadArgument(f'this guild doesn\'t have any warn punishments! You can configure these by doing {signature}')
+        try:
+            punishments = data[str(ctx.guild.id)]['punishments']
+        except KeyError:
+            raise error
+        else:
+            if not punishments:
+                raise error
+        embed = discord.Embed(colour=self.bot.colour, description="Users will receive a...")
+        for key, value in reversed(punishments.items()):
+            embed.description += f"\n\n**{key}** at **{value}** warning(s)"
+        embed.add_field(name="Info",
+                        value=f"Configure these with {signature}\nView info on these with `{ctx.prefix}sgp info`")
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
