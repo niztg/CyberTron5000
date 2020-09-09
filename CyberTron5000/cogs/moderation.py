@@ -497,11 +497,18 @@ class Moderation(commands.Cog):
             if not punishments:
                 raise error
         embed = discord.Embed(colour=self.bot.colour, description="Users will receive a...")
-        for key, value in reversed(punishments.items()):
+        for key, value in reversed(list(punishments.items())):
             embed.description += f"\n\n**{key}** at **{value}** warning(s)"
         embed.add_field(name="Info",
                         value=f"Configure these with {signature}\nView info on these with `{ctx.prefix}sgp info`")
         await ctx.send(embed=embed)
+
+    @commands.command(hidden=True)
+    async def apply(self, ctx, reason: str):
+        embed = discord.Embed(colour=self.bot.colour)
+        embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+        embed.description = discord.utils.escape_markdown(reason)
+        embed.title = "New mod application!"
 
 
 def setup(bot):
