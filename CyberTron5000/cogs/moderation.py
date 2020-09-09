@@ -508,22 +508,15 @@ class Moderation(commands.Cog):
                         value=f"Configure these with {signature}\nView info on these with `{ctx.prefix}sgp info`")
         await ctx.send(embed=embed)
 
-<<<<<<< HEAD
-    @commands.command(hidden=True)
-=======
     @commands.command()
     @ct5k()
->>>>>>> 54586e575e7a7291042d28467a5e92796c3616c4
     async def apply(self, ctx, reason: str):
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.description = discord.utils.escape_markdown(reason)
         embed.title = "New mod application!"
-<<<<<<< HEAD
-=======
         await self.bot.get_channel(753389607965556746).send(embed=embed)
         await ctx.message.add_reaction(ctx.tick())
->>>>>>> 54586e575e7a7291042d28467a5e92796c3616c4
 
 
 def setup(bot):
