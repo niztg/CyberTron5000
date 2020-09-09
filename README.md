@@ -24,8 +24,7 @@ CyberTron5000 fufills the need for better moderation with various easy to use fe
 - `c$vote quick` - Vote on a poll with an upvote/downvote menu
 - `c$user-nick` - Change a user's nickname.
 - `c$audit`- View the guild's recent audit logs in a convenient paginated menu.
-
-**SOON: Interactive warn commands**
+- `c$warn`, `c$warn edit`, `c$warn list`, `c$set_guild_punishments`, `c$view_guild_punishments` - Interactive warn commands to moderate your server!
 
 And More!
 
