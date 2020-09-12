@@ -1,5 +1,4 @@
 import asyncio
-from math import ceil
 from typing import Union
 from datetime import datetime as dt
 
@@ -326,26 +325,6 @@ class Moderation(commands.Cog):
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await ctx.send(f"You need the **Kick Members** permission to run this command.")
-
-    @commands.command(aliases=['elf'])
-    async def emote_list_formatter(self, ctx, amount: int = 20):
-        """Get a layout of emojis for your guild."""
-        # we have to figure out how many messages to send
-        # in this case we're gonna do one message for every 20 emojis in a guild
-        messages = ['']
-        messages *= ceil(
-            len(ctx.guild.emojis) / amount)  # now the list has all the messages we need to send, they're just empty.
-        for i in range(len(messages)):
-            start = i * amount
-            end = amount * (i + 1)
-            # now we have the ranges for each message. we will edit each item in the list and then send them.
-            for emoji in ctx.guild.emojis[start:end]:
-                # formatting the items in the list
-                messages[i] += f"{str(emoji)} • `<:{emoji.name}:{emoji.id}>`\n"
-        if any([item for item in messages if len(item) > 1999]):
-            return await ctx.send("The limit you chose was probably too long. Please try again with a smaller limit.")
-        for message in messages:
-            await ctx.send(message)
 
     @commands.command(aliases=["n", "changenickname", "nick"])
     @checks.check_mod_or_owner()

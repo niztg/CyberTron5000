@@ -4,6 +4,7 @@ from typing import Union
 
 import discord
 import matplotlib
+from math import ceil
 import matplotlib.pyplot as plt
 from discord.ext import commands
 from humanize import naturaltime as nt
@@ -414,6 +415,13 @@ class Profile(commands.Cog):
         embed.set_footer(icon_url='https://cdn.discordapp.com/emojis/739983277053706302.png?v=1', text=str(member))
         await ctx.send(embed=embed)
 
+    @guildinfo.command()
+    async def roles(self, ctx):
+        """A paginated menu of all of the guild's roles."""
+        roles = sorted(ctx.guild.roles, key=lambda r: r.position, reverse=True)
+        source = paginator.IndexedListSource(data=["{0.mention} <:member:731190477927219231> **{1}**".format(r, len(r.members)) for r in roles], embed=discord.Embed(colour=self.bot.colour))
+        await paginator.CatchAllMenu(source=source).start(ctx)
+
     @commands.command(aliases=['channel', 'chan', 'ci'])
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Shows info on a channel."""
@@ -443,6 +451,39 @@ class Profile(commands.Cog):
             embed.set_footer(
                 text=f'Channel created {nt(dt.utcnow() - channel.created_at)}')
         await ctx.send(embed=embed)
+
+    def emote_pages(self, ctx: commands.Context, amount: int):
+        messages = ['']
+        messages *= ceil(
+            len(ctx.guild.emojis) / amount)  # now the list has all the messages we need to send, they're just empty.
+        for i in range(len(messages)):
+            start = i * amount
+            end = amount * (i + 1)
+            # now we have the ranges for each message. we will edit each item in the list and then send them.
+            for emoji in ctx.guild.emojis[start:end]:
+                # formatting the items in the list
+                messages[i] += "{0} • `{0}`\n".format(emoji.__str__())
+        if any([item for item in messages if len(item) > 1999]):
+            raise ValueError("The amount you chose was too large. Try again with a smaller amount.")
+        return messages
+
+    @commands.command(aliases=['elf'])
+    async def emote_list_formatter(self, ctx, amount: int = 20):
+        """Get a layout of emojis for your guild."""
+        try:
+            messages = self.emote_pages(ctx, amount)
+        except ValueError as error:
+            raise commands.BadArgument(str(error))
+        for message in messages:
+            await ctx.send(message)
+
+    @guildinfo.command(aliases=['em'])
+    async def emojis(self, ctx):
+        """A paginated menu of all of the guild's emojis."""
+        embeds = []
+        for page in self.emote_pages(ctx, 20):
+            embeds.append(discord.Embed(colour=self.bot.colour, description=page))
+        await paginator.CatchAllMenu(source=paginator.EmbedSource(embeds)).start(ctx)
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.BadUnionArgument):
