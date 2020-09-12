@@ -159,7 +159,7 @@ class Moderation(commands.Cog):
             description=poll
         )
         embed.add_field(name="Vote Now!",
-                        value="<:upvote:751314607808839803> **I agree!**\n<:downvote:751314712179900457> **I disagree!**")
+                        value="<:upvote:751314607808839803> **Yes!**\n<:downvote:751314712179900457> **No!**")
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         msg = await ctx.send(embed=embed)
         [await msg.add_reaction(x) for x in ("<:upvote:751314607808839803>", "<:downvote:751314712179900457>")]
@@ -510,7 +510,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @ct5k()
-    async def apply(self, ctx, reason: str):
+    async def apply(self, ctx, *, reason: str):
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         embed.description = discord.utils.escape_markdown(reason)

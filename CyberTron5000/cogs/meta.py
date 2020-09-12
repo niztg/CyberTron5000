@@ -335,7 +335,7 @@ class Meta(commands.Cog):
     async def invite(self, ctx):
         """Invite me to your server!"""
         await ctx.send(
-            content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632")
+            content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=523328")
 
     @commands.command()
     async def support(self, ctx):
