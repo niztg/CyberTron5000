@@ -87,7 +87,7 @@ class Moderation(commands.Cog):
         await ctx.guild.ban(user=user, reason=reason, delete_message_days=7)
         await ctx.send(f"{ctx.tick()} {str(user)} banned! Reason:\n> {reason}")
 
-    @commands.command(usage='<user id or user name#user discriminator>')
+    @commands.command(usage='<user id|user name#user discriminator>')
     @commands.has_guild_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     async def unban(self, ctx, user, *, reason=None):
@@ -153,15 +153,17 @@ class Moderation(commands.Cog):
         """A quick upvote/downvote poll. Nothing fancy."""
         # if you don't want the good poll command
         # use this
+        UPVOTE = self.bot.get_emoji(751314607808839803)
+        DOWNVOTE = self.bot.get_emoji(751314712179900457)
         embed = discord.Embed(
             colour=self.bot.colour,
             description=poll
         )
         embed.add_field(name="Vote Now!",
-                        value="<:upvote:751314607808839803> **Yes!**\n<:downvote:751314712179900457> **No!**")
+                        value=f"{UPVOTE} **Yes!**\n{DOWNVOTE} **No!**")
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
         msg = await ctx.send(embed=embed)
-        [await msg.add_reaction(x) for x in ("<:upvote:751314607808839803>", "<:downvote:751314712179900457>")]
+        [await msg.add_reaction(x) for x in (UPVOTE, DOWNVOTE)]
 
     @commands.command(name='user-nick', help="Change a user's nickname.", aliases=['usernick', 'un'])
     @commands.has_permissions(manage_nicknames=True)
