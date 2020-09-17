@@ -89,7 +89,7 @@ class InfractionUser:
         except:
             pass
         with open(FILENAME, 'w') as f:
-            json.dump(data, f, indent=4)
+            json.dump(data, f, indent=4) 
 
 class Infraction:
     def __init__(self, data):
