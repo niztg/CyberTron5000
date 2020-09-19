@@ -417,6 +417,26 @@ class Meta(commands.Cog):
                              icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=['cool-bots'], name='cool_bots')
+    async def _cool_bots(self, ctx):
+        """If you like CyberTron5000, you might also like these bots!"""
+        bots = {
+            670564722218762240: {"bot": 720229743974285312, "url": "https://github.com/DevilJamJar/DevilBot"},
+            671795392358121504: {"bot": 671801771345182782, "url": "https://discord.gg/Hx9zEUw"},
+            491174779278065689: {"bot": 675589737372975124, "url": "https://github.com/Daggy1234/dagbot"},
+            569374429218603019: {"bot": 709922850953494598, "url": "https://github.com/YeetVegetabales/NOVA"}
+        }
+        embed = discord.Embed(colour=self.bot.colour, title="If you like {0.bot.user.name}, try also...".format(self))
+
+        async def cycle(_users: dict):
+            for key, value in _users.items():
+                embed.add_field(name=f"{(self.bot.get_user(value['bot']) or await self.bot.fetch_user(value['bot'])).name}", value=f"by [{(self.bot.get_user(key) or await self.bot.fetch_user(key)).name}]({value['url']})", inline=False)
+
+        await cycle(bots)
+        await ctx.send(embed=embed)
+
+
+
 
 def setup(bot):
     bot.add_cog(Meta(bot))
