@@ -219,7 +219,7 @@ class Meta(commands.Cog):
         ms = await ctx.send(("Do you want to follow this suggestion? If you follow it, you will recieve updates on it's status.\n"
                              f"If you want to unfollow this suggestion, do `{ctx.prefix}suggest unfollow {sugid}`.\n"
                              f"{ctx.tick()} | **Yes**\n"
-                             "{ctx.tick(False)} | **No**\n"
+                             f"{ctx.tick(False)} | **No**\n"
                              "(You have 15 seconds)"))
         await self.bot.db.execute("INSERT INTO suggestions (msg_id, suggest_id) VALUES ($1, $2)", mes.id, sugid)
         try:
@@ -249,6 +249,8 @@ class Meta(commands.Cog):
         try:
             with open("./json_files/suggestions.json", "r") as f:
                 res = json.load(f)
+            if ctx.author.id in res[str(id)]:
+                raise commands.BadArgument("you already follow this suggestion!")
             res[str(id)].append(ctx.author.id)
             with open("./json_files/suggestions.json", "w") as f:
                 json.dump(res, f, indent=4)
