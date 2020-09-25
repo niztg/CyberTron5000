@@ -1,12 +1,23 @@
 import json
 from datetime import datetime as dt
-from discord import Embed, Colour
+
+__all__ = (
+    'FILENAME',
+    'InfractionUser',
+    'Infraction',
+    'set_infraction_punishments'
+)
 
 FILENAME = './json_files/infractions.json'
 
 
 class InfractionUser:
     """A template for a warning user"""
+    __slots__ = (
+        '_guild',
+        '_user',
+        '_data'
+    )
 
     def __init__(self, guild_id, user_id):
         self._guild = guild_id
@@ -66,7 +77,7 @@ class InfractionUser:
     def num_valid_infractions(self):
         """The number of valid infractions they have."""
         return len(self.valid_infractions)
-    
+
     def determine_punishment(self):
         with open(FILENAME) as f:
             data = json.load(f)
@@ -89,9 +100,18 @@ class InfractionUser:
         except:
             pass
         with open(FILENAME, 'w') as f:
-            json.dump(data, f, indent=4) 
+            json.dump(data, f, indent=4)
+
 
 class Infraction:
+    """The model for an infraction"""
+    __slots__ = (
+        '_data',
+        'reason',
+        'infraction_number',
+        'is_null'
+    )
+
     def __init__(self, data):
         self._data = data
         self.reason = data.get('reason')
@@ -167,15 +187,3 @@ def set_infraction_punishments(guild_id, **options):
     data[str(guild_id)]['punishments'] = dict(options)
     with open(FILENAME, 'w') as f:
         json.dump(data, f, indent=4)
-
-
-class CyberColours(Colour):
-    @classmethod
-    def main(cls):
-        return cls(0x00dcff)
-
-
-class CyberEmbed(Embed):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.colour = kwargs.get('colour') or kwargs.get('color') or CyberColours.main()

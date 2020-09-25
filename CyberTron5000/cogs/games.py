@@ -6,10 +6,8 @@ import discord
 from discord.ext import commands
 from unidecode import unidecode
 
-from CyberTron5000.utils import (
-    cyberformat,
-    lists,
-)
+from CyberTron5000.utils import cyberformat, lists
+from CyberTron5000.utils.models.pokemon import Pokemon
 
 
 class Games(commands.Cog):
