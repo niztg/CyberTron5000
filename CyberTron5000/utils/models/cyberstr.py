@@ -123,7 +123,7 @@ def bool_help(value: bool, true: str = None, false: str = None):
     :param false:
     :return:
     """
-    if value:
-        return true
-    else:
-        return false
+    return {
+        True: true,
+        False: false
+    }.get(value)
