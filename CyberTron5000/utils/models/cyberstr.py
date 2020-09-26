@@ -4,7 +4,8 @@ __all__ = (
     'cyberstr',
     'get_temperature',
     'to_emoji',
-    'bar'
+    'bar',
+    'bool_help'
 )
 
 
