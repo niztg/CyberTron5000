@@ -84,7 +84,7 @@ class CyberTron5000(Bot):
         self.embed = CyberEmbed
         self.colour_chooser = CyberColours
         self.logging = {
-            'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
+            'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=379968',
             'support': 'https://discord.com/invite/2fxKxJH',
             'github': 'https://github.com/niztg/CyberTron5000',
             'website': 'https://cybertron-5k.netlify.app',
