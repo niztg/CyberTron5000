@@ -1,4 +1,5 @@
 import asyncio
+
 import aiohttp
 
 from CyberTron5000.utils.lists import TYPES, STAT_NAMES

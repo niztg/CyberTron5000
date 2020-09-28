@@ -7,7 +7,6 @@ import discord
 from discord.ext import commands, flags
 
 from CyberTron5000.utils import paginator, cyberformat, converter, lists
-from CyberTron5000.utils.models.pokemon import Pokemon
 
 
 # ≫

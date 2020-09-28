@@ -187,8 +187,7 @@ class Meta(commands.Cog):
             news = await self.bot.db.fetch("SELECT message, number FROM news")
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_author(name=f"About {self.version}", icon_url=self.bot.user.avatar_url)
-            with self.bot.logger() as logger:
-                embed.description = f"→ [Invite]({logger.invite}) | [Support]({logger.support}) | <:github:724036339426787380> [GitHub]({logger.github}) | <:cursor_default:734657467132411914>[Website]({logger.website}) | <:karma:704158558547214426> [Reddit]({logger.reddit})\n"
+            embed.description = f"→ [Invite]({self.bot.logger.invite}) | [Support]({self.bot.logger.support}) | <:github:724036339426787380> [GitHub]({self.bot.logger.github}) | <:cursor_default:734657467132411914>[Website]({self.bot.logger.website}) | <:karma:704158558547214426> [Reddit]({self.bot.logger.reddit})\n"
             embed.description += f"→ Latest Commits: {'|'.join(await self.get_commits(limit=3, author=False, names=False))}\n"
             embed.description += f"→ Used Memory | {cyberformat.bar(stat=psutil.virtual_memory()[2], max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}\n→ CPU | {cyberformat.bar(stat=psutil.cpu_percent(), max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}"
             embed.description += f"\n→ Uptime | {uptime}"

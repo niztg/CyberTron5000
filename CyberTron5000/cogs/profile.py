@@ -1,10 +1,10 @@
 import collections
 from datetime import datetime as dt
+from math import ceil
 from typing import Union
 
 import discord
 import matplotlib
-from math import ceil
 import matplotlib.pyplot as plt
 from discord.ext import commands
 from humanize import naturaltime as nt
