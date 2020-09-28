@@ -105,7 +105,7 @@ class Events(commands.Cog):
             embed.description = MENTION_MESSAGE
             embed.set_thumbnail(url=self.bot.user.avatar_url)
             embed.add_field(name="Links",
-                            value=f"[Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)")
+                            value=f"[Invite]({self.bot.logging['invite']}) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)")
             await message.channel.send(embed=embed)
 
     @commands.Cog.listener()
@@ -131,7 +131,7 @@ class Events(commands.Cog):
         channels = sorted([t for t in guild.text_channels if t.permissions_for(guild.me).send_messages],
                           key=lambda x: x.position)
         await channels[0].send(embed=discord.Embed(color=self.bot.colour,
-                                                   description="Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
+                                                   description=f"Hi, thanks for inviting me! My default prefix is `c$`, but you can add a new one it by doing `c$prefix add <new prefix>`.\n→ [Invite]({self.bot.logging['invite']}) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"))
         await self.bot.logging_channel[1].send(f"Joined Guild! This is guild **#{len(self.bot.guilds)}**", embed=embed)
 
     @commands.Cog.listener()

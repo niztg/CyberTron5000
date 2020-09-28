@@ -187,7 +187,7 @@ class Meta(commands.Cog):
             news = await self.bot.db.fetch("SELECT message, number FROM news")
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_author(name=f"About {self.version}", icon_url=self.bot.user.avatar_url)
-            embed.description = f"→ [Invite](https://cybertron-5k.netlify.app/invite) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"
+            embed.description = f"→ [Invite]({self.bot.logging['invite']}) | [Support](https://cybertron-5k.netlify.app/server) | <:github:724036339426787380> [GitHub](https://github.com/niztg/CyberTron5000) | <:cursor_default:734657467132411914>[Website](https://cybertron-5k.netlify.app) | <:karma:704158558547214426> [Reddit](https://reddit.com/r/CyberTron5000)\n"
             embed.description += f"→ Latest Commits: {'|'.join(await self.get_commits(limit=3, author=False, names=False))}\n"
             embed.description += f"→ Used Memory | {cyberformat.bar(stat=psutil.virtual_memory()[2], max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}\n→ CPU | {cyberformat.bar(stat=psutil.cpu_percent(), max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}"
             embed.description += f"\n→ Uptime | {uptime}"
@@ -337,7 +337,7 @@ class Meta(commands.Cog):
     async def invite(self, ctx):
         """Invite me to your server!"""
         await ctx.send(
-            content=f"**{ctx.author}** | https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=523328")
+            content=f"**{ctx.author}** | {self.bot.logging['invite']}")
 
     @commands.command()
     async def support(self, ctx):
