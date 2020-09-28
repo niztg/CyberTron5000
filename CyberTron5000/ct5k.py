@@ -52,6 +52,15 @@ class CyberColours(discord.Colour):
     def main(cls):
         return cls(0x00dcff)
 
+    @classmethod
+    def custom(cls, colour: str):
+        try:
+            colour = discord.Colour(int(colour, 16))
+        except Exception as error:
+            raise ValueError(str(error)) from error
+        finally:
+            return cls(colour)
+
 
 class CyberEmbed(discord.Embed):
     def __init__(self, **kwargs):
@@ -76,7 +85,8 @@ class CyberTron5000(Bot):
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
         self.start_time = dt.utcnow()
-        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if filename.endswith('.py')]
+        self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if
+                    filename.endswith('.py')]
         self.clever = Cleverbot(self.config.cleverbot)
         self.clever.set_context(DictContext(self))
         self.load_extension(name='jishaku')
@@ -111,10 +121,22 @@ class CyberTron5000(Bot):
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
 
-    # :: Key
-    # 1 - errors
-    # 2 - guilds
-    # 3 - suggestions
+    def logger(_self, data=None):
+        data = data or _self.logging
+
+        class logger:
+            def __init__(self, **data):
+                for k, v in data.items():
+                    setattr(self, k, v)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                return
+
+        return logger(**data)
+
 
     @property
     def uptime(self) -> dict:
@@ -162,9 +184,13 @@ class CyberTron5000(Bot):
             """
             tags2 = await self.db.fetch(SQL2, query['guild_id'])
             for query2 in tags2:
-                self._tag_dict[query['guild_id']][query2['name']] = {'content': query2['content'],
-                                                                     'uses': query2['uses'] or 0,
-                                                                     'author': query2['user_id'], 'id': query2['id']}
+                self._tag_dict[query['guild_id']][query2['name']] = \
+                    {
+                        'content': query2['content'],
+                        'uses': query2['uses'] or 0,
+                        'author': query2['user_id'],
+                        'id': query2['id']
+                    }
         print("TAGS HAVE BEEN INITIALIZED")
         print("READY!")
         print("───────────────────────────────────────────────────────────────────────────────────────────────────────")
