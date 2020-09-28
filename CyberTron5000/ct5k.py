@@ -119,7 +119,14 @@ class CyberTron5000(Bot):
             "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
         }
 
-    async def __aioinit__(self):
+        def __str__(
+                self: Enum
+        ):
+            return self.value
+
+    async def __aioinit__(
+            self
+    ):
         """Async init"""
         self.db = await asyncpg.create_pool(**self.config.pg_data)
         self.session = aiohttp.ClientSession()
