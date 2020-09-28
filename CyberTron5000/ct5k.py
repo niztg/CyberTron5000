@@ -114,12 +114,10 @@ class CyberTron5000(Bot):
         website = 'https://cybertron-5k.netlify.app'
         reddit = 'https://reddit.com/r/CyberTron5000'
         servers = {
-                "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
-                "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
-                "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
-            }
-
-
+            "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
+            "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
+            "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
+        }
 
     async def __aioinit__(self):
         """Async init"""
@@ -135,6 +133,7 @@ class CyberTron5000(Bot):
     def logging_channel(self) -> List[discord.TextChannel]:
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
+
     @property
     def uptime(self) -> dict:
         delta_uptime = dt.utcnow() - self.start_time
