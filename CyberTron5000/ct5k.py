@@ -25,9 +25,9 @@ import asyncpg
 import discord
 import aiohttp
 from discord.ext.commands import Bot, when_mentioned_or
+from async_cleverbot import Cleverbot, DictContext
 
 from CyberTron5000 import config, ctx
-from CyberTron5000.utils import models
 
 print(
     r"""
@@ -45,6 +45,18 @@ print(
             \$$$$$$                                                                                                          
 """
 )
+
+
+class CyberColours(discord.Colour):
+    @classmethod
+    def main(cls):
+        return cls(0x00dcff)
+
+
+class CyberEmbed(discord.Embed):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.colour = kwargs.get('colour') or kwargs.get('color') or CyberColours.main()
 
 
 class CyberTron5000(Bot):
@@ -65,10 +77,12 @@ class CyberTron5000(Bot):
         self.config = config.config()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if filename.endswith('.py')]
+        self.clever = Cleverbot(self.config.cleverbot)
+        self.clever.set_context(DictContext(self))
         self.load_extension(name='jishaku')
         self.loop.create_task(self.__aioinit__())
-        self.embed = models.CyberEmbed
-        self.colour_chooser = models.CyberColours
+        self.embed = CyberEmbed
+        self.colour_chooser = CyberColours
         self.logging = {
             'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=104189632',
             'support': 'https://discord.com/invite/2fxKxJH',
@@ -101,6 +115,9 @@ class CyberTron5000(Bot):
     # 1 - errors
     # 2 - guilds
     # 3 - suggestions
+
+    def run(self, *args, **kwargs):
+        super().run(self.config.bot_token)
 
     @property
     def uptime(self) -> dict:
@@ -166,4 +183,4 @@ class CyberTron5000(Bot):
 # 5,000!
 
 
-CyberTron5000().run(config.config().bot_token)
+CyberTron5000().run()

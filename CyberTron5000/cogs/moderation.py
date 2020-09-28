@@ -7,13 +7,8 @@ import json
 import humanize
 from discord.ext import commands, flags
 
-from CyberTron5000.utils import (
-    paginator,
-    lists,
-    cyberformat,
-    checks
-)
-from CyberTron5000.utils.models import Infraction, InfractionUser, set_infraction_punishments, FILENAME
+from CyberTron5000.utils import paginator, lists, cyberformat, checks
+from CyberTron5000.utils.models.infractions import *
 from CyberTron5000.utils.converter import Prefix
 
 

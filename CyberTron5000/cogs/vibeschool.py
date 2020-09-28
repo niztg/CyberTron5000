@@ -6,10 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
-from CyberTron5000.utils.checks import (
-    check_channel,
-    check_guild_and_admin
-)
+from CyberTron5000.utils.checks import check_channel, check_guild_and_admin
 
 
 # ≫

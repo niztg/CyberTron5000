@@ -2,29 +2,19 @@ import asyncio
 import json
 from traceback import format_exception
 
-import async_cleverbot
 import discord
 import random
 import humanize
-from discord.ext import (
-    commands,
-    flags,
-    tasks
-)
+from discord.ext import commands, flags, tasks
 
-from CyberTron5000.utils.cyberformat import (
-    minimalize,
-    hyper_replace,
-    bar
-)
+from CyberTron5000.utils.cyberformat import minimalize, hyper_replace, bar
 
 
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.x_r = ":warning:727013811571261540"
-        self.clever = async_cleverbot.Cleverbot(self.bot.config.cleverbot)
-        self.clever.set_context(async_cleverbot.DictContext(self.clever))
+        self.clever = bot.clever
 
     @staticmethod
     def snipes():

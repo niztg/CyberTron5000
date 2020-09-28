@@ -2,25 +2,17 @@ from datetime import datetime as dt
 
 import aiogoogletrans
 import aiowiki
-import async_cleverbot
 import async_cse
 import discord
 from discord.ext import commands, flags
 
-from CyberTron5000.utils import (
-    paginator,
-    cyberformat,
-    converter
-)
-from CyberTron5000.utils.lists import (
-    STAT_NAMES,
-    TYPES
-)
+from CyberTron5000.utils import paginator, cyberformat, converter, lists
+from CyberTron5000.utils.models.pokemon import Pokemon
 
 
 # ≫
 
-async def fetch_rtfs(res):
+def fetch_rtfs(res):
     items = []
     for item in res:
         item.pop("module")
@@ -43,15 +35,12 @@ class Api(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.pypi_logo = "https://static1.squarespace.com/static/59481d6bb8a79b8f7c70ec19/594a49e202d7bcca9e61fe23/59b2ee34914e6b6d89b9241c/1506011023937/pypi_logo.png?format=1000w"
-        self.clever = async_cleverbot.Cleverbot(bot.config.cleverbot)
-        self.clever.set_context(async_cleverbot.DictContext(self.bot))
+        self.clever = bot.clever
 
     @commands.command(aliases=['ily'], help="compliment your friends :heart:")
     async def compliment(self, ctx, *, user=None):
-        user = user or ctx.author.mention
-        async with self.bot.session.get('https://complimentr.com/api') as r:
-            data = await r.json()
-        return await ctx.send(f":heart: **{user}, {data['compliment']}**")
+        data = await (await self.bot.session.get('https://complimentr.com/api')).json()
+        return await ctx.send(f":heart: **{user or ctx.author}, {data['compliment']}**")
 
     @flags.add_flag("--unit", type=str, default='c')
     @flags.command(usage='<city>,[country]')
@@ -99,7 +88,7 @@ class Api(commands.Cog):
             else:
                 evo_line.append(e)
         n = '\n'
-        embed.description = f" ".join([TYPES[item.lower()] for item in data['type']])
+        embed.description = f" ".join([lists.TYPES[item.lower()] for item in data['type']])
         embed.description += f'\n<:pokeball:715599637079130202> {data["description"]}\n**{data["height"]}**\n**{data["weight"]}**'
         embed.add_field(name='Evolution Line',
                         value=f'{" → ".join(evo_line)}' or "**{0}**".format(str(pokemon).capitalize()),
@@ -107,7 +96,7 @@ class Api(commands.Cog):
         embed.add_field(name='Abilities', value='**' + ', '.join([f'{i}' for i in data['abilities']]) + '**',
                         inline=False)
         embed.add_field(name='Base Stats',
-                        value=f"{f'{n}'.join([f'**{STAT_NAMES[key]}:** `{value}`' for key, value in data['stats'].items()])}",
+                        value=f"{f'{n}'.join([f'**{lists.STAT_NAMES[key]}:** `{value}`' for key, value in data['stats'].items()])}",
                         inline=False)
         await ctx.send(embed=embed)
 
@@ -247,7 +236,7 @@ class Api(commands.Cog):
         if not res:
             return await ctx.send("No results.")
         embed = discord.Embed(color=self.bot.colour)
-        data = await fetch_rtfs(res)
+        data = fetch_rtfs(res)
         source = paginator.IndexedListSource(data, embed=embed, per_page=5, show_index=False)
         await paginator.CatchAllMenu(source=source).start(ctx)
 
@@ -255,7 +244,8 @@ class Api(commands.Cog):
     @commands.is_nsfw()
     async def giphy(self, ctx, *, query):
         """Get a random gif based on your query"""
-        async with self.bot.session.get('http://api.giphy.com/v1/gifs/search?q=' + query + f'&api_key={self.bot.config.giphy}&limit=10') as r:
+        URL = "http://api.giphy.com/v1/gifs/search?q={0}&api_key={1}&limit={2}"
+        async with self.bot.session.get(URL.format(query, self.bot.config.giphy, 10)) as r:
             res = await r.json()
         data = res.get('data')
         embeds = []
