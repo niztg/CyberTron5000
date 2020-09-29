@@ -28,7 +28,6 @@ from discord.ext.commands import Bot, when_mentioned_or
 from async_cleverbot import Cleverbot, DictContext
 
 from CyberTron5000 import config, ctx
-
 print(
     r"""
  ______             __                         ________                              _______    ______    ______    ______  
@@ -80,7 +79,8 @@ class CyberTron5000(Bot):
                 everyone=False
             ),
             case_insensitive=True,
-            status=discord.Status.online)
+            status=discord.Status.online,
+            intents=discord.Intents.all())
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()

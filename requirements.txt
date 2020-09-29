@@ -1,4 +1,4 @@
-discord~=1.0.1
+discord.py~=1.5.0
 humanize~=2.6.0
 aiohttp~=3.6.2
 matplotlib~=3.3.1
@@ -20,3 +20,4 @@ sr_api
 jishaku~=1.19.1.200
 tabulate~=0.8.7
 PyDictionary~=2.0.1
+discord~=1.0.1
