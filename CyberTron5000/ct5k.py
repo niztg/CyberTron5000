@@ -81,7 +81,8 @@ class CyberTron5000(Bot):
             ),
             case_insensitive=True,
             status=discord.Status.online,
-            intents=discord.Intents.all())
+            intents=discord.Intents.all()
+        )
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
@@ -140,23 +141,6 @@ class CyberTron5000(Bot):
     def logging_channel(self) -> List[discord.TextChannel]:
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
-
-    def logger(_self, data=None):
-        data = data or _self.logging
-
-        class logger:
-            def __init__(self, **data):
-                for k, v in data.items():
-                    setattr(self, k, v)
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, exc_type, exc_val, exc_tb):
-                return
-
-        return logger(**data)
-
 
     def run(self, *args, **kwargs):
         super().run(self.config.bot_token)
