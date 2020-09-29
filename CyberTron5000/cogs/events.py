@@ -1,9 +1,9 @@
 import asyncio
 import json
+import random
 from traceback import format_exception
 
 import discord
-import random
 import humanize
 from discord.ext import commands, flags, tasks
 

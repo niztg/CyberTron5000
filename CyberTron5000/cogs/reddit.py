@@ -1,7 +1,6 @@
 import datetime
 import random
 
-import aiohttp
 import discord
 import humanize
 from discord.ext import commands

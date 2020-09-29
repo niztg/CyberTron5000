@@ -19,13 +19,14 @@ SOFTWARE.
 """
 import os
 from datetime import datetime as dt
+from enum import Enum
 from typing import List
 
+import aiohttp
 import asyncpg
 import discord
-import aiohttp
-from discord.ext.commands import Bot, when_mentioned_or
 from async_cleverbot import Cleverbot, DictContext
+from discord.ext.commands import Bot, when_mentioned_or
 
 from CyberTron5000 import config, ctx
 print(
@@ -106,7 +107,26 @@ class CyberTron5000(Bot):
             }
         }
 
-    async def __aioinit__(self):
+    class logger(Enum):
+        invite = 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=379968'
+        support = 'https://discord.com/invite/2fxKxJH'
+        github = 'https://github.com/niztg/CyberTron5000'
+        website = 'https://cybertron-5k.netlify.app'
+        reddit = 'https://reddit.com/r/CyberTron5000'
+        servers = {
+            "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
+            "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
+            "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
+        }
+
+        def __str__(
+                self: Enum
+        ):
+            return self.value
+
+    async def __aioinit__(
+            self
+    ):
         """Async init"""
         self.db = await asyncpg.create_pool(**self.config.pg_data)
         self.session = aiohttp.ClientSession()
@@ -121,6 +141,7 @@ class CyberTron5000(Bot):
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
 
+<<<<<<< HEAD
     def logger(_self, data=None):
         data = data or _self.logging
 
@@ -141,6 +162,8 @@ class CyberTron5000(Bot):
     def run(self, *args, **kwargs):
         super().run(self.config.bot_token)
 
+=======
+>>>>>>> 526d2030231e0471f50852fd8f8c626cbce3e9f2
     @property
     def uptime(self) -> dict:
         delta_uptime = dt.utcnow() - self.start_time

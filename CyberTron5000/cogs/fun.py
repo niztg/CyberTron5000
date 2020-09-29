@@ -7,8 +7,8 @@ from io import BytesIO
 from time import time
 
 import discord
-from discord.ext import commands, flags
 from PyDictionary import PyDictionary as dictionary
+from discord.ext import commands, flags
 from humanize import naturaltime as nt
 from jikanpy import AioJikan
 from sr_api import Client
