@@ -239,13 +239,12 @@ class Api(commands.Cog):
         source = paginator.IndexedListSource(data, embed=embed, per_page=5, show_index=False)
         await paginator.CatchAllMenu(source=source).start(ctx)
 
-    @flags.add_flag(name='--limit', type=int, default=10)
-    @flags.command(aliases=['gif'])
+    @commands.command(aliases=['gif'])
     @commands.is_nsfw()
-    async def giphy(self, ctx, *, query, **flags):
+    async def giphy(self, ctx, *, query):
         """Get a random gif based on your query"""
         URL = "http://api.giphy.com/v1/gifs/search?q={0}&api_key={1}&limit={2}"
-        async with self.bot.session.get(URL.format(query, self.bot.config.giphy, flags.get('limit'))) as r:
+        async with self.bot.session.get(URL.format(query, self.bot.config.giphy, 10)) as r:
             res = await r.json()
         data = res.get('data')
         embeds = []

@@ -29,7 +29,6 @@ from async_cleverbot import Cleverbot, DictContext
 from discord.ext.commands import Bot, when_mentioned_or
 
 from CyberTron5000 import config, ctx
-
 print(
     r"""
  ______             __                         ________                              _______    ______    ______    ______  
@@ -81,7 +80,9 @@ class CyberTron5000(Bot):
                 everyone=False
             ),
             case_insensitive=True,
-            status=discord.Status.online)
+            status=discord.Status.online,
+            intents=discord.Intents.all()
+        )
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
         self.config = config.config()
@@ -140,6 +141,10 @@ class CyberTron5000(Bot):
     def logging_channel(self) -> List[discord.TextChannel]:
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
+
+
+    def run(self, *args, **kwargs):
+        super().run(self.config.bot_token)
 
     @property
     def uptime(self) -> dict:
@@ -209,4 +214,4 @@ class CyberTron5000(Bot):
 # 5,000!
 
 
-CyberTron5000().run(config.config().bot_token)
+CyberTron5000().run()
