@@ -141,7 +141,6 @@ class CyberTron5000(Bot):
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
 
-<<<<<<< HEAD
     def logger(_self, data=None):
         data = data or _self.logging
 
@@ -162,8 +161,6 @@ class CyberTron5000(Bot):
     def run(self, *args, **kwargs):
         super().run(self.config.bot_token)
 
-=======
->>>>>>> 526d2030231e0471f50852fd8f8c626cbce3e9f2
     @property
     def uptime(self) -> dict:
         delta_uptime = dt.utcnow() - self.start_time
