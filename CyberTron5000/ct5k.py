@@ -136,7 +136,6 @@ class CyberTron5000(Bot):
         return [self.get_channel(727277234666078220), self.get_channel(746935543144644650),
                 self.get_channel(746935661201981510)]
 
-
     def run(self, *args, **kwargs):
         super().run(self.config.bot_token)
 
