@@ -19,7 +19,6 @@ SOFTWARE.
 """
 import os
 from datetime import datetime as dt
-from enum import Enum
 from typing import List
 
 import aiohttp
@@ -28,7 +27,8 @@ import discord
 from async_cleverbot import Cleverbot, DictContext
 from discord.ext.commands import Bot, when_mentioned_or
 
-from CyberTron5000 import config, ctx
+import CyberTron5000 as _cyber
+
 print(
     r"""
  ______             __                         ________                              _______    ______    ______    ______  
@@ -84,7 +84,8 @@ class CyberTron5000(Bot):
         )
         self.colour = 0x00dcff
         self.prefixes, self._tag_dict, self.global_votes = {}, {}, {}
-        self.config = config.config()
+        self.config = _cyber.config()
+        self.logger = _cyber.logger()
         self.start_time = dt.utcnow()
         self.ext = [f"CyberTron5000.cogs.{filename[:-3]}" for filename in os.listdir('./cogs') if
                     filename.endswith('.py')]
@@ -94,34 +95,8 @@ class CyberTron5000(Bot):
         self.loop.create_task(self.__aioinit__())
         self.embed = CyberEmbed
         self.colour_chooser = CyberColours
-        self.logging = {
-            'invite': 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=379968',
-            'support': 'https://discord.com/invite/2fxKxJH',
-            'github': 'https://github.com/niztg/CyberTron5000',
-            'website': 'https://cybertron-5k.netlify.app',
-            'reddit': 'https://reddit.com/r/CyberTron5000',
-            'servers': {
-                "CyberTron5000 Emotes 1": "https://discord.gg/29vqZfm",
-                "CyberTron5000 Emotes 2": "https://discord.gg/Qn7VYg8",
-                "CyberTron5000 Emotes 3": "https://discord.gg/Xgddz6W"
-            }
-        }
 
-    class logger(Enum):
-        invite = 'https://discord.com/oauth2/authorize?client_id=697678160577429584&scope=bot&permissions=379968'
-        support = 'https://discord.com/invite/2fxKxJH'
-        github = 'https://github.com/niztg/CyberTron5000'
-        website = 'https://cybertron-5k.netlify.app'
-        reddit = 'https://reddit.com/r/CyberTron5000'
-
-        def __str__(
-                self: Enum
-        ):
-            return self.value
-
-    async def __aioinit__(
-            self
-    ):
+    async def __aioinit__(self):
         """Async init"""
         self.db = await asyncpg.create_pool(**self.config.pg_data)
         self.session = aiohttp.ClientSession()
@@ -157,7 +132,7 @@ class CyberTron5000(Bot):
         return when_mentioned_or(*prefixes)(self, message)
 
     async def get_context(self, message, *, cls=None):
-        return await super().get_context(message, cls=cls or ctx.CyberContext)
+        return await super().get_context(message, cls=cls or _cyber.CyberContext)
 
     async def startup(self):
         await self.wait_until_ready()

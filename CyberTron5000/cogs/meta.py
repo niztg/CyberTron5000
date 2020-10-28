@@ -187,7 +187,7 @@ class Meta(commands.Cog):
             news = await self.bot.db.fetch("SELECT message, number FROM news")
             embed = discord.Embed(colour=self.bot.colour)
             embed.set_author(name=f"About {self.version}", icon_url=self.bot.user.avatar_url)
-            embed.description = f"→ [Invite]({self.bot.logger.invite}) | [Support]({self.bot.logger.support}) | <:github:724036339426787380> [GitHub]({self.bot.logger.github}) | <:cursor_default:734657467132411914>[Website]({self.bot.logger.website}) | <:karma:704158558547214426> [Reddit]({self.bot.logger.reddit})\n"
+            embed.description = f"→ [Invite]({self.bot.logger.invite}) | [Support]({self.bot.logger.support}) | <:github:724036339426787380> [GitHub]({self.bot.logger.github}) | <:cursor_default:734657467132411914>[Website]({self.bot.logger.website}) | <:karma:704158558547214426> [Reddit]({self.bot.logger.reddit} | <:dbl:767915846290505838> [top.gg]({self.bot.logger.topgg})\n"
             embed.description += f"→ Latest Commits: {'|'.join(await self.get_commits(limit=3, author=False, names=False))}\n"
             embed.description += f"→ Used Memory | {cyberformat.bar(stat=psutil.virtual_memory()[2], max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}\n→ CPU | {cyberformat.bar(stat=psutil.cpu_percent(), max=100, filled='<:loading_filled:730823516059992204>', empty='<:loading_empty:730823515862859897>')}"
             embed.description += f"\n→ Uptime | {uptime}"
@@ -337,26 +337,19 @@ class Meta(commands.Cog):
     async def invite(self, ctx):
         """Invite me to your server!"""
         await ctx.send(
-            content=f"**{ctx.author}** | {self.bot.logging['invite']}")
+            content=f"**{ctx.author}**, invite {self.bot.user.name} to your guild! | {self.bot.logger.invite}")
 
     @commands.command()
     async def support(self, ctx):
         """Join our help server!"""
-        embed = discord.Embed(colour=self.bot.colour)
-        embed.set_author(name="Join the Support Server!", url=self.bot.logging['support'])
-        embed.description = f"[`Join Today!`]({self.bot.logging['support']}) <:star:737736250718421032>"
-        embed.add_field(name=f"Emote Servers", value=f"\n".join(
-            [f"<:emoji:734231060069613638> [`{key}`]({value})" for key, value in
-             self.bot.logging['servers'].items()]))
-        embed.set_thumbnail(url=ctx.me.avatar_url)
-        await ctx.send(content=f"**{ctx.author}** | https://discord.com/invite/2fxKxJH", embed=embed)
+        await ctx.send(content=f"**{ctx.author}**, join the support server to be notified of the newest updates! | https://discord.com/invite/2fxKxJH")
 
     @commands.group(invoke_without_command=True, aliases=['git'])
     async def github(self, ctx):
         """View the code for CyberTron5000!"""
         embed = discord.Embed(color=self.bot.colour,
                               title="<:star:737736250718421032> Check out the source code on GitHub!",
-                              url=self.bot.logging['github'])
+                              url=self.bot.logger.github)
         embed.description = "Star the GitHub repository to support the bot!"
         embed.add_field(name="<:license:737733205645590639> LICENSE",
                         value=f"[MIT](https://opensource.org/licenses/MIT)")
@@ -369,24 +362,22 @@ class Meta(commands.Cog):
     async def _git_commits(self, ctx, limit: int = 5):
         """Shows you recent github commits"""
         if limit < 1 or limit > 15:
-            return await ctx.send(
-                f"<:warning:727013811571261540> **{ctx.author.name}**, limit must be greater than 0 and less than 16!")
-        commits = [f"{index}. {commit}" for index, commit in
-                   enumerate(await self.get_commits(limit, author=False, names=True), 1)]
+            raise commands.BadArgument("limit must be greater than 0 and less than 16!")
+        commits = [f"{index}. {commit}" for index, commit in enumerate(await self.get_commits(limit, author=False, names=True), 1)]
         await ctx.send(embed=discord.Embed(description="\n".join(commits), colour=self.bot.colour).set_author(
             name=f"Last {limit} GitHub Commit(s) for CyberTron5000",
             icon_url="https://www.pngjoy.com/pngl/52/1164606_telegram-icon-github-icon-png-white-png-download.png",
-            url=self.bot.logging['github']))
+            url=self.bot.logger.github))
 
-    @github.command(aliases=['repo'])
-    async def repository(self, ctx, repository):
+    @github.command()
+    async def repository(self, ctx, repository='niztg/CyberTron5000'):
         """View a github repository"""
         embed = discord.Embed(colour=self.bot.colour)
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://api.github.com/repos/{repository}") as r1, cs.get(
                     f"https://api.github.com/users/{repository.split('/')[0]}") as r2:
                 if r1.status != 200 or r2.status != 200:
-                    return await ctx.send(f"Repository not found.")
+                    raise commands.BadArgument(f"Repository not found.")
                 res1 = await r1.json()
                 res2 = await r2.json()
         embed.set_author(name=f'{res1.get("full_name")}', icon_url=res2.get("avatar_url"), url=res1.get("svn_url"))
@@ -436,6 +427,10 @@ class Meta(commands.Cog):
 
         await cycle(bots)
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['topgg', 'top.gg'])
+    async def vote(self, ctx):
+        return await ctx.send(f"**{ctx.author}**, vote for {self.bot.user.name} on top.gg! | {self.bot.logger.topgg}")
 
 
 

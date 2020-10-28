@@ -372,7 +372,7 @@ class Moderation(commands.Cog):
             try:
                 await ctx.invoke(punishment, member)
             except Exception:
-                raise commands.BotMissingPermissions(
+                raise commands.BadArgument(
                     "I don't have the requisite permissions to do this, or I can't moderate this user! Please give me the permissions to do this.")
         else:
             await ctx.send(
