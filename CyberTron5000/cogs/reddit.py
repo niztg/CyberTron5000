@@ -249,6 +249,8 @@ class Reddit(commands.Cog):
         async with self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/hot.json", params={'limit': 100}) as r:
             res = await r.json()
         for i in res['data']['children']:
+            if i['data']['over_18'] and not ctx.channel.is_nsfw():
+                raise commands.NSFWChannelRequired(ctx.channel)
             posts.append(i['data'])
         counter = 0
         embeds = []
