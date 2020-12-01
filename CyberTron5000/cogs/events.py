@@ -87,12 +87,7 @@ class Events(commands.Cog):
         embed.description = f"`{error.__class__.__name__}`\n[Jump!]({ctx.message.jump_url})\n"
         embed.description += f"```py\n{self.format_error(ctx, error, not known_value)}\n```"
         embed.description = embed.description[:2048]
-<<<<<<< HEAD
-        await ctx.send(f"The error has been sent to my creator! It will be fixed as soon as possible!",
-                       embed=embed.add_field(name="Join the Support Server!", value=f"{self.bot.logger.support}"))
-=======
         await ctx.send("An unexpected error ({}) has occured, but it has been sent to my creator and will be fixed as soon as possible!\n**Join the support server for more information:** {}".format(error.__class__.__name__, self.bot.logger.support))
->>>>>>> c13006ff8118f48a60517ff4f51488b614ac6502
         await self.bot.logging_channel[0].send(embed=embed)
 
     @commands.Cog.listener(name="on_message")
