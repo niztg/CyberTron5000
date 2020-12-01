@@ -19,6 +19,9 @@ class Images(commands.Cog):
     def dagpi_token(self):
         return self.bot.config.dagpi_token
 
+    async def get_dagpi(self, opt):
+        pass
+
     @commands.command(name='wanted')
     async def _static_wanted(self, ctx, *, url: ImageConverter = None):
         """
