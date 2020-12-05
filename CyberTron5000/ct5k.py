@@ -74,7 +74,7 @@ class CyberTron5000(Bot):
             command_prefix=self.get_prefix,
             pm_help=None,
             allowed_mentions=discord.AllowedMentions(
-                users=False,
+                users=True,
                 roles=False,
                 everyone=False
             ),

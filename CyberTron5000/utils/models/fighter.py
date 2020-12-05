@@ -1,4 +1,5 @@
 import discord
+import random
 
 class Fighter:
     def __init__(self, member: discord.Member):
