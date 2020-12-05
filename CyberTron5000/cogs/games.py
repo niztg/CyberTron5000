@@ -5,8 +5,11 @@ import aiotrivia
 import discord
 from discord.ext import commands
 from unidecode import unidecode
+from contextlib import suppress
+from async_timeout import timeout
 
 from CyberTron5000.utils import cyberformat, lists
+from CyberTron5000.utils.models.fighter import Fighter
 
 
 class Games(commands.Cog):
@@ -115,7 +118,8 @@ class Games(commands.Cog):
         msg = await ctx.send(embed=initial_embed)
         content = "<:pokeball:715599637079130202> Attempts: **{0}/3**"
         hints = [
-            f"**Evolution Line**\n{' → '.join([unidecode(p).lower().capitalize() for p in pokemon['family']['evolutionLine']])}".replace(__name.capitalize(), "???"),
+            f"**Evolution Line**\n{' → '.join([unidecode(p).lower().capitalize() for p in pokemon['family']['evolutionLine']])}".replace(
+                __name.capitalize(), "???"),
             f"**Pokédex Entry**\n{unidecode(pokemon['description']).lower().replace(__name, '???').capitalize()}",
             f"`{cyberformat.better_random_char(__name, '_')}`",
             f"**Species**\n{' '.join(pokemon['species'])}",
@@ -125,18 +129,19 @@ class Games(commands.Cog):
         num_hints = 0
         try:
             for attempt in range(3):
-                await msg.edit(content=content.format(attempt+1))
+                await msg.edit(content=content.format(attempt + 1))
                 message = await self.bot.wait_for('message', timeout=30, check=lambda m: m.author == ctx.author)
                 __message = unidecode(str(message.content.lower()))
                 if __message == __name:
-                    answer_embed.description = f"You guessed correctly with **{attempt+1}** guesses and **{num_hints}** hints!"
+                    answer_embed.description = f"You guessed correctly with **{attempt + 1}** guesses and **{num_hints}** hints!"
                     return await msg.edit(embed=answer_embed, content='')
                 elif __message == f"{ctx.prefix}hint":
                     num_hints += 1
                     hint = random.choice(hints)
                     hints.remove(hint)
                     embed = discord.Embed(colour=self.bot.colour)
-                    embed.set_author(name=f"Hint", icon_url="https://cdn.discordapp.com/emojis/715599637079130202.png?v=1")
+                    embed.set_author(name=f"Hint",
+                                     icon_url="https://cdn.discordapp.com/emojis/715599637079130202.png?v=1")
                     embed.description = hint
                     await ctx.send(embed=embed)
                 elif __message == f"{ctx.prefix}cancel":
@@ -194,10 +199,179 @@ class Games(commands.Cog):
         Guess a random logo!
         """
 
-    def cog_unload(self):
-        #close trivia aiohttp session
-        self.bot.loop.create_task(self.trivia.close())
+    @commands.command(aliases=['mm'])
+    async def mastermind(self, ctx):
+        """Guess a random 4 digit code!"""
+        await ctx.send(
+            f'**Guess a random 4 digit code!**\nKey:\n{ctx.tick()} - Right number in the right spot.\n<:ticknull:732660186057015317> - Right number in the wrong spot.\n{ctx.tick(False)} - This number does not appear in the code.')
+        code = random.sample(list(map(str, list(range(9)))), 4)
+        tries = 0
+        statuses = {
+            0: ctx.tick(False),
+            1: "<:ticknull:732660186057015317>",
+            2: ctx.tick(True)
+        }
 
+        def perfect(responses: list):
+            return responses == [2, 2, 2, 2]
+
+        while True:
+            final = []
+            msg = await self.bot.wait_for(
+                'message',
+                check=lambda m: (m.author, m.channel) == (ctx.author, ctx.channel)
+            )
+            msg = msg.content
+            if msg == "stop":
+                return await ctx.send("Stopping. the code was {}".format("".join(code)))
+            if not msg.isdigit() or not len(msg) == 4:
+                await ctx.send("{} is not a valid code. Codes are all 4 integers long.".format(msg))
+                continue
+            data = list(msg)
+            multiple = any(data.count(x) > 1 for x in data)
+            tries += 1
+            for x in range(4):
+                if data[x] == code[x]:
+                    final.append(2)
+                elif data[x] in code:
+                    final.append(1)
+                elif data[x] not in code:
+                    final.append(0)
+            if perfect(final):
+                return await ctx.send("You won in {} tries! The code was {}".format(tries, "".join(code)))
+            else:
+                await ctx.send(" ".join(list(map(statuses.get, final))))
+                await ctx.send("{} tries".format(tries))
+                if multiple:
+                    await ctx.send("Note: codes do not contain 2 or more of the same number")
+
+    @commands.command()
+    async def fight(self, ctx, member: discord.Member):
+        """Fight against anyone!"""
+        user_1 = Fighter(ctx.author)
+        await ctx.send(f"{member.mention}, {ctx.author} has challenged you to a fight. Do you accept?")
+        try:
+            msg = await self.bot.wait_for(
+                'message',
+                timeout=30,
+                check=lambda x: x.author == member
+            )
+            if msg.content.lower().startswith('y'):
+                user_2 = Fighter(member)
+            else:
+                return
+        except asyncio.TimeoutError:
+            return await ctx.send('out of time')
+
+        prompt = True
+        while (not user_1.dead) and (not user_2.dead):
+            embed = discord.Embed(description=f"{user_1}\n{user_2}", title="Score", colour=self.bot.colour)
+            await ctx.send(embed=embed)
+            if prompt:
+                user = user_1
+                anti_user = user_2
+            else:
+                user = user_2
+                anti_user = user_1
+
+            prompt = not prompt
+
+            await ctx.send(f"{user.name}, `{ctx.prefix}play attack`/`{ctx.prefix}play heal`/`{ctx.prefix}play end`")
+            choice = await self.bot.wait_for(
+                'message',
+                check=lambda x: x.author == user.self and x.content.startswith(f"{ctx.prefix}play")
+            )
+            choice = choice.content.lower()[len(f"{ctx.prefix}play"):].strip()
+            if choice.startswith("a"):
+                dmg = random.randint(1, 100)
+                dealt = anti_user.update_heath(-dmg)
+                await ctx.send(
+                    f"{user.name}, you dealt {-dealt} damage with the {random.choice(lists.WEAPONS).strip()}")
+                if anti_user.dead:
+                    embed2 = discord.Embed(description=f"{user_1}\n{user_2}", title="Score", colour=self.bot.colour)
+                    await ctx.send(embed=embed2)
+                    return await ctx.send(f"{user.self.mention}, you win!")
+                else:
+                    continue
+            elif choice.startswith("h"):
+                try:
+                    heal = user.heal()
+                    await ctx.send(f"{user.name}, you healed **{heal}** health!")
+                except Exception as error:
+                    await ctx.send(error)
+                    continue
+            elif choice.startswith("e"):
+                await ctx.send(embed=embed)
+                return await ctx.send(f"{anti_user.self.mention}, you win!")
+            else:
+                await ctx.send("aint valid.")
+
+    @commands.command(aliases=['ql'])
+    async def quiplash(self, ctx):
+        """Play Quiplash, the famous Jackbox game!"""
+        content = f'➣ **{ctx.author.display_name}**'
+        embed = discord.Embed(title=f"Quiplash!",
+                              description=f"Type `{ctx.prefix}join` to join. The game will start in "
+                                          "60 seconds or with 8 players!", colour=self.bot.colour)
+        embed.add_field(name="Players (1)", value=content)
+        msg = await ctx.send(embed=embed)
+        users = [ctx.author]
+        with suppress(asyncio.TimeoutError):
+            try:
+                async with timeout(60):
+                    while True:
+                        app = await self.bot.wait_for('message', check=lambda
+                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content == f"{ctx.prefix}join")
+                        content += f"\n➣ **{app.author.display_name}**"
+                        users.append(app.author)
+                        embed.set_field_at(index=0, name=f"Players {len(users)}", value=content)
+                        await msg.edit(embed=embed)
+                        if len(users) == 8:
+                            break
+                        continue
+            finally:
+                await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
+        quip = random.choice(lists.QUIPS)
+        for user in users:
+            await user.send('This round\'s prompt is: {}'.format(quip))
+        finals = []
+        answerers = []
+        with suppress(asyncio.TimeoutError):
+            try:
+                while True:
+                    async with timeout(60):
+                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel,
+                                                                                            discord.DMChannel) and x.author not in answerers and x.author in users)
+                        finals.append(msg.content)
+                        answerers.append(msg.author)
+                        await msg.author.send("Quip noted.")
+                        if len(finals) == len(users):
+                            break
+                        continue
+            finally:
+                await ctx.send("READY!\n" + f"{' '.join([u.mention for u in users])}")
+        if not finals:
+            return await ctx.send('no quips :(')
+        await ctx.send(f"The Prompt: **{quip}**\nQuips:\n" + "\n".join([f"{i}. {v}" for i, v in enumerate(finals, 1)]))
+        await ctx.send("Enter the number of your favourite quip.")
+        vote = {}
+        for number in range(1, len(finals) + 1):
+            vote[str(number)] = 0
+        a = 0
+        with suppress(asyncio.TimeoutError):
+            while True:
+                async with timeout(60):
+                    msg = await self.bot.wait_for('message', check=lambda
+                        x: x.content.isdigit() and x.content in vote.keys() and x.author in users and x.channel == ctx.channel)
+                    vote[msg.content] += 1
+                    a += 1
+                    if a == len(users):
+                        break
+                    continue
+        winner = max(vote.items(), key=lambda m: m[1])
+        quip = finals[int(winner[0]) - 1]
+        user = answerers[int(winner[0]) - 1]
+        await ctx.send(f"Option {winner[0]} is the winner!\n`{quip}`\nwritten by {user}")
 
 
 def setup(bot):
