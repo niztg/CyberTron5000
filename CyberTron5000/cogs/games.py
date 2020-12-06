@@ -1,3 +1,8 @@
+"""
+a bunch of these commands were stolen from NOVA by YeetVegetabales
+Check it out here: https://discord.gg/7ft4y9X
+"""
+
 import asyncio
 import random
 
