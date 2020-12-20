@@ -207,9 +207,9 @@ class Games(commands.Cog):
         code = random.sample(list(map(str, list(range(9)))), 4)
         tries = 0
         statuses = {
-            0: ctx.tick(False),
+            0: str(ctx.tick(False)),
             1: "<:ticknull:732660186057015317>",
-            2: ctx.tick(True)
+            2: str(ctx.tick(True))
         }
 
         def perfect(responses: list):
@@ -241,7 +241,7 @@ class Games(commands.Cog):
                 return await ctx.send("You won in {} tries! The code was {}".format(tries, "".join(code)))
             else:
                 await ctx.send(" ".join(list(map(statuses.get, final))))
-                await ctx.send("{} tries".format(tries))
+                await ctx.send("{} trie(s)".format(tries))
                 if multiple:
                     await ctx.send("Note: codes do not contain 2 or more of the same number")
 
