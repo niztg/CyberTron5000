@@ -22,7 +22,7 @@ class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {'token': bot.config.dagpi_token}
+        self.headers = {'Authorization': bot.config.dagpi_token}
         self.trivia = aiotrivia.TriviaClient()
 
     # rock paper scissors, shoot
@@ -105,7 +105,7 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
-        async with self.bot.session.get('https://dagpi.tk/api/wtp', headers=self.headers) as r, ctx.typing():
+        async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers=self.headers) as r, ctx.typing():
             who = await r.json()
             __name = unidecode(str(who['pokemon']['name'])).lower()
             async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
@@ -198,11 +198,6 @@ class Games(commands.Cog):
             await msg.edit(embed=discord.Embed(colour=self.bot.colour,
                                                description=f"{ctx.tick(False)} You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
-    @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
-    async def guesslogo(self, ctx):
-        """
-        Guess a random logo!
-        """
 
     @commands.command(aliases=['mm'])
     async def mastermind(self, ctx):
