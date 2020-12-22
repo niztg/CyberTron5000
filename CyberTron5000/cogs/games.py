@@ -343,6 +343,8 @@ class Games(commands.Cog):
                             if len(users) == 8:
                                 break
                             continue
+                        else:
+                            continue
             finally:
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
@@ -357,12 +359,12 @@ class Games(commands.Cog):
             try:
                 while True:
                     async with timeout(60):
-                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel,
-                                                                                            discord.DMChannel) and x.author not in answerers and x.author in users)
+                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel, discord.DMChannel) and x.author not in answerers and x.author in users)
                         finals.append(msg.content)
                         answerers.append(msg.author)
-                        await msg.author.send("Quip noted.")
-                        await t.edit(content=amsg.format(len(finals), len(users)))
+                        await msg.add_reaction(ctx.tick())
+                        this = "I have received quips from:\n" + "\n".join([str(x) for x in answerers])
+                        await t.edit(content=amsg.format(len(finals), len(users)) + "\n" + this)
                         if len(finals) == len(users):
                             break
                         continue
@@ -376,11 +378,13 @@ class Games(commands.Cog):
         for number in range(1, len(finals) + 1):
             vote[str(number)] = 0
         a = 0
+        those_who_answered = []
         with suppress(asyncio.TimeoutError):
             while True:
                 async with timeout(60):
                     msg = await self.bot.wait_for('message', check=lambda
-                        x: x.content.isdigit() and x.content in vote.keys() and x.author in users and x.channel == ctx.channel)
+                        x: x.content.isdigit() and x.content in vote.keys() and x.author in users and x.author not in those_who_answered and x.channel == ctx.channel)
+                    those_who_answered.append(msg.author)
                     vote[msg.content] += 1
                     a += 1
                     if a == len(users):
@@ -395,7 +399,7 @@ class Games(commands.Cog):
         for y in winner:
             if y[1] == winner[0][1]:
                 winners.append(y)
-        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([str(answerers[int(a[0]) -1]) for a in winners])
+        msg += f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([str(answerers[int(a[0]) -1]) for a in winners])
         await ctx.send(msg)
 
 
