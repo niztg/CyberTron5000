@@ -316,6 +316,7 @@ class Games(commands.Cog):
         embed.add_field(name="Players (1)", value=content)
         msg = await ctx.send(embed=embed)
         users = [ctx.author]
+        cancel = False
         with suppress(asyncio.TimeoutError):
             try:
                 async with timeout(60):
@@ -328,6 +329,7 @@ class Games(commands.Cog):
                             if app.content == f"{ctx.prefix}start":
                                 break
                             elif app.content == f"{ctx.prefix}end":
+                                cancel = True
                                 return await ctx.send(
                                     "Game cancelled."
                                 )
@@ -342,7 +344,8 @@ class Games(commands.Cog):
                                 break
                             continue
             finally:
-                await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
+                if not cancel:
+                    await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         quip = random.choice(lists.QUIPS)
         for user in random.sample(users, len(users)):
             await user.send('This round\'s prompt is: {}'.format(quip))
@@ -392,8 +395,7 @@ class Games(commands.Cog):
         for y in winner:
             if y[1] == winner[0][1]:
                 winners.append(y)
-
-        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join()
+        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([str(answerers[int(a[0]) -1]) for a in winners])
         await ctx.send(msg)
 
 
