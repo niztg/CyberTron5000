@@ -390,7 +390,7 @@ class Games(commands.Cog):
         msg = ""
         for x in winner:
             num = int(x[0])-1
-            msg += f"{x[0]}.\n> {finals[num]}\n**{answerers[num]}** - {x[1]}\n\n"
+            msg += f"> {finals[num]}\n**{answerers[num]}** - {x[1]} votes (Option {x[0]})\n"
         winners = []
         for y in winner:
             if y[1] == winner[0][1]:
