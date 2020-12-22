@@ -321,25 +321,33 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content in (f"{ctx.prefix}join", f"{ctx.prefix}start", f"{ctx.prefix}end"))
-                        if app.content == f"{ctx.prefix}start" and app.author == ctx.author:
-                            break
-                        elif app.content == f"{ctx.prefix}end" and app.author == ctx.author:
-                            return
-                        content += f"\n➣ **{app.author.display_name}**"
-                        users.append(app.author)
-                        embed.set_field_at(index=0, name=f"Players ({len(users)})", value=content)
-                        await msg.edit(embed=embed)
-                        if len(users) == 8:
-                            break
-                        continue
+                            x: x.channel == ctx.channel and not x.author.bot and x.content in (f"{ctx.prefix}join", f"{ctx.prefix}start", f"{ctx.prefix}end"))
+                        if app.author in users and app.author != ctx.author:
+                            continue
+                        elif app.author == ctx.author and app.content != f"{ctx.prefix}join":
+                            if app.content == f"{ctx.prefix}start":
+                                break
+                            elif app.content == f"{ctx.prefix}end":
+                                return await ctx.send(
+                                    "Game cancelled."
+                                )
+                            else:
+                                continue
+                        elif app.content == f"{ctx.prefix}join" and app.author not in users:
+                            content += f"\n➣ **{app.author.display_name}**"
+                            users.append(app.author)
+                            embed.set_field_at(index=0, name=f"Players ({len(users)})", value=content)
+                            await msg.edit(embed=embed)
+                            if len(users) == 8:
+                                break
+                            continue
             finally:
                 await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         quip = random.choice(lists.QUIPS)
-        for user in random.shuffle(users):
+        for user in random.sample(users, len(users)):
             await user.send('This round\'s prompt is: {}'.format(quip))
-        msg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**"
-        t = await ctx.send(msg.format(0, len(users)))
+        amsg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**"
+        t = await ctx.send(amsg.format(0, len(users)))
         finals = []
         answerers = []
         with suppress(asyncio.TimeoutError):
@@ -351,7 +359,7 @@ class Games(commands.Cog):
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.author.send("Quip noted.")
-                        await t.edit(msg.format(len(finals)), len(users))
+                        await t.edit(content=amsg.format(len(finals), len(users)))
                         if len(finals) == len(users):
                             break
                         continue
@@ -385,7 +393,7 @@ class Games(commands.Cog):
             if y[1] == winner[0][1]:
                 winners.append(y)
 
-        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([answerers[int(a)-1] for a in winners])
+        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join()
         await ctx.send(msg)
 
 
