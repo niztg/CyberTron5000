@@ -1,8 +1,3 @@
-"""
-a bunch of these commands were stolen from NOVA by YeetVegetabales
-Check it out here: https://discord.gg/7ft4y9X
-"""
-
 import asyncio
 import random
 
@@ -22,7 +17,7 @@ class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {'Authorization': bot.config.dagpi_token}
+        self.headers = {'token': bot.config.dagpi_token}
         self.trivia = aiotrivia.TriviaClient()
 
     # rock paper scissors, shoot
@@ -105,7 +100,7 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
-        async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers=self.headers) as r, ctx.typing():
+        async with self.bot.session.get('https://dagpi.tk/api/wtp', headers=self.headers) as r, ctx.typing():
             who = await r.json()
             __name = unidecode(str(who['pokemon']['name'])).lower()
             async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
@@ -198,6 +193,11 @@ class Games(commands.Cog):
             await msg.edit(embed=discord.Embed(colour=self.bot.colour,
                                                description=f"{ctx.tick(False)} You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
+    @commands.group(aliases=['gl', 'gtl'], invoke_without_command=True)
+    async def guesslogo(self, ctx):
+        """
+        Guess a random logo!
+        """
 
     @commands.command(aliases=['mm'])
     async def mastermind(self, ctx):
@@ -312,7 +312,7 @@ class Games(commands.Cog):
         content = f'➣ **{ctx.author.display_name}**'
         embed = discord.Embed(title=f"Quiplash!",
                               description=f"Type `{ctx.prefix}join` to join. The game will start in "
-                                          f"60 seconds or with 8 players!\n{ctx.author.mention}: type `{ctx.prefix}start` or `{ctx.prefix}end` to start/end the game.", colour=self.bot.colour)
+                                          "60 seconds or with 8 players!", colour=self.bot.colour)
         embed.add_field(name="Players (1)", value=content)
         msg = await ctx.send(embed=embed)
         users = [ctx.author]
@@ -321,14 +321,10 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content in (f"{ctx.prefix}join", f"{ctx.prefix}start", f"{ctx.prefix}end"))
-                        if app.content == f"{ctx.prefix}start" and app.author == ctx.author:
-                            break
-                        elif app.content == f"{ctx.prefix}end" and app.author == ctx.author:
-                            return
+                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content == f"{ctx.prefix}join")
                         content += f"\n➣ **{app.author.display_name}**"
                         users.append(app.author)
-                        embed.set_field_at(index=0, name=f"Players {len(users)}", value=content)
+                        embed.set_field_at(index=0, name=f"Players ({len(users)})", value=content)
                         await msg.edit(embed=embed)
                         if len(users) == 8:
                             break
@@ -336,10 +332,8 @@ class Games(commands.Cog):
             finally:
                 await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         quip = random.choice(lists.QUIPS)
-        for user in random.shuffle(users):
+        for user in users:
             await user.send('This round\'s prompt is: {}'.format(quip))
-        msg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**".format(0, len(users))
-        t = await ctx.send(msg.format(0))
         finals = []
         answerers = []
         with suppress(asyncio.TimeoutError):
@@ -351,7 +345,6 @@ class Games(commands.Cog):
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.author.send("Quip noted.")
-                        await t.edit(msg.format(len(finals)), len(users))
                         if len(finals) == len(users):
                             break
                         continue
@@ -375,18 +368,10 @@ class Games(commands.Cog):
                     if a == len(users):
                         break
                     continue
-        winner = sorted(vote.items(), key=lambda m: m[1], reverse=True)
-        msg = ""
-        for x in winner:
-            num = int(x[0])-1
-            msg += f"{x[0]}. > {finals[num]}\n**{answerers[num]}** - {x[1]}\n\n"
-        winners = []
-        for y in winner:
-            if y[1] == winner[0][1]:
-                winners.append(y)
-
-        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([answerers[int(a)-1] for a in winners])
-        await ctx.send(msg)
+        winner = max(vote.items(), key=lambda m: m[1])
+        quip = finals[int(winner[0]) - 1]
+        user = answerers[int(winner[0]) - 1]
+        await ctx.send(f"Option {winner[0]} is the winner!\n`{quip}`\nwritten by {user}")
 
 
 def setup(bot):
