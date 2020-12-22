@@ -312,7 +312,7 @@ class Games(commands.Cog):
         content = f'➣ **{ctx.author.display_name}**'
         embed = discord.Embed(title=f"Quiplash!",
                               description=f"Type `{ctx.prefix}join` to join. The game will start in "
-                                          "60 seconds or with 8 players!", colour=self.bot.colour)
+                                          f"60 seconds or with 8 players!\n{ctx.author.mention}: type `{ctx.prefix}start` or `{ctx.prefix}end` to start/end the game.", colour=self.bot.colour)
         embed.add_field(name="Players (1)", value=content)
         msg = await ctx.send(embed=embed)
         users = [ctx.author]
@@ -321,7 +321,11 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content == f"{ctx.prefix}join")
+                            x: x.channel == ctx.channel and x.author not in users and not x.author.bot and x.content in (f"{ctx.prefix}join", f"{ctx.prefix}start", f"{ctx.prefix}end"))
+                        if app.content == f"{ctx.prefix}start" and app.author == ctx.author:
+                            break
+                        elif app.content == f"{ctx.prefix}end" and app.author == ctx.author:
+                            return
                         content += f"\n➣ **{app.author.display_name}**"
                         users.append(app.author)
                         embed.set_field_at(index=0, name=f"Players {len(users)}", value=content)
@@ -332,8 +336,10 @@ class Games(commands.Cog):
             finally:
                 await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         quip = random.choice(lists.QUIPS)
-        for user in users:
+        for user in random.shuffle(users):
             await user.send('This round\'s prompt is: {}'.format(quip))
+        msg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**".format(0, len(users))
+        t = await ctx.send(msg.format(0))
         finals = []
         answerers = []
         with suppress(asyncio.TimeoutError):
@@ -345,6 +351,7 @@ class Games(commands.Cog):
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.author.send("Quip noted.")
+                        await t.edit(msg.format(len(finals)), len(users))
                         if len(finals) == len(users):
                             break
                         continue
@@ -368,10 +375,18 @@ class Games(commands.Cog):
                     if a == len(users):
                         break
                     continue
-        winner = max(vote.items(), key=lambda m: m[1])
-        quip = finals[int(winner[0]) - 1]
-        user = answerers[int(winner[0]) - 1]
-        await ctx.send(f"Option {winner[0]} is the winner!\n`{quip}`\nwritten by {user}")
+        winner = sorted(vote.items(), key=lambda m: m[1], reverse=True)
+        msg = ""
+        for x in winner:
+            num = int(x[0])-1
+            msg += f"{x[0]}. > {finals[num]}\n**{answerers[num]}** - {x[1]}\n\n"
+        winners = []
+        for y in winner:
+            if y[1] == winner[0][1]:
+                winners.append(y)
+
+        msg += f"<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([answerers[int(a)-1] for a in winners])
+        await ctx.send(msg)
 
 
 def setup(bot):
