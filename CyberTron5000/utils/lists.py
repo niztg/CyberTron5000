@@ -318,7 +318,6 @@ QUIPS = ["What two words would passengers never want to hear a pilot say?",
          "Come up with a name for the most difficult yoga pose known to mankind",
          "What's lurking under your bed when you sleep?",
          "The name of a canine comedy club with puppy stand-up comedians",
-         "A great name for a nude beach in Alaska",
          "Make up the title of a movie that is based on the first time you had sex",
          "A vanity license plate a jerk in an expensive car would get",
          "A good fake name to use when checking into a hotel",
@@ -330,3 +329,63 @@ QUIPS = ["What two words would passengers never want to hear a pilot say?",
          "Something you should never stick up your butt",
          "A terrible name for a clown",
          "An inappropriate thing to do at a cemetery"]
+
+
+HANGMAN_STATES = {
+    0: '''```
+  +---+
+  |   |
+      |
+      |
+      |
+      |
+=========```''',
+    1: '''```
+  +---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========```''',
+    2: '''```
+  +---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========```''',
+    3: '''```
+  +---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========```''',
+    4: '''```
+  +---+
+  |   |
+  O   |
+ /|\  |
+      |
+      |
+=========```''',
+    5: '''```
+  +---+
+  |   |
+  O   |
+ /|\  |
+ /    |
+      |
+=========```''',
+    6: '''```
+  +---+
+  |   |
+  O   |
+ /|\  |
+ / \  |
+      |
+=========```'''
+}

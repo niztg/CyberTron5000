@@ -107,16 +107,17 @@ class Games(commands.Cog):
         """
         async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers=self.headers) as r, ctx.typing():
             who = await r.json()
+            who = who['data']
             __name = unidecode(str(who['pokemon']['name'])).lower()
             async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
                 pokemon = await r2.json()
             initial_embed = discord.Embed(colour=self.bot.colour)
             initial_embed.title = "Who's that Pokemon?"
             initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."
-            initial_embed.set_image(url=who.get('question_image'))
+            initial_embed.set_image(url=who.get('question'))
             initial_embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
             answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {who['pokemon']['name']}!")
-            answer_embed.set_image(url=who.get('answer_image'))
+            answer_embed.set_image(url=who.get('answer'))
         if __name.replace('.', '') == "mrmime":
             await ctx.invoke(ctx.command)
             return
@@ -359,7 +360,7 @@ class Games(commands.Cog):
             try:
                 while True:
                     async with timeout(60):
-                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel, discord.DMChannel) and x.author not in answerers and x.author in users)
+                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel, discord.DMChannel) and x.author not in answerers and x.author in users and len(x.content) < 1000)
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.add_reaction(ctx.tick())
@@ -391,7 +392,7 @@ class Games(commands.Cog):
                         break
                     continue
         winner = sorted(vote.items(), key=lambda m: m[1], reverse=True)
-        msg = ""
+        msg = f"{quip}\n\n"
         for x in winner:
             num = int(x[0])-1
             msg += f"> {finals[num]}\n**{answerers[num]}** - {x[1]} votes (Option {x[0]})\n"
@@ -401,6 +402,47 @@ class Games(commands.Cog):
                 winners.append(y)
         msg += f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([str(answerers[int(a[0]) -1]) for a in winners])
         await ctx.send(msg)
+
+    @commands.command(aliases=['hm'])
+    async def hangman(self, ctx):
+        tries = 0
+        this = await (await self.bot.session.get("https://www.mit.edu/~ecprice/wordlist.10000")).text()
+        word = random.choice(this.splitlines())
+        blanks = list("＿" * len(word))
+        guessed = []
+
+        def check(message):
+            return (message.author, message.channel) == (ctx.author, ctx.channel)
+
+        while tries != 6:
+            await ctx.send(f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}")
+            l = await self.bot.wait_for('message', check=check)
+            mesg = l.content
+            if mesg == word:
+                return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
+            elif (len(mesg)) == 1:
+                if mesg in word:
+                    if mesg in blanks:
+                        await ctx.send("You already guessed this letter!")
+                        continue
+                    else:
+                        indexes = []
+                        for x in range(len(word)):
+                            if word[x] == mesg:
+                                indexes.append(x)
+                        for y in indexes:
+                            blanks[y] = mesg
+
+                else:
+                    await ctx.send("Oops, that letter was not found in the word! Keep going!")
+                    guessed.append(mesg)
+                    tries += 1
+                continue
+            else:
+                await ctx.send("That was not the word! Keep trying!")
+                tries += 1
+
+        await ctx.send(f"You lost! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
 
 
 def setup(bot):
