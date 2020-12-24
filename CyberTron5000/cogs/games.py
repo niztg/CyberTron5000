@@ -105,7 +105,7 @@ class Games(commands.Cog):
         """
         Who's that pokemon!?
         """
-        async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers=self.headers) as r, ctx.typing():
+        async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers={"Authorization": self.bot.config.dagpi_token}) as r, ctx.typing():
             bean = await r.json()
             print(bean)
             who = bean['Data']
