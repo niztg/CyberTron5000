@@ -443,7 +443,7 @@ class Games(commands.Cog):
 
         await ctx.send(f"You lost! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
 
-    @commands.command()
+    @trivia.command(invoke_without_command=True)
     async def party(self, ctx, number_of_questions: int = 15):
         """Play trivia with a party of people!"""
         if number_of_questions > 50 or number_of_questions <= 0:
@@ -490,7 +490,7 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        questions = await self.trivia.get_specific_question(amount=15, type="multiple")
+        questions = await self.trivia.get_specific_question(amount=number_of_questions)
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
