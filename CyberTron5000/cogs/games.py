@@ -544,7 +544,7 @@ class Games(commands.Cog):
         rank = 0
         for winner in winners:
             rank += 1
-            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers"
+            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/100) * 100}**%)"
 
         await ctx.send(sbd)
 
