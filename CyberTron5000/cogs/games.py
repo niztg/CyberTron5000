@@ -159,7 +159,7 @@ class Games(commands.Cog):
     #         answer_embed.description = "You ran out of time!"
     #         await msg.edit(embed=answer_embed, content='')
 
-    @commands.command(help="Get's you a trivia question.", aliases=['tr', 't'])
+    @commands.group(help="Get's you a trivia question.", aliases=['tr', 't'], invoke_without_command=True)
     async def trivia(self, ctx, difficulty: str = None):
         difficulty = difficulty or random.choice(['easy', 'medium', 'hard'])
         try:
@@ -442,6 +442,105 @@ class Games(commands.Cog):
                 tries += 1
 
         await ctx.send(f"You lost! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
+
+    @commands.command()
+    async def party(self, ctx, number_of_questions: int = 15):
+        """Play trivia with a party of people!"""
+        if number_of_questions > 50 or number_of_questions <= 0:
+            raise commands.BadArgument("Number of questions must be less than 50 and greater than 0.")
+        content = f'➣ **{ctx.author.display_name}**'
+        embed = discord.Embed(title=f"Trivia!",
+                              description=f"Type `{ctx.prefix}join` to join. The game will start in "
+                                          f"60 seconds or with 8 players!\n{ctx.author.mention}: type `{ctx.prefix}start` or `{ctx.prefix}end` to start/end the game.",
+                              colour=0x00dcff)
+        embed.add_field(name="Players (1)", value=content)
+        msg = await ctx.send(embed=embed)
+        users = [ctx.author]
+        cancel = False
+        with suppress(asyncio.TimeoutError):
+            try:
+                async with timeout(60):
+                    while True:
+                        app = await self.bot.wait_for('message', check=lambda
+                            x: x.channel == ctx.channel and not x.author.bot and x.content in (
+                        f"{ctx.prefix}join", f"{ctx.prefix}start", f"{ctx.prefix}end"))
+                        if app.author in users and app.author != ctx.author:
+                            continue
+                        elif app.author == ctx.author and app.content != f"{ctx.prefix}join":
+                            if app.content == f"{ctx.prefix}start":
+                                break
+                            elif app.content == f"{ctx.prefix}end":
+                                cancel = True
+                                return await ctx.send(
+                                    "Game cancelled."
+                                )
+                            else:
+                                continue
+                        elif app.content == f"{ctx.prefix}join" and app.author not in users:
+                            content += f"\n➣ **{app.author.display_name}**"
+                            users.append(app.author)
+                            embed.set_field_at(index=0, name=f"Players ({len(users)})", value=content)
+                            await msg.edit(embed=embed)
+                            if len(users) == 8:
+                                break
+                            continue
+                        else:
+                            continue
+            finally:
+                if not cancel:
+                    await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
+        await ctx.send("Fetching questions...")
+        questions = await self.trivia.get_specific_question(amount=15, type="multiple")
+        await ctx.send("Questions gathered!")
+        scores = {}
+        for x in users:
+            scores[x.id] = 0
+        await asyncio.sleep(2)
+        q_no = 0
+        await ctx.send(
+            "The game is starting! Enter the number of the question's answer to get the point! At the end of 15 questions, the scores will be tallied up and the winners displayed!")
+        await asyncio.sleep(2)
+        for question in questions:
+            q_no += 1
+            q = f"{q_no}. **{question.question}**\n\n"
+            responses = question.responses
+            random.shuffle(responses)
+            correct_number = str(responses.index(question.answer) + 1)
+            _1 = 0
+            for answer in responses:
+                _1 += 1
+                q += f"`{_1}.` {answer}\n"
+            await ctx.send(q)
+            try:
+
+                async with timeout(45):
+                    while True:
+                        ans = await self.bot.wait_for('message', check=lambda x: x.content.isdigit() and 0 < int(
+                            x.content) <= 4 and x.author in users, timeout=45)
+                        answer = ans.content
+                        if answer == correct_number:
+                            await ctx.send(
+                                f"{ans.author.mention} got it! The answer was {correct_number}, {question.answer}")
+                            scores[ans.author.id] += 1
+                            await ctx.send("Get ready for the next question (or scoreboard)!")
+                            await asyncio.sleep(2)
+                            break
+                        else:
+                            await ctx.send("That's incorrect!")
+                            continue
+            except asyncio.TimeoutError:
+                await ctx.send(f"The answer was {correct_number}, {question.question}")
+                await ctx.send("Get ready for the next question!")
+                await asyncio.sleep(2)
+                continue
+        winner = sorted(scores.items(), key=lambda m: m[1], reverse=True)
+        winners = []
+        for y in winner:
+            if y[1] == winner[0][1]:
+                winners.append(y)
+        sbd = f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
+            [str(ctx.guild.get_member(a[0])) for a in winners])
+        await ctx.send(sbd)
 
 
 def setup(bot):
