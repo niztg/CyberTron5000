@@ -22,7 +22,6 @@ class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {'Authorization': bot.config.dagpi_token}
         self.trivia = aiotrivia.TriviaClient()
 
     # rock paper scissors, shoot
@@ -100,66 +99,65 @@ class Games(commands.Cog):
         embed.set_field_at(index, name=members[index].display_name, value=kmk.popitem()[0])
         await ctx.send(embed=embed)
 
-    @commands.group(aliases=['wtp'], invoke_without_command=True)
-    async def whosthatpokemon(self, ctx):
-        """
-        Who's that pokemon!?
-        """
-        async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers={"Authorization": self.bot.config.dagpi_token}) as r, ctx.typing():
-            bean = await r.json()
-            print(bean)
-            who = bean['Data']
-            __name = unidecode(str(who['pokemon']['name'])).lower()
-            async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
-                pokemon = await r2.json()
-            initial_embed = discord.Embed(colour=self.bot.colour)
-            initial_embed.title = "Who's that Pokemon?"
-            initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."
-            initial_embed.set_image(url=who.get('question'))
-            initial_embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
-            answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {who['pokemon']['name']}!")
-            answer_embed.set_image(url=who.get('answer'))
-        if __name.replace('.', '') == "mrmime":
-            await ctx.invoke(ctx.command)
-            return
-        msg = await ctx.send(embed=initial_embed)
-        content = "<:pokeball:715599637079130202> Attempts: **{0}/3**"
-        hints = [
-            f"**Evolution Line**\n{' → '.join([unidecode(p).lower().capitalize() for p in pokemon['family']['evolutionLine']])}".replace(
-                __name.capitalize(), "???"),
-            f"**Pokédex Entry**\n{unidecode(pokemon['description']).lower().replace(__name, '???').capitalize()}",
-            f"`{cyberformat.better_random_char(__name, '_')}`",
-            f"**Species**\n{' '.join(pokemon['species'])}",
-            f"**Height/Weight**\n{pokemon['height']}/{pokemon['weight']}",
-            f"**Generation**\n{pokemon['generation']}"
-        ]
-        num_hints = 0
-        try:
-            for attempt in range(3):
-                await msg.edit(content=content.format(attempt + 1))
-                message = await self.bot.wait_for('message', timeout=30, check=lambda m: m.author == ctx.author)
-                __message = unidecode(str(message.content.lower()))
-                if __message == __name:
-                    answer_embed.description = f"You guessed correctly with **{attempt + 1}** guesses and **{num_hints}** hints!"
-                    return await msg.edit(embed=answer_embed, content='')
-                elif __message == f"{ctx.prefix}hint":
-                    num_hints += 1
-                    hint = random.choice(hints)
-                    hints.remove(hint)
-                    embed = discord.Embed(colour=self.bot.colour)
-                    embed.set_author(name=f"Hint",
-                                     icon_url="https://cdn.discordapp.com/emojis/715599637079130202.png?v=1")
-                    embed.description = hint
-                    await ctx.send(embed=embed)
-                elif __message == f"{ctx.prefix}cancel":
-                    await msg.edit(embed=answer_embed, content='')
-                else:
-                    continue
-            answer_embed.description = "You used up all of your guesses!"
-            await msg.edit(embed=answer_embed, content='')
-        except asyncio.TimeoutError:
-            answer_embed.description = "You ran out of time!"
-            await msg.edit(embed=answer_embed, content='')
+    # @commands.group(aliases=['wtp'], invoke_without_command=True)
+    # async def whosthatpokemon(self, ctx):
+    #     """
+    #     Who's that pokemon!?
+    #     """
+    #     async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers={"Authorization": self.bot.config.dagpi_token}) as r, ctx.typing():
+    #         bean = await r.json()
+    #         who = bean['Data']
+    #         __name = unidecode(str(who['pokemon']['name'])).lower()
+    #         async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
+    #             pokemon = await r2.json()
+    #         initial_embed = discord.Embed(colour=self.bot.colour)
+    #         initial_embed.title = "Who's that Pokemon?"
+    #         initial_embed.description = f"Do `{ctx.prefix}hint` for a hint or `{ctx.prefix}cancel` to cancel."
+    #         initial_embed.set_image(url=who.get('question'))
+    #         initial_embed.set_footer(text=str(ctx.author), icon_url=ctx.author.avatar_url)
+    #         answer_embed = discord.Embed(colour=self.bot.colour, title=f"It's {who['pokemon']['name']}!")
+    #         answer_embed.set_image(url=who.get('answer'))
+    #     if __name.replace('.', '') == "mrmime":
+    #         await ctx.invoke(ctx.command)
+    #         return
+    #     msg = await ctx.send(embed=initial_embed)
+    #     content = "<:pokeball:715599637079130202> Attempts: **{0}/3**"
+    #     hints = [
+    #         f"**Evolution Line**\n{' → '.join([unidecode(p).lower().capitalize() for p in pokemon['family']['evolutionLine']])}".replace(
+    #             __name.capitalize(), "???"),
+    #         f"**Pokédex Entry**\n{unidecode(pokemon['description']).lower().replace(__name, '???').capitalize()}",
+    #         f"`{cyberformat.better_random_char(__name, '_')}`",
+    #         f"**Species**\n{' '.join(pokemon['species'])}",
+    #         f"**Height/Weight**\n{pokemon['height']}/{pokemon['weight']}",
+    #         f"**Generation**\n{pokemon['generation']}"
+    #     ]
+    #     num_hints = 0
+    #     try:
+    #         for attempt in range(3):
+    #             await msg.edit(content=content.format(attempt + 1))
+    #             message = await self.bot.wait_for('message', timeout=30, check=lambda m: m.author == ctx.author)
+    #             __message = unidecode(str(message.content.lower()))
+    #             if __message == __name:
+    #                 answer_embed.description = f"You guessed correctly with **{attempt + 1}** guesses and **{num_hints}** hints!"
+    #                 return await msg.edit(embed=answer_embed, content='')
+    #             elif __message == f"{ctx.prefix}hint":
+    #                 num_hints += 1
+    #                 hint = random.choice(hints)
+    #                 hints.remove(hint)
+    #                 embed = discord.Embed(colour=self.bot.colour)
+    #                 embed.set_author(name=f"Hint",
+    #                                  icon_url="https://cdn.discordapp.com/emojis/715599637079130202.png?v=1")
+    #                 embed.description = hint
+    #                 await ctx.send(embed=embed)
+    #             elif __message == f"{ctx.prefix}cancel":
+    #                 await msg.edit(embed=answer_embed, content='')
+    #             else:
+    #                 continue
+    #         answer_embed.description = "You used up all of your guesses!"
+    #         await msg.edit(embed=answer_embed, content='')
+    #     except asyncio.TimeoutError:
+    #         answer_embed.description = "You ran out of time!"
+    #         await msg.edit(embed=answer_embed, content='')
 
     @commands.command(help="Get's you a trivia question.", aliases=['tr', 't'])
     async def trivia(self, ctx, difficulty: str = None):
