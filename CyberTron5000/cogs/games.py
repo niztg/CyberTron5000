@@ -15,6 +15,7 @@ from async_timeout import timeout
 
 from CyberTron5000.utils import cyberformat, lists
 from CyberTron5000.utils.models.fighter import Fighter
+from CyberTron5000.utils.models.question import Question
 
 
 class Games(commands.Cog):
@@ -489,7 +490,9 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        questions = await aiotrivia.TriviaClient().get_specific_question(amount=number_of_questions)
+        _2 = await self.bot.session.get("https://opentdb.com/api.php", params={"amount": 15})
+        _3 = await _2.json()
+        questions = [Question(a) for a in _3]
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
