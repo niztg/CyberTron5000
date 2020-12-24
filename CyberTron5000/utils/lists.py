@@ -328,7 +328,19 @@ QUIPS = ["What two words would passengers never want to hear a pilot say?",
          "Miller Lite beer would make a lot of money if they came up with a beer called Miller Lite _____",
          "Something you should never stick up your butt",
          "A terrible name for a clown",
-         "An inappropriate thing to do at a cemetery"]
+         "An inappropriate thing to do at a cemetery",
+         "The last thing you see before blowing up",
+         "The best way to impress a Martian",
+         "Your final words before you were burned in Salem as a witch",
+         "A great president from a cartoon series would be: ____",
+         "I didn't mean to kill him! I just ___",
+         "A lesser talked about room in the White House",
+         "The easiest way to make a gamer mad",
+         "As Shakespeare said, '_____'",
+         "The name of the guy who invented Jazz",
+         "A movie guaranteed to be a hit with necrophiliacs",
+         "The name of a teacher you know you'd instantly hate",
+         "You have 6 words to anger an entire group of people"]
 
 
 HANGMAN_STATES = {

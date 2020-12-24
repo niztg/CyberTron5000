@@ -371,6 +371,7 @@ class Games(commands.Cog):
                 await ctx.send("READY!\n" + f"{' '.join([u.mention for u in users])}")
         if not finals:
             return await ctx.send('no quips :(')
+        random.shuffle(finals)
         await ctx.send(f"The Prompt: **{quip}**\nQuips:\n" + "\n".join([f"{i}. {v}" for i, v in enumerate(finals, 1)]))
         await ctx.send("Enter the number of your favourite quip.")
         vote = {}
@@ -419,8 +420,7 @@ class Games(commands.Cog):
             if mesg == word:
                 return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
             elif (len(mesg)) == 1:
-                if mesg in word or mesg in guessed:
-                    if mesg in blanks:
+                    if mesg in blanks or mesg in guessed:
                         await ctx.send("You already guessed this letter!")
                         continue
                     else:
@@ -489,9 +489,7 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        questions = []
-        for x in range(15):
-            questions.append(await aiotrivia.TriviaClient().get_random_question())
+        questions = await aiotrivia.TriviaClient().get_specific_question(amount=number_of_questions)
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
