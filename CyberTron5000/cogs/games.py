@@ -499,7 +499,7 @@ class Games(commands.Cog):
         q_no = 0
         await ctx.send(
             f"The game is starting! Enter the number of the question's answer to get the point! At the end of {number_of_questions} questions, the scores will be tallied up and the winners displayed!")
-        await asyncio.sleep(2)
+        await asyncio.sleep(5)
         for question in questions:
             q_no += 1
             q = f"{q_no}. **{question.question}**\n\n"
@@ -526,7 +526,7 @@ class Games(commands.Cog):
                             await asyncio.sleep(2)
                             break
                         else:
-                            await ctx.send("That's incorrect!")
+                            await ctx.send(f"That's incorrect, {ans.author}!")
                             continue
             except asyncio.TimeoutError:
                 await ctx.send(f"The answer was {correct_number}, {question.question}")
@@ -539,7 +539,7 @@ class Games(commands.Cog):
             if y[1] == winner[0][1]:
                 winners.append(y)
         sbd = f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
-            [f"{str(ctx.guild.get_member(a[0]))} - **{a[1]}** answers" for a in winners])
+            [f"{a}. {str(ctx.guild.get_member(b[0]))} - **{b[1]}** answers" for a, b in zip(range(1, len(winner)), winners)])
         await ctx.send(sbd)
 
 
