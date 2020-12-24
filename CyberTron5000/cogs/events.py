@@ -240,7 +240,7 @@ class Events(commands.Cog):
                     votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
                 except ZeroDivisionError:
                     votebar = bar(0, 10, '■', '□')
-                new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+                new_q_format.append(f"{item['emoji']} `{item['votes']}` **{item['question']}** • {votebar}")
             embed.description = f"\n".join(new_q_format)
             await message.edit(embed=embed)
 
@@ -272,7 +272,7 @@ class Events(commands.Cog):
                 votebar = bar(stat=item["votes"], max=total, filled='■', empty='□')
             except ZeroDivisionError:
                 votebar = bar(0, 10, '■', '□')
-            new_q_format.append(f"{item['emoji']} **{item['question']}** • {votebar}")
+            new_q_format.append(f"{item['emoji']} `{item['votes']}` **{item['question']}** • {votebar}")
         embed.description = f"\n".join(new_q_format)
         await message.edit(embed=embed)
 

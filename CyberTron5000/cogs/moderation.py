@@ -134,7 +134,7 @@ class Moderation(commands.Cog):
             if not item['question']:
                 votes.remove(item)
                 continue
-            _q_format.append(f"{item['emoji']} **{item['question']}** • {cyberformat.bar(0, 10, '■', '□')}")
+            _q_format.append(f"{item['emoji']} `0` **{item['question']}** • {cyberformat.bar(0, 10, '■', '□')}")
         embed.description = f"\n".join(_q_format)
         _msg = await ctx.send(embed=embed)
         for a in votes:
