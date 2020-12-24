@@ -490,9 +490,9 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        _2 = await self.bot.session.get("https://opentdb.com/api.php", params={"amount": 15})
-        _3 = await _2.json()
-        questions = [Question(a) for a in _3]
+        questions = []
+        for x in range(15):
+            questions.append(await aiotrivia.TriviaClient().get_random_question())
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
