@@ -107,6 +107,7 @@ class Games(commands.Cog):
         """
         async with self.bot.session.get('https://api.dagpi.xyz/data/wtp', headers=self.headers) as r, ctx.typing():
             bean = await r.json()
+            print(bean)
             who = bean['Data']
             __name = unidecode(str(who['pokemon']['name'])).lower()
             async with self.bot.session.get(f"https://some-random-api.ml/pokedex?pokemon={__name}") as r2:
