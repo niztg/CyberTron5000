@@ -416,7 +416,7 @@ class Games(commands.Cog):
         while tries != 6:
             await ctx.send(f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}")
             l = await self.bot.wait_for('message', check=check)
-            mesg = l.content
+            mesg = l.content.lower()
             if mesg == word:
                 return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
             elif (len(mesg)) == 1:
