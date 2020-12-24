@@ -22,7 +22,6 @@ class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.trivia = aiotrivia.TriviaClient()
 
     # rock paper scissors, shoot
     @commands.command(aliases=['rps'], help="Rock paper scissors shoot")
@@ -163,7 +162,7 @@ class Games(commands.Cog):
     async def trivia(self, ctx, difficulty: str = None):
         difficulty = difficulty or random.choice(['easy', 'medium', 'hard'])
         try:
-            question = await self.trivia.get_random_question(difficulty)
+            question = await aiotrivia.TriviaClient().get_random_question(difficulty)
         except aiotrivia.AiotriviaException:
             return await ctx.send(f'**{difficulty}** is not a valid difficulty!')
         embed = discord.Embed(colour=ctx.bot.colour)
@@ -490,7 +489,7 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        questions = await self.trivia.get_specific_question(amount=number_of_questions)
+        questions = await aiotrivia.TriviaClient().get_specific_question(amount=number_of_questions)
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
