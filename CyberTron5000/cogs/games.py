@@ -498,7 +498,7 @@ class Games(commands.Cog):
         await asyncio.sleep(2)
         q_no = 0
         await ctx.send(
-            "The game is starting! Enter the number of the question's answer to get the point! At the end of 15 questions, the scores will be tallied up and the winners displayed!")
+            f"The game is starting! Enter the number of the question's answer to get the point! At the end of {number_of_questions} questions, the scores will be tallied up and the winners displayed!")
         await asyncio.sleep(2)
         for question in questions:
             q_no += 1
@@ -539,7 +539,7 @@ class Games(commands.Cog):
             if y[1] == winner[0][1]:
                 winners.append(y)
         sbd = f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
-            [str(ctx.guild.get_member(a[0])) for a in winners])
+            [f"{str(ctx.guild.get_member(a[0]))} - **{a[1]}** answers" for a in winners])
         await ctx.send(sbd)
 
 
