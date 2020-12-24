@@ -522,8 +522,12 @@ class Games(commands.Cog):
                             await ctx.send(
                                 f"{ans.author.mention} got it! The answer was {correct_number}, {question.answer}")
                             scores[ans.author.id] += 1
-                            await ctx.send("Get ready for the next question (or scoreboard)!")
-                            await asyncio.sleep(2)
+                            if q_no != number_of_questions:
+                                await ctx.send("Get ready for the next question!")
+                                await asyncio.sleep(2)
+                            else:
+                                await ctx.send("The game is over! The scores are now being tallied up!")
+                                await asyncio.sleep(5)
                             break
                         else:
                             await ctx.send(f"That's incorrect, {ans.author}!")
@@ -539,7 +543,7 @@ class Games(commands.Cog):
             if y[1] == winner[0][1]:
                 winners.append(y)
         sbd = f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
-            [f"{a}. {str(ctx.guild.get_member(b[0]))} - **{b[1]}** answers" for a, b in zip(range(1, len(winner)), winners)])
+            [f"{a}. {str(ctx.guild.get_member(b[0]))} - **{b[1]}** answers" for a, b in zip(range(1, len(winners)), winners)])
         await ctx.send(sbd)
 
 
