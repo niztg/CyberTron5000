@@ -15,7 +15,6 @@ from async_timeout import timeout
 
 from CyberTron5000.utils import cyberformat, lists
 from CyberTron5000.utils.models.fighter import Fighter
-from CyberTron5000.utils.models.question import Question
 
 
 class Games(commands.Cog):
@@ -544,7 +543,7 @@ class Games(commands.Cog):
         rank = 0
         for winner in winners:
             rank += 1
-            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/100) * 100}**%)"
+            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/number_of_questions) * 100}**%)"
 
         await ctx.send(sbd)
 
