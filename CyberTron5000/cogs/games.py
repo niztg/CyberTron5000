@@ -537,13 +537,13 @@ class Games(commands.Cog):
                 await ctx.send("Get ready for the next question!")
                 await asyncio.sleep(2)
                 continue
-        winner = sorted(scores.items(), key=lambda m: m[1], reverse=True)
-        winners = []
-        for y in winner:
-            if y[1] == winner[0][1]:
-                winners.append(y)
-        sbd = f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
-            [f"{a}. {str(ctx.guild.get_member(b[0]))} - **{b[1]}** answers" for a, b in zip(range(1, len(winners)), winners)])
+        winners = sorted(scores.items(), key=lambda m: m[1], reverse=True)
+        sbd = "<:owner:730864906429136907> **SCOREBOARD**\n\n"
+        rank = 0
+        for winner in winners:
+            rank += 1
+            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers"
+
         await ctx.send(sbd)
 
 
