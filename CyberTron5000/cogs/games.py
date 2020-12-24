@@ -420,6 +420,7 @@ class Games(commands.Cog):
             if mesg == word:
                 return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
             elif (len(mesg)) == 1:
+                if mesg in word or mesg in guessed:
                     if mesg in blanks or mesg in guessed:
                         await ctx.send("You already guessed this letter!")
                         continue
