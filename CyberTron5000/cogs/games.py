@@ -404,8 +404,8 @@ class Games(commands.Cog):
     @commands.command(aliases=['hm'])
     async def hangman(self, ctx):
         tries = 0
-        this = await (await self.bot.session.get("https://www.mit.edu/~ecprice/wordlist.10000")).text()
-        word = random.choice(this.splitlines())
+        this = await (await self.bot.session.get("https://www.randomlists.com/data/words.json")).json()
+        word = random.choice(this['data'])
         blanks = list("＿" * len(word))
         guessed = []
 
@@ -419,7 +419,7 @@ class Games(commands.Cog):
             if mesg == word:
                 return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
             elif (len(mesg)) == 1:
-                if mesg in word:
+                if mesg in word or mesg in guessed:
                     if mesg in blanks:
                         await ctx.send("You already guessed this letter!")
                         continue
@@ -499,7 +499,7 @@ class Games(commands.Cog):
         await asyncio.sleep(2)
         q_no = 0
         await ctx.send(
-            f"The game is starting! Enter the number of the question's answer to get the point! At the end of {number_of_questions} questions, the scores will be tallied up and the winners displayed!")
+            f"The game is starting! Enter the number of the question's answer to get the point! At the end of {number_of_questions} questions, the scores will be tallied up and the winners displayed! If the bot doesn't react to your message, it means that that message wasn't processed. Send it again!")
         await asyncio.sleep(5)
         for question in questions:
             q_no += 1
@@ -525,12 +525,13 @@ class Games(commands.Cog):
                             scores[ans.author.id] += 1
                             if q_no != number_of_questions:
                                 await ctx.send("Get ready for the next question!")
-                                await asyncio.sleep(2)
+                                await asyncio.sleep(7)
                             else:
                                 await ctx.send("The game is over! The scores are now being tallied up!")
                                 await asyncio.sleep(5)
                             break
                         else:
+                            await ans.add_reaction(ctx.tick(False))
                             await ctx.send(f"That's incorrect, {ans.author}!")
                             continue
             except asyncio.TimeoutError:
@@ -543,7 +544,7 @@ class Games(commands.Cog):
         rank = 0
         for winner in winners:
             rank += 1
-            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/number_of_questions) * 100}**%)"
+            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/number_of_questions) * 100}**%)\n"
 
         await ctx.send(sbd)
 
