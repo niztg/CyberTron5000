@@ -490,7 +490,10 @@ class Games(commands.Cog):
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
         await ctx.send("Fetching questions...")
-        questions = await aiotrivia.TriviaClient().get_specific_question(amount=number_of_questions)
+        questions = []
+        client = aiotrivia.TriviaClient()
+        for x in range(number_of_questions):
+            questions.append(await client.get_random_question())
         await ctx.send("Questions gathered!")
         scores = {}
         for x in users:
