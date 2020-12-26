@@ -347,10 +347,13 @@ class Games(commands.Cog):
             finally:
                 if not cancel:
                     await ctx.send("The game is starting!" + "\n" + f"{' '.join([u.mention for u in users])}")
-        quip = random.choice(lists.QUIPS)
+        quips = lists.QUIPS
+        if ctx.guild.id == 790565439670321182:
+            quips += lists.IZLAM_QUIPS
+        quip = random.choice(quips)
         for user in users:
             await user.send('This round\'s prompt is: {}'.format(quip))
-        this_thing = {a: ctx.tick(None) for a in users}
+        this_thing = {a: "<a:a_loading:741383826412142603>" for a in users}
         amsg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**\n\n{}"
         t = await ctx.send(amsg.format(0, len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
         finals = []

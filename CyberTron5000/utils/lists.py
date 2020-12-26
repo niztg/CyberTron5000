@@ -401,3 +401,10 @@ HANGMAN_STATES = {
       |
 =========```'''
 }
+
+
+IZLAM_QUIPS = [
+    "The real reason legion will never find love",
+    "How yahya will find his second wife",
+    "This is why the new server was created"
+]
