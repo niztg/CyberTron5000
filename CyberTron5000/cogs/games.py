@@ -321,20 +321,20 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and not x.author.bot and x.content.startswith((f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
+                            x: x.channel == ctx.channel and not x.author.bot and x.content.lower().startswith((f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
                         if app.author in users and app.author != ctx.author:
                             continue
-                        elif app.author == ctx.author and not app.content.startswith(f"{ctx.prefix}j"):
-                            if app.content.startswith(f"{ctx.prefix}s"):
+                        elif app.author == ctx.author and not app.content.lower().startswith(f"{ctx.prefix}j"):
+                            if app.content.lower().startswith(f"{ctx.prefix}s"):
                                 break
-                            elif app.content.startswith(f"{ctx.prefix}e"):
+                            elif app.content.lower().startswith(f"{ctx.prefix}e"):
                                 cancel = True
                                 return await ctx.send(
                                     "Game cancelled."
                                 )
                             else:
                                 continue
-                        elif app.content.startswith(f"{ctx.prefix}join") and app.author not in users:
+                        elif app.content.lower().startswith(f"{ctx.prefix}j") and app.author not in users:
                             content += f"\n➣ **{app.author.display_name}**"
                             users.append(app.author)
                             embed.set_field_at(index=0, name=f"Players ({len(users)})", value=content)
