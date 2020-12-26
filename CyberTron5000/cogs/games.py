@@ -350,8 +350,9 @@ class Games(commands.Cog):
         quip = random.choice(lists.QUIPS)
         for user in users:
             await user.send('This round\'s prompt is: {}'.format(quip))
-        amsg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**"
-        t = await ctx.send(amsg.format(0, len(users)))
+        this_thing = {a: ctx.tick(None) for a in users}
+        amsg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**\n\n{}"
+        t = await ctx.send(amsg.format(0, len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
         finals = []
         answerers = []
         with suppress(asyncio.TimeoutError):
@@ -362,8 +363,8 @@ class Games(commands.Cog):
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.add_reaction(ctx.tick())
-                        this = "I have received quips from:\n" + "\n".join([str(x) for x in answerers])
-                        await t.edit(content=amsg.format(len(finals), len(users)) + "\n" + this)
+                        this_thing[msg.author] = ctx.tick()
+                        await t.edit(content=amsg.format(len(finals), len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
                         if len(finals) == len(users):
                             break
                         continue
