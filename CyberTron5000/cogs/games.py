@@ -384,6 +384,7 @@ class Games(commands.Cog):
                 async with timeout(60):
                     msg = await self.bot.wait_for('message', check=lambda
                         x: x.content.isdigit() and x.content in vote.keys() and x.author in users and x.author not in those_who_answered and x.channel == ctx.channel)
+                    await msg.add_reaction(ctx.tick())
                     those_who_answered.append(msg.author)
                     vote[msg.content] += 1
                     a += 1
