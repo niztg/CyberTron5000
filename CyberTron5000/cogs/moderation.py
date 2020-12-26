@@ -39,7 +39,6 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_messages=True)
     async def purge(self, ctx, amount: int, **flags):
         """Purges a given amount of messages."""
-        amount += 1
         await ctx.message.delete()
         user = flags.get('user')
         if user:
