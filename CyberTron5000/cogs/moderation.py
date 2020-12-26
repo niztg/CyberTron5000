@@ -106,7 +106,6 @@ class Moderation(commands.Cog):
             return await ctx.send(f"{ctx.tick()} {str(user)} was unbanned! Reason:\n> {reason}")
 
     @commands.group(usage='<poll|option1|option2|option3...>', aliases=['poll'], invoke_without_command=True)
-    @commands.cooldown(1, 60, commands.BucketType.guild)
     async def vote(self, ctx, *, message):
         """Vote on something."""
         options = message.split("|")
