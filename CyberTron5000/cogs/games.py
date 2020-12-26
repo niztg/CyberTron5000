@@ -371,7 +371,6 @@ class Games(commands.Cog):
                 await ctx.send("READY!\n" + f"{' '.join([u.mention for u in users])}")
         if not finals:
             return await ctx.send('no quips :(')
-        random.shuffle(finals)
         await ctx.send(f"The Prompt: **{quip}**\nQuips:\n" + "\n".join([f"{i}. {v}" for i, v in enumerate(finals, 1)]))
         await ctx.send("Enter the number of your favourite quip.")
         vote = {}
