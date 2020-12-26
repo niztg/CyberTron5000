@@ -197,12 +197,11 @@ class Games(commands.Cog):
             await msg.edit(embed=discord.Embed(colour=self.bot.colour,
                                                description=f"{ctx.tick(False)} You ran out of time! The correct answer was {correct}, **{question.answer}**"))
 
-
     @commands.command(aliases=['mm'])
     async def mastermind(self, ctx):
         """Guess a random 4 digit code!"""
         await ctx.send(
-            f'**Guess a random 4 digit code!**\nKey:\n{ctx.tick()} - Right number in the right spot.\n<:ticknull:732660186057015317> - Right number in the wrong spot.\n{ctx.tick(False)} - This number does not appear in the code.')
+            f'**Guess a random 4 digit code!**\nKey:\n{ctx.tick()} - Right number in the right spot.\n<:ticknull:732660186057015317> - Right number in the wrong spot.\n{ctx.tick(False)} - This number does not appear in the code.\n\nType `{ctx.prefix}end` to quit the game.')
         code = random.sample(list(map(str, list(range(9)))), 4)
         tries = 0
         statuses = {
@@ -221,7 +220,7 @@ class Games(commands.Cog):
                 check=lambda m: (m.author, m.channel) == (ctx.author, ctx.channel)
             )
             msg = msg.content
-            if msg == "stop":
+            if msg == "stop" or msg == f"{ctx.prefix}end":
                 return await ctx.send("Stopping. the code was {}".format("".join(code)))
             if not msg.isdigit() or not len(msg) == 4:
                 await ctx.send("{} is not a valid code. Codes are all 4 integers long.".format(msg))
@@ -311,7 +310,8 @@ class Games(commands.Cog):
         content = f'➣ **{ctx.author.display_name}**'
         embed = discord.Embed(title=f"Quiplash!",
                               description=f"Type `{ctx.prefix}join` to join. The game will start in "
-                                          f"60 seconds or with 8 players!\n{ctx.author.mention}: type `{ctx.prefix}start` or `{ctx.prefix}end` to start/end the game.", colour=self.bot.colour)
+                                          f"60 seconds or with 8 players!\n{ctx.author.mention}: type `{ctx.prefix}start` or `{ctx.prefix}end` to start/end the game.",
+                              colour=self.bot.colour)
         embed.add_field(name="Players (1)", value=content)
         msg = await ctx.send(embed=embed)
         users = [ctx.author]
@@ -321,7 +321,8 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and not x.author.bot and x.content.lower().startswith((f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
+                            x: x.channel == ctx.channel and not x.author.bot and x.content.lower().startswith(
+                            (f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
                         if app.author in users and app.author != ctx.author:
                             continue
                         elif app.author == ctx.author and not app.content.lower().startswith(f"{ctx.prefix}j"):
@@ -355,19 +356,23 @@ class Games(commands.Cog):
             await user.send('This round\'s prompt is: {}'.format(quip))
         this_thing = {a: "<a:a_loading:741383826412142603>" for a in users}
         amsg = "You have all been sent the prompt! DM me your answer to the question!\nQuips received: **{}/{}**\n\n{}"
-        t = await ctx.send(amsg.format(0, len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
+        t = await ctx.send(
+            amsg.format(0, len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
         finals = []
         answerers = []
         with suppress(asyncio.TimeoutError):
             try:
                 while True:
                     async with timeout(60):
-                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel, discord.DMChannel) and x.author not in answerers and x.author in users and len(x.content) < 1000)
+                        msg = await self.bot.wait_for('message', check=lambda x: isinstance(x.channel,
+                                                                                            discord.DMChannel) and x.author not in answerers and x.author in users and len(
+                            x.content) < 1000)
                         finals.append(msg.content)
                         answerers.append(msg.author)
                         await msg.add_reaction(ctx.tick())
                         this_thing[msg.author] = ctx.tick()
-                        await t.edit(content=amsg.format(len(finals), len(users), "\n".join([f"{tick} {person}" for person, tick in this_thing.items()])))
+                        await t.edit(content=amsg.format(len(finals), len(users), "\n".join(
+                            [f"{tick} {person}" for person, tick in this_thing.items()])))
                         if len(finals) == len(users):
                             break
                         continue
@@ -397,13 +402,14 @@ class Games(commands.Cog):
         winner = sorted(vote.items(), key=lambda m: m[1], reverse=True)
         msg = f"{quip}\n\n"
         for x in winner:
-            num = int(x[0])-1
+            num = int(x[0]) - 1
             msg += f"> {finals[num]}\n**{answerers[num]}** - {x[1]} votes (Option {x[0]})\n"
         winners = []
         for y in winner:
             if y[1] == winner[0][1]:
                 winners.append(y)
-        msg += f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join([str(answerers[int(a[0]) -1]) for a in winners])
+        msg += f"\n<:owner:730864906429136907> **WINNER(S):**\n" + '\n'.join(
+            [str(answerers[int(a[0]) - 1]) for a in winners])
         await ctx.send(msg)
 
     @commands.command(aliases=['hm'])
@@ -418,11 +424,13 @@ class Games(commands.Cog):
             return (message.author, message.channel) == (ctx.author, ctx.channel)
 
         while tries != 6:
-            await ctx.send(f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}")
+            await ctx.send(
+                f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}")
             l = await self.bot.wait_for('message', check=check)
             mesg = l.content.lower()
             if mesg == word:
-                return await ctx.send(f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
+                return await ctx.send(
+                    f"You got with **{tries}** mistakes! The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
             elif (len(mesg)) == 1:
                 if mesg in word or mesg in guessed:
                     if mesg in blanks or mesg in guessed:
@@ -466,7 +474,8 @@ class Games(commands.Cog):
                 async with timeout(60):
                     while True:
                         app = await self.bot.wait_for('message', check=lambda
-                            x: x.channel == ctx.channel and not x.author.bot and x.content.lower().startswith((f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
+                            x: x.channel == ctx.channel and not x.author.bot and x.content.lower().startswith(
+                            (f"{ctx.prefix}j", f"{ctx.prefix}s", f"{ctx.prefix}e")))
                         if app.author in users and app.author != ctx.author:
                             continue
                         elif app.author == ctx.author and not app.content.lower().startswith(f"{ctx.prefix}j"):
@@ -549,7 +558,7 @@ class Games(commands.Cog):
         rank = 0
         for winner in winners:
             rank += 1
-            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1]/number_of_questions) * 100}**%)\n"
+            sbd += f"`{rank}.` **{ctx.guild.get_member(winner[0])}** - **{winner[1]}** answers (**{(winner[1] / number_of_questions) * 100}**%)\n"
 
         await ctx.send(sbd)
 
