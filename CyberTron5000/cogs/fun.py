@@ -539,5 +539,12 @@ class Fun(commands.Cog):
         except discord.HTTPException:
             return await ctx.send("You passed in too many words!")
 
+    @commands.command()
+    async def ship(self, ctx, member_1: discord.Member, member_2: discord.Member):
+        """Ship 2 members"""
+        from random import randint
+        rate = randint(1, 100)
+        await ctx.send(f"""**{member_1}** | <a:hug:748315930685210746> {rate}% :heart: | **{member_2}**""")
+
 def setup(bot):
     bot.add_cog(Fun(bot))
