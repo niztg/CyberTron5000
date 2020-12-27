@@ -425,7 +425,7 @@ class Games(commands.Cog):
 
         while tries != 6:
             await ctx.send(
-                f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}")
+                f"Your word: **{' '.join(blanks)}**\n{lists.HANGMAN_STATES.get(tries)}\nGuessed letters: {', '.join(guessed)}\nType `{ctx.prefix}end` if you want to finish the game.")
             l = await self.bot.wait_for('message', check=check)
             mesg = l.content.lower()
             if mesg == word:
@@ -450,6 +450,8 @@ class Games(commands.Cog):
                     tries += 1
                 continue
             else:
+                if mesg.lower().startswith(f"{ctx.prefix}e"):
+                    return await ctx.send(f"The word was **{word}**\n{lists.HANGMAN_STATES.get(tries)}")
                 await ctx.send("That was not the word! Keep trying!")
                 tries += 1
 
