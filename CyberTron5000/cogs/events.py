@@ -158,7 +158,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener(name="on_message")
     async def cleverbot_session(self, message):
-        if message.channel.id in (730486269468999741, 730570845013147708, 750404241566335088, 783448914123817020):
+        if message.channel.id in (730486269468999741, 730570845013147708, 750404241566335088, 783448914123817020, 792709275133935626):
             if message.author.bot:
                 return
             async with message.channel.typing():
