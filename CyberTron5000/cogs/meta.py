@@ -369,7 +369,7 @@ class Meta(commands.Cog):
             icon_url="https://www.pngjoy.com/pngl/52/1164606_telegram-icon-github-icon-png-white-png-download.png",
             url=self.bot.logger.github))
 
-    @github.command()
+    @github.command(aliases=['repo'])
     async def repository(self, ctx, repository='niztg/CyberTron5000'):
         """View a github repository"""
         embed = discord.Embed(colour=self.bot.colour)
