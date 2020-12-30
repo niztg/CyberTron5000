@@ -351,7 +351,12 @@ class Games(commands.Cog):
         quips = lists.QUIPS
         if ctx.guild.id == 790565439670321182:
             quips += lists.IZLAM_QUIPS
-        quip = random.choice(quips)
+        _a = []
+        for q in quips:
+            if q not in _a:
+                _a.append(q)
+        # cbf to manually remove the dupes so i have this instead
+        quip = random.choice(_a)
         for user in users:
             await user.send('This round\'s prompt is: {}'.format(quip))
         this_thing = {a: "<a:a_loading:741383826412142603>" for a in users}
