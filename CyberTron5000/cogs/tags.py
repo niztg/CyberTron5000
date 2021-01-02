@@ -1,21 +1,15 @@
-"""
-Dedicated to thag
-"""
 from asyncio import TimeoutError
 from random import randint
 
 import discord
 from discord.ext import commands
 
-from CyberTron5000.utils.cyberformat import better_random_char
-from CyberTron5000.utils.paginator import (
-    CatchAllMenu,
-    IndexedListSource
-)
+from CyberTron5000.utils.paginator import CatchAllMenu, IndexedListSource
 
 
 class Tags(commands.Cog):
     """Tags are a way of storing data for later retrieval"""
+
     def __init__(self, bot):
         self.bot = bot
         self._tag_dict = bot._tag_dict
@@ -33,17 +27,19 @@ class Tags(commands.Cog):
         return ftags
 
     def fetch_tag(self, ctx, tag):
+        tag = tag.lower()
         guild_tags = self._tag_dict.get(ctx.guild.id)
         if not guild_tags:
             raise ValueError(f'This guild does not have any tags!')
         try:
             return guild_tags[tag]['content']
         except KeyError:
-            raise commands.BadArgument(f'This tag does not exist for this guild! (Note that tags are {better_random_char("case-sensitive")})')
+            raise commands.BadArgument(f'This tag does not exist for this guild!')
 
     @commands.group(invoke_without_command=True)
     async def tag(self, ctx, *, tag=None):
         """Invokes a tag"""
+        tag = tag.lower()
         if not tag:
             return await ctx.send(f"do `{ctx.prefix}help tag` bruhv")
         try:
@@ -60,9 +56,9 @@ class Tags(commands.Cog):
                                   ctx.guild.id)
 
     @tag.command(aliases=['create'])
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def add(self, ctx, tag, *, content):
         """Adds a tag"""
+        tag = tag.lower()
         for i in self.forbidden:
             if str(tag).strip().startswith(i):
                 raise commands.BadArgument(f"that tag starts with a forbidden word!")
@@ -71,16 +67,17 @@ class Tags(commands.Cog):
         if self._tag_dict.get(ctx.guild.id).get(tag):
             return await ctx.send("This tag already exists for this guild!")
         id = randint(1, 99_999)
-        self._tag_dict[ctx.guild.id][tag] = {'content': content, 'uses': 0, 'author': ctx.author.id, 'id': id}
+        self._tag_dict[ctx.guild.id][tag.lower()] = {'content': content or str(ctx.message.attachments[0].url), 'uses': 0, 'author': ctx.author.id, 'id': id}
         await self.bot.db.execute(
-            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
+            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)",
+            ctx.author.id,
             ctx.guild.id, tag, content, 0, id)
         await ctx.send(f"{ctx.tick()} Success! `{tag}` is now a tag in **{ctx.guild.name}**")
 
     @tag.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def edit(self, ctx, tag, *, new_content):
         """Edits a tag"""
+        tag = tag.lower()
         try:
             self.fetch_tag(ctx, tag)
         except Exception as error:
@@ -120,14 +117,14 @@ class Tags(commands.Cog):
             raise commands.BadArgument(f'This guild does not have any tags!')
         tags = guild_tags.items()
         tags = sorted(tags, key=lambda x: x[1]['uses'], reverse=True)
-        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1]['author'] == member.id] # only add to list comp if belongs to author instead of removing from dict items in above lines
+        data = [f'{tag[0]} - {tag[1]["uses"]} uses' for tag in tags if tag[1][
+            'author'] == member.id]  # only add to list comp if belongs to author instead of removing from dict items in above lines
         embed = discord.Embed(colour=self.bot.colour)
         embed.set_author(name=f"All of {ctx.author}'s Tags in {ctx.guild}", icon_url=ctx.author.avatar_url)
         source = IndexedListSource(data=data, embed=embed, title="Tags")
         await CatchAllMenu(source=source).start(ctx)
 
-    @tag.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @tag.command(usage='')
     async def make(self, ctx, *args):
         """Makes a tag"""
         if args:
@@ -139,33 +136,38 @@ class Tags(commands.Cog):
             message1 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=300)
         except TimeoutError:
             return await ctx.send(f"{ctx.tick(False)} Boo, you ran out of time!")
+        c = message1.content.lower()
         for i in self.forbidden:
-            if str(message1.content).strip().startswith(i):
+            if str(c).strip().startswith(i):
                 raise commands.BadArgument(f"that tag starts with a forbidden word!")
-        if self._tag_dict.get(ctx.guild.id).get(message1.content):
+        if self._tag_dict.get(ctx.guild.id).get(c):
             return await ctx.send("This tag already exists for this guild!")
         await ctx.send(
-            f"<a:loading:743537226503421973> Your tag is called `{message1.content}`. Please enter the content of your tag...")
+            f"<a:loading:743537226503421973> Your tag is called `{c}`. Please enter the content of your tag...")
         try:
             message2 = await self.bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=300)
         except TimeoutError:
             return await ctx.send(f"{ctx.tick(False)} Boo, you ran out of time!")
         id = randint(1, 99_999)
-        self._tag_dict[ctx.guild.id][message1.content] = {'content': message2.content, 'uses': 0,
-                                                          'author': ctx.author.id, 'id': id}
+        self._tag_dict[ctx.guild.id][c] = {
+            'content': message2.content or str(message2.attachments[0].url), 'uses': 0,
+            'author': ctx.author.id, 'id': id}
         await self.bot.db.execute(
-            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)", ctx.author.id,
-            ctx.guild.id, message1.content, message2.content, 0, id)
-        await ctx.send(f"{ctx.tick()} Success! Tag `{message1.content}` created!")
+            "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)",
+            ctx.author.id,
+            ctx.guild.id, c, message2.content, 0, id)
+        await ctx.send(f"{ctx.tick()} Success! Tag `{c}` created!")
 
     @tag.command(aliases=['rm', 'remove'])
     async def delete(self, ctx, *, tag):
         """Deletes a tag"""
+        tag = tag.lower()
         try:
             self.fetch_tag(ctx, tag)
         except Exception as error:
             return await ctx.send(error)
-        if ctx.author.permissions_in(ctx.channel).kick_members or ctx.author.id == self._tag_dict[ctx.guild.id][tag]['author']:
+        if ctx.author.permissions_in(ctx.channel).kick_members or ctx.author.id == self._tag_dict[ctx.guild.id][tag][
+            'author']:
             await self.bot.db.execute("DELETE FROM tags WHERE name = $1 AND guild_id = $2", tag, ctx.guild.id)
             self._tag_dict[ctx.guild.id].pop(tag)
             await ctx.send(f"{ctx.tick()} Success! Tag `{tag}` deleted!")
@@ -175,6 +177,7 @@ class Tags(commands.Cog):
     @tag.command()
     async def info(self, ctx, *, tag):
         """Shows info on a tag"""
+        tag = tag.lower()
         try:
             self.fetch_tag(ctx, tag)
         except Exception as error:
@@ -188,6 +191,16 @@ class Tags(commands.Cog):
         embed.description += f"ID: **{data['id']}**"
         embed.set_author(name=str(author), icon_url=author.avatar_url)
         await ctx.send(embed=embed)
+
+    @tag.command()
+    async def raw(self, ctx, tag):
+        """See the raw markdown of a tag"""
+        tag = tag.lower()
+        try:
+            content = self.fetch_tag(ctx, tag)
+        except Exception as error:
+            raise commands.BadArgument(error)
+        return await ctx.send(discord.utils.escape_markdown(content))
 
 
 def setup(bot):
