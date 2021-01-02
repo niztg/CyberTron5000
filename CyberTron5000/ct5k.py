@@ -162,7 +162,7 @@ class CyberTron5000(Bot):
             for query2 in tags2:
                 self._tag_dict[query['guild_id']][query2['name']] = \
                     {
-                        'content': query2['content'],
+                        'content': query2['content'].lower(),
                         'uses': query2['uses'] or 0,
                         'author': query2['user_id'],
                         'id': query2['id']

@@ -196,10 +196,7 @@ class Tags(commands.Cog):
     async def raw(self, ctx, tag):
         """See the raw markdown of a tag"""
         tag = tag.lower()
-        try:
-            content = self.fetch_tag(ctx, tag)
-        except Exception as error:
-            raise commands.BadArgument(error)
+        content = self.fetch_tag(ctx, tag)
         return await ctx.send(discord.utils.escape_markdown(content))
 
 
