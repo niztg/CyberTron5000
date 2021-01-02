@@ -160,9 +160,9 @@ class CyberTron5000(Bot):
             """
             tags2 = await self.db.fetch(SQL2, query['guild_id'])
             for query2 in tags2:
-                self._tag_dict[query['guild_id']][query2['name']] = \
+                self._tag_dict[query['guild_id']][query2['name'].lower()] = \
                     {
-                        'content': query2['content'].lower(),
+                        'content': query2['content'],
                         'uses': query2['uses'] or 0,
                         'author': query2['user_id'],
                         'id': query2['id']
