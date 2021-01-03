@@ -71,7 +71,7 @@ class Tags(commands.Cog):
         await self.bot.db.execute(
             "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)",
             ctx.author.id,
-            ctx.guild.id, tag, content, 0, id)
+            ctx.guild.id, tag, content or str(ctx.message.attachments[0].url), 0, id)
         await ctx.send(f"{ctx.tick()} Success! `{tag}` is now a tag in **{ctx.guild.name}**")
 
     @tag.command()
@@ -155,7 +155,7 @@ class Tags(commands.Cog):
         await self.bot.db.execute(
             "INSERT INTO tags (user_id, guild_id, name, content, uses, id) VALUES ($1, $2, $3, $4, $5, $6)",
             ctx.author.id,
-            ctx.guild.id, c, message2.content, 0, id)
+            ctx.guild.id, c, message2.content or str(message2.attachments[0].url), 0, id)
         await ctx.send(f"{ctx.tick()} Success! Tag `{c}` created!")
 
     @tag.command(aliases=['rm', 'remove'])
