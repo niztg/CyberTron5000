@@ -266,6 +266,62 @@ class Profile(commands.Cog):
 
         embed.description = "\n".join(chl)
         await ctx.send(embed=embed)
+        
+    @guildinfo.command(aliases=['role-chan', 'rc'])
+    async def role_channels(self, ctx, role: discord.Role):
+        """Shows you the channels of a guild that everyone can see."""
+        embed = discord.Embed(colour=self.bot.colour).set_author(icon_url=ctx.guild.icon_url_as(format='png'),
+                                                                 name=f"Channels in {ctx.guild}")
+        for c in ctx.guild.categories:
+            x = []
+            for i in c.channels:
+                if isinstance(i, discord.TextChannel):
+                    if i.is_nsfw():
+                        channel = "<:nsfw:730852009032286288>"
+                    elif str(i.type) == "news":
+                        channel = "<:news:730866149109137520>"
+                    else:
+                        if i.overwrites_for(role).read_messages is False:
+                            continue
+                        else:
+                            channel = "<:text_channel:703726554018086912>"
+                    x.append(f"{channel} {i.name}")
+                elif isinstance(i, discord.VoiceChannel):
+                    if i.overwrites_for(role).read_messages is False:
+                        continue
+                    else:
+                        channel = "<:voice_channel:703726554068418560>"
+                    x.append(f"{channel} {i.name}")
+                else:
+                    pass
+            if x:
+                embed.add_field(name=f"<:menu:739570837081817160> {c}", value='\u200b' + "\n".join(x), inline=False)
+            else:
+                pass
+        y = ctx.guild.text_channels + ctx.guild.voice_channels
+        chl = []
+        for o in y:
+            if not o.category:
+                if isinstance(o, discord.TextChannel):
+                    if o.is_nsfw():
+                        channel = "<:nsfw:730852009032286288>"
+                    elif str(o.type) == "news":
+                        channel = "<:news:730866149109137520>"
+                    else:
+                        if o.overwrites_for(role).read_messages is False:
+                            continue
+                        else:
+                            channel = "<:text_channel:703726554018086912>"
+                    chl.append(f"{channel} {o.name}")
+                elif isinstance(o, discord.VoiceChannel):
+                    if o.overwrites_for(role).read_messages is False:
+                        continue
+                    else:
+                        channel = "<:voice_channel:703726554068418560>"
+                    chl.append(f"{channel} {o.name}")
+
+        embed.description = "\n".join(chl)
+        await ctx.send(embed=embed)
 
     @commands.command(help="Gets a user's info.")
     async def betteruserinfo(self, ctx, *, member: discord.Member = None):
