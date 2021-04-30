@@ -136,11 +136,12 @@ class Profile(commands.Cog):
         admins = [admin for admin in members if admin.guild_permissions.administrator and not admin.bot]
         mods = [mod for mod in members if mod.guild_permissions.kick_members and not mod.bot]
         mod_bots = [bot for bot in members if bot.guild_permissions.kick_members and bot.bot]
+        sfunc = lambda status: status_mapping.get(status)
         await ctx.send(
             embed=discord.Embed(description=f"<:owner:730864906429136907> **OWNER:** {owner}\n"
-                                            f"\n**ADMINS** (Total {len(admins)})\n {f'{n}'.join([f'🛡 {admin.mention} - {admin.top_role.mention}' for admin in admins[:10]])}"
-                                            f"\n\n**MODERATORS** (Total {len(mods)})\n {f'{n}'.join([f'🛡 {mod.mention} - {mod.top_role.mention}' for mod in mods[:10]])}"
-                                            f"\n\n**MOD BOTS** (Total {len(mod_bots)})\n {f'{n}'.join([f'🛡 {bot.mention} - {bot.top_role.mention}' for bot in mod_bots[:10]])}",
+                                            f"\n**ADMINS** (Total {len(admins)})\n {f'{n}'.join([f'{sfunc(admin.status)} {admin.mention} - {admin.top_role.mention}' for admin in admins[:10]])}"
+                                            f"\n\n**MODERATORS** (Total {len(mods)})\n {f'{n}'.join([f'{sfunc(mod.status)} {mod.mention} - {mod.top_role.mention}' for mod in mods[:10]])}"
+                                            f"\n\n**MOD BOTS** (Total {len(mod_bots)})\n {f'{n}'.join([f'{bot.mention} - {bot.top_role.mention}' for bot in mod_bots[:10]])}",
                                 colour=self.bot.colour).set_author(name=f"Staff Team for {ctx.guild}",
                                                                    icon_url=ctx.guild.icon_url))
 
