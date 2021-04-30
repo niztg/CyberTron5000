@@ -136,7 +136,7 @@ class Profile(commands.Cog):
         admins = [admin for admin in members if admin.guild_permissions.administrator and not admin.bot]
         mods = [mod for mod in members if mod.guild_permissions.kick_members and not mod.bot]
         mod_bots = [bot for bot in members if bot.guild_permissions.kick_members and bot.bot]
-        sfunc = lambda status: status_mapping.get(status)
+        sfunc = lambda status: sl.get(status)
         await ctx.send(
             embed=discord.Embed(description=f"<:owner:730864906429136907> **OWNER:** {owner}\n"
                                             f"\n**ADMINS** (Total {len(admins)})\n {f'{n}'.join([f'{sfunc(admin.status)} {admin.mention} - {admin.top_role.mention}' for admin in admins[:10]])}"
