@@ -116,7 +116,7 @@ class Reddit(commands.Cog):
 
     @commands.command(aliases=['mod'])
     async def moderator(self, ctx, mod, subreddit):
-        async with ctx.typing(), self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators.json") as r:
+        async with ctx.typing(), self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r:
             data = await r.json()
             if r.status != 200:
                 raise commands.BadArgument(f'subreddit **{subreddit}** not found!')
@@ -220,7 +220,7 @@ class Reddit(commands.Cog):
     @commands.command(help="Shows info about a subreddit")
     async def subreddit(self, ctx, subreddit):
         try:
-            async with ctx.typing(), self.bot.session.get(f"https://reddit.com/r/{subreddit}/about/.json") as r, self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators.json") as r1:
+            async with ctx.typing(), self.bot.session.get(f"https://reddit.com/r/{subreddit}/about/.json") as r, self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r1:
                 res = await r.json()
                 resp = await r1.json()
                 data = res['data']
