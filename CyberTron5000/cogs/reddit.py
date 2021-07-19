@@ -221,23 +221,24 @@ class Reddit(commands.Cog):
     async def subreddit(self, ctx, subreddit):
         try:
             async with ctx.typing(), self.bot.session.get(f"https://reddit.com/r/{subreddit}/about/.json") as r, self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r1:
-                res = await r.json()
-                resp = await r1.json()
-                data = res['data']
-                icon = data['community_icon'].split("?")[0]
-                banner = data['banner_background_image'].split("?")[0]
-                embed = discord.Embed(description=f"{data['public_description']}\n**{data['subscribers']:,}** subscribers | **{data['active_user_count']:,}** active users", colour=self.bot.colour)
-                embed.title = data['display_name_prefixed']
-                embed.url = f"https://reddit.com/r/{subreddit}"
-                embed.set_thumbnail(url=icon)
-                embed.description += f'\n<:asset:734531316741046283> [Icon URL]({str(icon)}) | [Banner URL]({str(banner)})'
-                daba = resp['data']
-                mods = [i for i in daba['children']]
-                embed.add_field(name=f"Mods (Total {len(mods)})", value="\n".join([f"[{mod['name']}](https://reddit.com/user/{mod['name']})" for mod in mods[:10]]))
-                embed.set_footer(text=f"Subreddit created {humanize.naturaltime(datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(data['created_utc']))}")
-            if data['over18'] and not ctx.channel.is_nsfw():
-                raise commands.NSFWChannelRequired(ctx.channel)
-            return await ctx.send(embed=embed)
+                print(await r.json())
+            #     res = await r.json()
+            #     resp = await r1.json()
+            #     data = res['data']
+            #     icon = data['community_icon'].split("?")[0]
+            #     banner = data['banner_background_image'].split("?")[0]
+            #     embed = discord.Embed(description=f"{data['public_description']}\n**{data['subscribers']:,}** subscribers | **{data['active_user_count']:,}** active users", colour=self.bot.colour)
+            #     embed.title = data['display_name_prefixed']
+            #     embed.url = f"https://reddit.com/r/{subreddit}"
+            #     embed.set_thumbnail(url=icon)
+            #     embed.description += f'\n<:asset:734531316741046283> [Icon URL]({str(icon)}) | [Banner URL]({str(banner)})'
+            #     daba = resp['data']
+            #     mods = [i for i in daba['children']]
+            #     embed.add_field(name=f"Mods (Total {len(mods)})", value="\n".join([f"[{mod['name']}](https://reddit.com/user/{mod['name']})" for mod in mods[:10]]))
+            #     embed.set_footer(text=f"Subreddit created {humanize.naturaltime(datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(data['created_utc']))}")
+            # if data['over18'] and not ctx.channel.is_nsfw():
+            #     raise commands.NSFWChannelRequired(ctx.channel)
+            # return await ctx.send(embed=embed)
         except KeyError:
             raise commands.BadArgument(f'subreddit {subreddit} not found.')
 
