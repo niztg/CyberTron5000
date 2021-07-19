@@ -116,26 +116,27 @@ class Reddit(commands.Cog):
 
     @commands.command(aliases=['mod'])
     async def moderator(self, ctx, mod, subreddit):
-        async with ctx.typing(), self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r:
-            data = await r.json()
-            if r.status != 200:
-                raise commands.BadArgument(f'subreddit **{subreddit}** not found!')
-            mods = data['data']['children']
-            try:
-                index = [str(m['name']).lower() for m in mods].index(str(mod).lower())
-            except ValueError:
-                raise commands.BadArgument(f"{mod} doesn't moderate {subreddit}.")
-            user = mods[index]
-            embed = discord.Embed(colour=self.bot.colour)
-            name = f"{user['name']}"
-            flair = user['author_flair_text']
-            if flair:
-                name += f" | {flair}"
-            added = datetime.datetime.utcfromtimestamp(user['date'])
-            embed.set_author(name=name, icon_url="https://cdn.discordapp.com/emojis/446524953341460491.png?v=1")
-            embed.description = "Permissions: " + ", ".join([f"**{perm.title()}**" for perm in user['mod_permissions']])
-            embed.description += f"\nAdded as Mod: **{added.strftime('%B %d, %Y')}** ({humanize.naturaltime(datetime.datetime.utcnow()-added)})"
-        await ctx.send(embed=embed)
+        await ctx.send("This command is currently out of commission, please come back later.")
+        # async with ctx.typing(), self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r:
+        #     data = await r.json()
+        #     if r.status != 200:
+        #         raise commands.BadArgument(f'subreddit **{subreddit}** not found!')
+        #     mods = data['data']['children']
+        #     try:
+        #         index = [str(m['name']).lower() for m in mods].index(str(mod).lower())
+        #     except ValueError:
+        #         raise commands.BadArgument(f"{mod} doesn't moderate {subreddit}.")
+        #     user = mods[index]
+        #     embed = discord.Embed(colour=self.bot.colour)
+        #     name = f"{user['name']}"
+        #     flair = user['author_flair_text']
+        #     if flair:
+        #         name += f" | {flair}"
+        #     added = datetime.datetime.utcfromtimestamp(user['date'])
+        #     embed.set_author(name=name, icon_url="https://cdn.discordapp.com/emojis/446524953341460491.png?v=1")
+        #     embed.description = "Permissions: " + ", ".join([f"**{perm.title()}**" for perm in user['mod_permissions']])
+        #     embed.description += f"\nAdded as Mod: **{added.strftime('%B %d, %Y')}** ({humanize.naturaltime(datetime.datetime.utcnow()-added)})"
+        # await ctx.send(embed=embed)
 
     @commands.command(aliases=['showerthought'], help="hmm :thinking:")
     async def thonk(self, ctx):
@@ -219,28 +220,28 @@ class Reddit(commands.Cog):
 
     @commands.command(help="Shows info about a subreddit")
     async def subreddit(self, ctx, subreddit):
-        try:
-            async with ctx.typing(), self.bot.session.get(f"https://reddit.com/r/{subreddit}/about/.json") as r, self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r1:
-                print(await r.json())
-            #     res = await r.json()
-            #     resp = await r1.json()
-            #     data = res['data']
-            #     icon = data['community_icon'].split("?")[0]
-            #     banner = data['banner_background_image'].split("?")[0]
-            #     embed = discord.Embed(description=f"{data['public_description']}\n**{data['subscribers']:,}** subscribers | **{data['active_user_count']:,}** active users", colour=self.bot.colour)
-            #     embed.title = data['display_name_prefixed']
-            #     embed.url = f"https://reddit.com/r/{subreddit}"
-            #     embed.set_thumbnail(url=icon)
-            #     embed.description += f'\n<:asset:734531316741046283> [Icon URL]({str(icon)}) | [Banner URL]({str(banner)})'
-            #     daba = resp['data']
-            #     mods = [i for i in daba['children']]
-            #     embed.add_field(name=f"Mods (Total {len(mods)})", value="\n".join([f"[{mod['name']}](https://reddit.com/user/{mod['name']})" for mod in mods[:10]]))
-            #     embed.set_footer(text=f"Subreddit created {humanize.naturaltime(datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(data['created_utc']))}")
-            # if data['over18'] and not ctx.channel.is_nsfw():
-            #     raise commands.NSFWChannelRequired(ctx.channel)
-            # return await ctx.send(embed=embed)
-        except KeyError:
-            raise commands.BadArgument(f'subreddit {subreddit} not found.')
+        await ctx.send("This command is currently out of commission, please come back later.")
+        # try:
+        #     async with ctx.typing(), self.bot.session.get(f"https://reddit.com/r/{subreddit}/about/.json") as r, self.bot.session.get(f"https://www.reddit.com/r/{subreddit}/about/moderators/.json") as r1:
+        #     #     res = await r.json()
+        #     #     resp = await r1.json()
+        #     #     data = res['data']
+        #     #     icon = data['community_icon'].split("?")[0]
+        #     #     banner = data['banner_background_image'].split("?")[0]
+        #     #     embed = discord.Embed(description=f"{data['public_description']}\n**{data['subscribers']:,}** subscribers | **{data['active_user_count']:,}** active users", colour=self.bot.colour)
+        #     #     embed.title = data['display_name_prefixed']
+        #     #     embed.url = f"https://reddit.com/r/{subreddit}"
+        #     #     embed.set_thumbnail(url=icon)
+        #     #     embed.description += f'\n<:asset:734531316741046283> [Icon URL]({str(icon)}) | [Banner URL]({str(banner)})'
+        #     #     daba = resp['data']
+        #     #     mods = [i for i in daba['children']]
+        #     #     embed.add_field(name=f"Mods (Total {len(mods)})", value="\n".join([f"[{mod['name']}](https://reddit.com/user/{mod['name']})" for mod in mods[:10]]))
+        #     #     embed.set_footer(text=f"Subreddit created {humanize.naturaltime(datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(data['created_utc']))}")
+        #     # if data['over18'] and not ctx.channel.is_nsfw():
+        #     #     raise commands.NSFWChannelRequired(ctx.channel)
+        #     # return await ctx.send(embed=embed)
+        # except KeyError:
+        #     raise commands.BadArgument(f'subreddit {subreddit} not found.')
 
     @commands.command(aliases=['pages', 'paginate'])
     async def reddit_pages(self, ctx, subreddit, limit: int = 5):
