@@ -476,7 +476,7 @@ class Profile(commands.Cog):
     async def roles(self, ctx):
         """A paginated menu of all of the guild's roles."""
         roles = sorted(ctx.guild.roles, key=lambda r: r.position, reverse=True)
-        source = paginator.IndexedListSource(data=["{0.mention} <:member:731190477927219231> **{1}**".format(r, len(r.members)) for r in roles], embed=discord.Embed(colour=self.bot.colour))
+        source = paginator.IndexedListSource(data=["{0.mention} <:member:731190477927219231> **{1}**".format(r, len(r.members)) for r in roles if r.id != ctx.guild.id], embed=discord.Embed(colour=self.bot.colour), title="Roles")
         await paginator.CatchAllMenu(source=source).start(ctx)
 
     @commands.command(aliases=['channel', 'chan', 'ci'])
