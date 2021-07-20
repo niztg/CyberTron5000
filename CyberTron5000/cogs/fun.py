@@ -366,19 +366,19 @@ class Fun(commands.Cog):
             return await ctx.send(f"{channel} has no deleted messages.")
         embeds = []
         for snipe in reversed(channel_snipes[:flags.get('limit')]):
-            author = self.bot.get_user(int(snipe['author']))
-            if not author:
-                try:
-                    author = await self.bot.fetch_user(int(snipe['author'])
-                except:
-                    author = "Unknown User"
+            try:
+                author = self.bot.get_user(int(snipe['author'])) or await self.bot.fetch_user(int(snipe['author'])
+                img = author.avatar_url
+            except:
+                author = "Unknown User"
+                img = "https://media.discordapp.net/attachments/740678305237303454/866900622271971348/avvy.png"
             embed = discord.Embed(colour=self.bot.colour)
             desc = snipe['content']
             if not desc and snipe.get('embed'):
                 desc = '`<Embedded Message>`'
             embed.description = desc
             since = dt.strptime(snipe['created_at'], '%Y-%m-%d %H:%M:%S.%f')
-            embed.set_author(name=f"{author} said in {str(channel)}", icon_url=author.avatar_url)
+            embed.set_author(name=f"{author} said in {str(channel)}", icon_url=img)
             embed.timestamp = since
             embeds.append(embed)
         source = paginator.EmbedSource(embeds, footer=False)
