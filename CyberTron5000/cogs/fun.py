@@ -366,7 +366,12 @@ class Fun(commands.Cog):
             return await ctx.send(f"{channel} has no deleted messages.")
         embeds = []
         for snipe in reversed(channel_snipes[:flags.get('limit')]):
-            author = self.bot.get_user(int(snipe['author'])) or await self.bot.fetch_user(int(snipe['author']))
+            author = self.bot.get_user(int(snipe['author']))
+            if not author:
+                try:
+                    author = await self.bot.fetch_user(int(snipe['author'])
+                except:
+                    author = "Unknown User"
             embed = discord.Embed(colour=self.bot.colour)
             desc = snipe['content']
             if not desc and snipe.get('embed'):
