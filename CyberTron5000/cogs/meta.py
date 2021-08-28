@@ -437,13 +437,13 @@ class Meta(commands.Cog):
         """Tells you the bot's birthday"""
 
         get_datetime = lambda x: x.created_at
-        bday = datetime.datetime(year=2016, day=9, month=4)
-        today = datetime.datetime(year=2017, day=9, month=4)
+        bday = get_datetime(ctx.me)
+        today = get_datetime(ctx.message)
 
         is_bday = lambda x: not x[1]
         cincinnati = divmod((today - bday).days, 365)
 
-        bday_msg = f"🎉 **Today is my birthday! I'm turning {cincinnati[0]}" if is_bday(cincinnati) else None
+        bday_msg = f"🎉 **Today is my birthday! I'm turning {cincinnati[0]}**" if is_bday(cincinnati) else None
         add_msg = lambda i: i if i else "\nI have been alive for **{0[0]}** year(s) and **{0[1]}** days."\
             .format(cincinnati)
 
