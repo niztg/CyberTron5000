@@ -441,7 +441,7 @@ class Meta(commands.Cog):
         today = get_datetime(ctx.message)
 
         is_bday = lambda x: not x[1]
-        cincinnati = divmod((today - bday).seconds, 365)
+        cincinnati = divmod((today - bday).days, 365)
 
         bday_msg = f"🎉 **Today is my birthday! I'm turning {cincinnati[0]}" if is_bday(cincinnati) else None
         add_msg = lambda i: i if i else "\nI have been alive for **{0[0]}** years and **{0[1]}** days."\

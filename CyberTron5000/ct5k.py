@@ -73,8 +73,7 @@ class CyberTron5000(Bot):
         self.clever.set_context(DictContext(self))
         self.load_extension(name='jishaku')
         self.loop.create_task(self.__aioinit__())
-        self.embed = CyberEmbed
-        self.colour_chooser = CyberColours
+
 
     async def __aioinit__(self):
         """Async init"""
