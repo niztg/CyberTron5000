@@ -47,26 +47,6 @@ print(
 )
 
 
-class CyberColours(discord.Colour):
-    @classmethod
-    def main(cls):
-        return cls(0x00dcff)
-
-    @classmethod
-    def custom(cls, colour: str):
-        try:
-            _c = int(colour, 16)
-        except Exception as error:
-            raise ValueError(str(error)) from error
-        return cls(_c)
-
-
-class CyberEmbed(discord.Embed):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.colour = kwargs.get('colour') or kwargs.get('color') or CyberColours.main()
-
-
 class CyberTron5000(Bot):
     def __init__(self):
         """Regular init"""

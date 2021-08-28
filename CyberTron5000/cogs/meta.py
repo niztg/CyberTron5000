@@ -432,8 +432,24 @@ class Meta(commands.Cog):
     async def dbl(self, ctx):
         return await ctx.send(f"**{ctx.author}**, vote for {self.bot.user.name} on top.gg! | {self.bot.logger.topgg}")
 
+    @commands.command(aliases=['bday'])
+    async def birthday(self, ctx):
 
+        get_datetime = lambda x: x.created_at
+        bday = get_datetime(ctx.me)
+        today = get_datetime(ctx.message)
 
+        is_bday = lambda x: not x[1]
+        cincinnati = divmod((today - bday).seconds, 365)
+
+        bday_msg = f"🎉 **Today is my birthday! I'm turning {cincinnati[0]}" if is_bday(cincinnati) else None
+        add_msg = lambda i: i if i else "\nI have been alive for **{0[0]}** years and **{0[1]}** days."\
+            .format(cincinnati)
+
+        await ctx.send(
+            f"I was created by {self.bot.owner} on **{bday.strftime('%B %dth, %Y')}**\n"
+            f"{add_msg(bday_msg)}"
+        )
 
 def setup(bot):
     bot.add_cog(Meta(bot))
