@@ -437,8 +437,8 @@ class Meta(commands.Cog):
         """Tells you the bot's birthday"""
 
         get_datetime = lambda x: x.created_at
-        bday = get_datetime(ctx.me)
-        today = datetime.datetime(year=2020, day=9, month=4)
+        bday = datetime.datetime(year=2016, day=9, month=4)
+        today = datetime.datetime(year=2017, day=9, month=4)
 
         is_bday = lambda x: not x[1]
         cincinnati = divmod((today - bday).days, 365)
