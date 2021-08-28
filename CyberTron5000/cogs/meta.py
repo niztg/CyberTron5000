@@ -434,6 +434,7 @@ class Meta(commands.Cog):
 
     @commands.command(aliases=['bday'])
     async def birthday(self, ctx):
+        """Tells you the bot's birthday"""
 
         get_datetime = lambda x: x.created_at
         bday = get_datetime(ctx.me)
