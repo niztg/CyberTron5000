@@ -58,7 +58,7 @@ Store data for later retrieval!
 `c$tag add`, `c$tag delete`, `c$tag edit`, `c$tag info`, `c$tag list`, `c$guild_tags`
 - <h4>Images</h4>
 Manipulate various images including profile pictures, emojis and urls!
-`c$bad`, `c$gay`, `c$obama`, `c$hitler`, `c$fiveguys`, `c$paint`, `c$quote`, `c$triggered`, `c$tweet`
+`c$bad`, `c$obama`, `c$hitler`, `c$fiveguys`, `c$paint`, `c$quote`, `c$triggered`, `c$tweet`
 - <h4>Profile</h4>
 `c$userinfo`, `c$guildinfo`, `c$permissions`, `c$spotify`, `c$channelinfo`, `c$roleinfo`
 
