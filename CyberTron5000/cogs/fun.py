@@ -351,39 +351,6 @@ class Fun(commands.Cog):
         await ctx.send(
             f"{ctx.tick()} Set todo description for `{id}` ({results[0]['todo']}) to `{description}`")
 
-    @flags.add_flag("--limit", type=int, default=500)
-    @flags.add_flag("--channel", type=discord.TextChannel)
-    @flags.command()
-    async def snipe(self, ctx, **flags):
-        """Shows the most recently deleted messages in a given channel"""
-        # i know i shouldnt be using json for this
-        channel = flags.get('channel') or ctx.channel
-        with open('./json_files/snipes.json', 'r') as f:
-            snipes = json.load(f)
-        try:
-            channel_snipes = snipes[str(channel.id)]
-        except KeyError:
-            return await ctx.send(f"{channel} has no deleted messages.")
-        embeds = []
-        for snipe in reversed(channel_snipes[:flags.get('limit')]):
-            try:
-                author = self.bot.get_user(int(snipe['author'])) or await self.bot.fetch_user(int(snipe['author'])
-                img = author.avatar_url
-            except:
-                author = "Unknown User"
-                img = "https://media.discordapp.net/attachments/740678305237303454/866900622271971348/avvy.png"
-            embed = discord.Embed(colour=self.bot.colour)
-            desc = snipe['content']
-            if not desc and snipe.get('embed'):
-                desc = '`<Embedded Message>`'
-            embed.description = desc
-            since = dt.strptime(snipe['created_at'], '%Y-%m-%d %H:%M:%S.%f')
-            embed.set_author(name=f"{author} said in {str(channel)}", icon_url=img)
-            embed.timestamp = since
-            embeds.append(embed)
-        source = paginator.EmbedSource(embeds, footer=False)
-        await paginator.CatchAllMenu(source).start(ctx)
-
     @commands.command(aliases=['af'])
     async def animalfact(self, ctx, animal=None):
         """Shows a fact about an animal of your choice."""
