@@ -174,34 +174,6 @@ class Events(commands.Cog):
                 send = hyper_replace(str(r), old=[' i ', "i'm", "i'll"], new=[' I ', "I'm", "I'll"])
                 await message.channel.send(f"**{message.author.name}**, {send}{suff}")
 
-    @commands.Cog.listener(name='on_message')
-    async def monke(self, message):
-        if (message.channel.id == 735694049700347954) or (message.channel.id == 735690974340317216):
-            for i in ['🇲', '🇴', '🇳', '🇰', '🇪']:
-                await message.add_reaction(i)
-
-    @commands.Cog.listener(name='on_message')
-    async def potpotpotato(self, message):
-        msg = message.content.lower()
-        if message.guild.id == 748616619449647244 and not message.author.bot:
-            for word in ("hello", "good morning", "helo", "good night"):
-                if word in msg:
-                    await message.channel.send(word)
-            for start in ("i'm", "im", "i am", "am"):
-                if start in msg and not message.author.bot:
-                    if "aimg" in msg:
-                        return
-                    if random.randint(1, 5) == 3:
-                        texts = msg.split(start, 1)
-                        final = " ".join([i for i in texts[1:] if i is not None])
-                        await message.channel.send(f"Hi {final.strip()}, I'm dad!")
-                word = f" {self.bot.config.forbidden_word_flushed} "
-                if word in msg and not message.author.bot:
-                    if random.randint(1, 5) == 3:
-                        people = msg.split(word, 1)
-                        if len(people) == 2:
-                            await message.channel.send(
-                                f'Guy named "{people[0].strip()}": :smirk:\nGirl named "{people[1].strip()}": :flushed:')
 
     @tasks.loop(minutes=3)
     async def loop(self):
@@ -275,13 +247,6 @@ class Events(commands.Cog):
             new_q_format.append(f"{item['emoji']} `{item['votes']}` **{item['question']}** • {votebar}")
         embed.description = f"\n".join(new_q_format)
         await message.edit(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message: discord.Message):
-        _snipes = self.snipes()
-        if not _snipes.get(str(message.channel.id)):
-            _snipes[str(message.channel.id)] = []
-        self.append_snipe(message)
 
 
 def setup(bot):
